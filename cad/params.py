@@ -220,6 +220,23 @@ class PinholeModule:
 @dataclass(frozen=True)
 class Bought:
     """Cassette and film reference solids (docs/bom.md). Owned by cad/parts/film.py."""
+    # Cassette. Shell, lip envelope, cap height and spool protrusion are in `Measured`.
+    cassette_cap_t: float = 1.0       # end cap thickness, inside the 39.0mm height
+    cassette_cap_chamfer: float = 0.3
+    spool_end_d: float = 6.0          # top key end; not in the BOM, chosen
+    spool_stub_len: float = 2.5       # bottom stub, film-back.md 17.5
+    spool_stub_d: float = 5.0         # not in the BOM, chosen; fits the 7mm bottom locator recess
+    lip_t: float = 0.6                # each felt lip plate
+    lip_clearance: float = 0.10       # film to lip, each side
+    lip_back: float = 3.0             # lip block starts this far behind the cassette axis
+    chamber_y_min: float = -2.2       # cassette chamber rear limit, film-back.md 17.4
+    # Film strip.
+    film_in_lip: float = 3.0          # the strip starts this far inside the lip tip
+    film_phase: float = 0.0           # mm along the strip; 0 puts a perforation on every tooth at rest
+    perf_cut_depth: float = 0.5       # perforation cutter thickness; only has to exceed the film
+    perf_end_margin: float = 0.2      # no perforation within this of the strip ends
+    roll_d: float = 20.0              # mid-roll outer diameter on the take-up spool
+    roll_wrap_deg: float = 300.0      # outer wrap shown as a sheet; the rest of the roll is a solid annulus
 
 
 @dataclass(frozen=True)
