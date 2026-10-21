@@ -24,7 +24,8 @@ export function MotionDriver() {
   const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, spread: new Map() }), [])
 
   useFrame((_, seconds) => {
-    const { motion, nodes, store, manifest } = viewer
+    const { motion, nodes, store, manifest, cycles } = viewer
+    for (const cycle of cycles) cycle.tick(seconds)
     motion.tick(seconds)
     const { explode, boxes } = store.getState()
     if (

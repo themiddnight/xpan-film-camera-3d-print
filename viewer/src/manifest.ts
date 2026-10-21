@@ -1,4 +1,7 @@
-import { GROUPS, KINDS, type Drive, type Manifest, type Mechanism, type PartManifest, type Readout, type Vec3 } from './types'
+import {
+  GROUPS, KINDS, type Cycle, type CycleKey, type Drive, type Manifest, type Mechanism, type PartManifest, type Readout,
+  type Vec3,
+} from './types'
 
 export const MANIFEST_URL = new URL('manifest.json', document.baseURI).href
 
@@ -34,6 +37,14 @@ function string(x: unknown, path: string): string {
 
 function number(x: unknown, path: string): number {
   return typeof x === 'number' && Number.isFinite(x) ? x : fail(path, 'a finite number', x)
+}
+
+function boolean(x: unknown, path: string): boolean {
+  return typeof x === 'boolean' ? x : fail(path, 'true or false', x)
+}
+
+function strings(x: unknown, path: string): readonly string[] {
+  return array(x, path).map((s, i) => string(s, `${path}[${i}]`))
 }
 
 function oneOf<T extends string>(x: unknown, allowed: readonly T[], path: string): T {
@@ -89,7 +100,40 @@ function mechanism(x: unknown, path: string): Mechanism {
     id: string(o.id, `${path}.id`),
     label: string(o.label, `${path}.label`),
     readout: readout(o.readout, `${path}.readout`),
+    cyclic: o.cyclic === undefined ? false : boolean(o.cyclic, `${path}.cyclic`),
     drives: array(o.drives, `${path}.drives`).map((d, i) => drive(d, `${path}.drives[${i}]`)),
+  }
+}
+
+function cycleKey(x: unknown, path: string): CycleKey {
+  const o = record(x, path)
+  const values = record(o.values, `${path}.values`)
+  return {
+    t: number(o.t, `${path}.t`),
+    values: Object.fromEntries(Object.entries(values).map(([k, v]) => [k, number(v, `${path}.values.${k}`)])),
+    phase: string(o.phase, `${path}.phase`),
+  }
+}
+
+function cycle(x: unknown, path: string): Cycle {
+  const o = record(x, path)
+  const keys = array(o.keys, `${path}.keys`).map((k, i) => cycleKey(k, `${path}.keys[${i}]`))
+  if (keys.length < 2 || keys[0].t !== 0) fail(`${path}.keys`, 'two or more keys starting at t = 0', o.keys)
+  keys.forEach((k, i) => { if (i > 0 && k.t <= keys[i - 1].t) fail(`${path}.keys[${i}].t`, 'a time after the previous key', k.t) })
+  const counter = record(o.counter, `${path}.counter`)
+  const focus = record(o.focus, `${path}.focus`)
+  return {
+    id: string(o.id, `${path}.id`),
+    label: string(o.label, `${path}.label`),
+    keys,
+    counter: {
+      mechanism: string(counter.mechanism, `${path}.counter.mechanism`),
+      count_per_unit: number(counter.count_per_unit, `${path}.counter.count_per_unit`),
+      count_label: string(counter.count_label, `${path}.counter.count_label`),
+      per_unit: number(counter.per_unit, `${path}.counter.per_unit`),
+      unit: string(counter.unit, `${path}.counter.unit`),
+    },
+    focus: { ghost: strings(focus.ghost, `${path}.focus.ghost`), hide: strings(focus.hide, `${path}.focus.hide`) },
   }
 }
 
@@ -98,6 +142,7 @@ export function parseManifest(json: unknown): Manifest {
   const o = record(json, 'manifest')
   const parts = array(o.parts, 'manifest.parts').map((p, i) => part(p, `manifest.parts[${i}]`))
   const mechanisms = array(o.mechanisms, 'manifest.mechanisms').map((m, i) => mechanism(m, `manifest.mechanisms[${i}]`))
+  const cycles = o.cycles === undefined ? [] : array(o.cycles, 'manifest.cycles').map((c, i) => cycle(c, `manifest.cycles[${i}]`))
   if (parts.length === 0) throw new ManifestError('manifest.parts: the list is empty')
 
   const names = new Set<string>()
@@ -116,11 +161,23 @@ export function parseManifest(json: unknown): Manifest {
     })
   })
 
+  cycles.forEach((c, i) => {
+    const known = (id: string) => ids.has(id)
+    c.keys.forEach((k, j) => Object.keys(k.values).forEach(id => {
+      if (!known(id)) throw new ManifestError(`manifest.cycles[${i}].keys[${j}].values: no mechanism ${JSON.stringify(id)}`)
+    }))
+    if (!known(c.counter.mechanism)) throw new ManifestError(`manifest.cycles[${i}].counter.mechanism: no mechanism ${JSON.stringify(c.counter.mechanism)}`)
+    for (const name of [...c.focus.ghost, ...c.focus.hide]) {
+      if (!names.has(name)) throw new ManifestError(`manifest.cycles[${i}].focus: no part named ${JSON.stringify(name)}`)
+    }
+  })
+
   return {
     glb_unit_scale: number(o.glb_unit_scale, 'manifest.glb_unit_scale'),
     film_advance_mm: number(o.film_advance_mm, 'manifest.film_advance_mm'),
     parts,
     mechanisms,
+    cycles,
   }
 }
 

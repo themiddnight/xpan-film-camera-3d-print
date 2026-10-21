@@ -4,6 +4,7 @@ import { PartNodes } from '../scene/partNodes'
 import {
   type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type ViewName,
 } from '../types'
+import { CyclePlayer } from './cycle'
 import { Motion } from './motion'
 import { createStore, useSelector, type Store } from './store'
 
@@ -38,6 +39,8 @@ export interface Viewer {
   store: Store<ViewerState>
   /** Mechanism values, outside React state because they change every frame. */
   motion: Motion
+  /** One player per scripted cycle in the manifest, writing into `motion`. */
+  cycles: readonly CyclePlayer[]
   nodes: PartNodes
   /** The one section plane every part clips against; the section controls move it in place. */
   clipPlane: Plane
@@ -54,6 +57,8 @@ export interface Viewer {
     showView: (view: ViewName) => void
     reportBox: (name: string, box: Box3 | null) => void
     reportFailed: (name: string, error: Error) => void
+    /** Ghosts and hides the cycle's focus parts, or shows them again. */
+    setFocus: (cycle: CyclePlayer, on: boolean) => void
   }
 }
 
@@ -88,12 +93,14 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
     failed: new Set(),
   })
   const selectBounds = boundsSelector(manifest.parts)
+  const motion = new Motion(manifest.mechanisms)
 
   return {
     manifest,
     baseUrl,
     store,
-    motion: new Motion(manifest.mechanisms),
+    motion,
+    cycles: manifest.cycles.map(c => new CyclePlayer(c, motion)),
     nodes: new PartNodes(),
     clipPlane: new Plane(),
     selectBounds,
@@ -112,6 +119,13 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
           return { ...s, boxes: rest }
         }
         return s.boxes[name]?.equals(box) ? s : { ...s, boxes: { ...s.boxes, [name]: box } }
+      }),
+      setFocus: (player, on) => store.update(s => {
+        const parts = { ...s.parts }
+        const { ghost, hide } = player.cycle.focus
+        for (const name of ghost) parts[name] = on ? { visible: true, ghost: true } : SHOWN
+        for (const name of hide) parts[name] = on ? { visible: false, ghost: false } : SHOWN
+        return { ...s, parts }
       }),
       reportFailed: (name, error) => {
         console.error(`Part ${name} failed to load:`, error)

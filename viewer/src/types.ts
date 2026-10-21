@@ -56,8 +56,43 @@ export interface Mechanism {
   id: string
   label: string
   readout: Readout | null
+  /**
+   * The value keeps counting past 1 (a frame advance turns the knob on, it never runs back), and the
+   * slider shows the part within the current turn. Otherwise the value stays in 0 to 1.
+   */
+  cyclic: boolean
   /** Applied to each part in this order. */
   drives: readonly Drive[]
+}
+
+/** Mechanism values at one moment of a cycle. A cyclic mechanism's value counts from the cycle's start. */
+export interface CycleKey {
+  /** Seconds from the start of the cycle. */
+  t: number
+  values: Readonly<Record<string, number>>
+  /** What the mechanism is doing from this key to the next, for the readout. */
+  phase: string
+}
+
+/** Counts something from a cyclic mechanism's value, e.g. perforations and mm of film per frame. */
+export interface CycleCounter {
+  mechanism: string
+  /** Counted items per unit of the mechanism value, e.g. 14 perforations per frame. */
+  count_per_unit: number
+  count_label: string
+  per_unit: number
+  unit: string
+}
+
+/** A scripted run of several mechanisms together, e.g. one full frame advance. */
+export interface Cycle {
+  id: string
+  label: string
+  /** Ascending by t; the first is at 0, the last ends the cycle. */
+  keys: readonly CycleKey[]
+  counter: CycleCounter
+  /** Parts to ghost or hide while showing the cycle, so the moving parts are in view. */
+  focus: { ghost: readonly string[]; hide: readonly string[] }
 }
 
 export interface Manifest {
@@ -66,6 +101,7 @@ export interface Manifest {
   film_advance_mm: number
   parts: readonly PartManifest[]
   mechanisms: readonly Mechanism[]
+  cycles: readonly Cycle[]
 }
 
 /** World coordinates are camera-design coordinates in mm: X film travel, Y front, Z up. */

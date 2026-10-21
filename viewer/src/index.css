@@ -61,3 +61,8 @@ canvas { display: block; width: 100%; height: 100%; }
   .app { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; }
   aside { order: 2; border-right: none; border-top: 1px solid var(--line); }
 }
+
+.cycle { display: grid; gap: 6px; }
+button.primary { border-color: var(--accent); background: var(--accent); color: var(--bg); font-weight: 600; }
+button.primary:disabled { opacity: 0.55; cursor: default; }
+.readout { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }

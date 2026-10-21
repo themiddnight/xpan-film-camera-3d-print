@@ -1,5 +1,6 @@
 import { useViewer, useViewerState } from '../state/viewer'
 import type { ViewName } from '../types'
+import { CyclePanel } from './CyclePanel'
 import { MechanismPanel } from './MechanismPanel'
 import { PartsPanel } from './PartsPanel'
 import { SectionPanel } from './SectionPanel'
@@ -44,6 +45,7 @@ export function Sidebar() {
         <h1>X-Pan pinhole camera</h1>
         <div className="sub">65 x 24mm on 135 film. Built from cad/ with build123d.</div>
       </div>
+      <CyclePanel />
       <ViewPanel />
       <MechanismPanel />
       <ExplodePanel />

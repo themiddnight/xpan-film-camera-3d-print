@@ -29,12 +29,14 @@ export class Motion {
   private readonly playingListeners = new Set<() => void>()
   private readonly drivesByPart = new Map<string, PartDrive[]>()
   private readonly scratch = new Matrix4()
+  private readonly cyclic = new Set<string>()
 
   constructor(mechanisms: readonly Mechanism[]) {
     this.mechanisms = mechanisms
     for (const m of mechanisms) {
       this.values.set(m.id, 0)
       this.valueListeners.set(m.id, new Set())
+      if (m.cyclic) this.cyclic.add(m.id)
       for (const d of m.drives) {
         const list = this.drivesByPart.get(d.part) ?? []
         list.push({ mechanism: m.id, drive: compileDrive(d) })
@@ -48,7 +50,8 @@ export class Motion {
   }
 
   set(id: string, value: number): void {
-    const clamped = Math.min(1, Math.max(0, value))
+    const max = this.cyclic.has(id) ? Infinity : 1
+    const clamped = Math.min(max, Math.max(0, value))
     if (clamped === this.get(id)) return
     this.values.set(id, clamped)
     this.revision++
@@ -66,10 +69,18 @@ export class Motion {
     this.playingListeners.forEach(l => l())
   }
 
-  /** Advances every playing mechanism, bouncing between 0 and 1. */
+  isCyclic(id: string): boolean {
+    return this.cyclic.has(id)
+  }
+
+  /** Advances every playing mechanism: a cyclic one keeps turning, the others bounce between 0 and 1. */
   tick(seconds: number): void {
     const step = Math.min(seconds, MAX_FRAME_SECONDS) / SWEEP_SECONDS
     for (const [id, direction] of this.playing) {
+      if (this.cyclic.has(id)) {
+        this.set(id, this.get(id) + step)
+        continue
+      }
       let value = this.get(id) + direction * step
       let next = direction
       if (value > 1) { value = 2 - value; next = -1 }
