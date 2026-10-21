@@ -163,6 +163,26 @@ class Pawl:
     button_lug_w: float = 1.5         # quarter-turn lug on the button, in an L-slot in the collar
     button_lug_len: float = 1.0
     button_lug_h: float = 1.5
+    # Chosen while modeling cad/parts/transport.py (film-back.md 8.4 and 17.6 give no values).
+    tip_w: float = 1.8                # film-back.md 17.6: tip 1.8mm wide over the 2.2mm pocket
+    nose_len: float = 1.8             # along the lever; the pocket is notch_len = 2.4 long
+    nose_floor_gap: float = 0.05      # nose underside above the pocket floor at rest
+    button_end: float = 1.5           # lever runs this far past the button axis, so the button face bears on it
+    boss_od: float = 5.7              # pivot boss: shaft_bore + 2 x min_wall, rounded up
+    tip_chamfer: float = 0.8          # on the tip's top edge, keeps the lifted tip under the ceiling
+    spigot_d: float = 2.4             # spring seat under the button end; spring inside diameter is 2.9
+    spigot_len: float = 1.5
+    spring_wire: float = 0.3          # film-back.md 17.6
+    spring_solid_len: float = 2.5     # estimate: about 8 coils of 0.3mm wire
+    button_cap_d: float = 6.6         # the advance knob leaves room for no more (cap edge 1.1mm from it)
+    button_cap_h: float = 2.5
+    button_cap_gap: float = 0.5       # pressed, the cap underside stays this far above the shell top
+    button_cap_groove_w: float = 1.0  # fingernail or coin slot across the cap, for the quarter turn
+    button_cap_groove_d: float = 0.6
+    # Lug underside at rest. Pressed 2.5mm, the lug top sits 0.2mm under the ceiling (Z=28.5), so a
+    # quarter turn puts it under the top wall and the spring holds the button down (bayonet).
+    # The shell's slot for it is a vertical leg through the top wall (28.5 to 31.5), open underneath.
+    button_lug_z: float = 29.3
 
 
 @dataclass(frozen=True)
@@ -173,6 +193,36 @@ class TakeUp:
     knob_d: float = 26.0
     clutch_spring_od: float = 5.0
     clutch_spring_wire: float = 0.4
+    # Chosen while modeling cad/parts/transport.py. Z stack of the clutch, bottom to top:
+    # shaft bottom -28.8, collar hub -25.5, collar disc -22.5 to -20.5, felt to -19.0, spool -19.0 to +19.0,
+    # spring from the spool seat (+16.0) to the ceiling (28.5), knob 32.5 to 42.5.
+    flange_t: float = 1.2             # film-back.md 17.7
+    flange_gap: float = 35.6          # film-back.md 17.7
+    leader_slot_w: float = 1.0        # film-back.md 17.7
+    leader_slot_h: float = 20.0       # film-back.md 17.7
+    leader_slot_offset: float = 4.5   # chord offset from the axis, toward +Y (front), so the shaft bore stays whole
+    spring_seat_d: float = 5.6        # counterbore in the spool top for the clutch spring
+    spring_seat_depth: float = 3.0
+    clutch_spring_free: float = 15.0  # works at 12.5mm between the seat and the ceiling: 2.5mm preload (tune)
+    felt_t: float = 1.5               # bom.md 9: 1-2mm self-adhesive felt, stuck to the collar
+    felt_od: float = 14.0
+    felt_id: float = 3.5
+    collar_od: float = 14.0
+    collar_disc_t: float = 2.0
+    collar_hub_d: float = 8.0
+    collar_hub_len: float = 3.0
+    shaft_len: float = 70.0           # bom.md 1
+    shaft_bottom_z: float = -28.8     # blind bushing in the floor: leaves 1.2mm (= min_wall) of the 3mm floor
+    knob_h: float = 10.0
+    knob_z0: float = 32.5             # 1.0mm over the shell top (Z=31.5)
+    knob_roof: float = 1.2            # closed top over the shaft end (= min_wall)
+    knob_knurl_n: int = 48
+    knob_knurl_depth: float = 0.5
+    sprocket_pin_len: float = 60.0    # film-back.md 17.6: pressed into the shell floor boss, flush with the floor underside
+    sprocket_pin_bottom_z: float = -30.0
+    glued_bore: float = 3.2           # epoxy fit on a rod filed flat (collar, knobs, fork)
+    rod_flat_depth: float = 0.4       # the D bore's flat sits this far inside the rod radius
+    rod_flat_clear: float = 0.05      # the rod's own flat is this much deeper, so flat faces never touch
 
 
 @dataclass(frozen=True)
@@ -182,6 +232,21 @@ class Rewind:
     lift: float = 8.0
     tower_top_inside: float = 37.0
     rear_opening_top: float = 28.5
+    # Chosen while modeling cad/parts/transport.py (film-back.md 17.5).
+    tower_id: float = 7.6
+    tower_top_wall: float = 2.0
+    fork_od: float = 7.0
+    knob_d: float = 20.0
+    knob_h: float = 10.0
+    knob_gap: float = 0.5             # knob underside over the tower top at rest
+    knob_roof: float = 1.2
+    knob_knurl_n: int = 36
+    knob_knurl_depth: float = 0.4
+    shaft_gap_to_roof: float = 0.2    # shaft end sits this far above the fork slot roof, inside the fork bore
+    shaft_end_gap: float = 0.1        # shaft end to the knob bore roof
+    o_ring_id: float = 3.0            # bom.md 13: 3mm ID x 1mm section
+    o_ring_section: float = 1.0
+    o_ring_counterbore_d: float = 4.8
 
 
 @dataclass(frozen=True)
