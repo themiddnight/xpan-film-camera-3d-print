@@ -76,6 +76,14 @@ class Gate:
     aperture_h: float = 26.0
     velvet_groove_depth: float = 0.6
     fence_gap: float = 35.3
+    bevel: float = 0.3                # rear-side 45 deg bevel on the gate aperture
+    slot_bottom_z: float = -15.0      # dark slide bottom stop
+    velvet_groove_w: float = 3.0
+    velvet_groove_inset: float = 1.0  # chosen: groove inner edge to the front aperture
+    fence_w: float = 1.2              # chosen: Print.min_wall
+    fence_depth: float = 0.8          # fences stand from Y = 0 back to Y = -0.8
+    rail_end_x: float = 46.0          # chosen: rails run on as ribs past the divider until the sprocket teeth engage
+    rail_rib_depth: float = 2.0       # film-back.md 13: at least a 2.0mm rail base
 
     @property
     def slot_y0(self) -> float:
@@ -104,6 +112,30 @@ class Shell:
     pad_sheet: float = 0.25
     pad_foam: float = 2.0
     shoe_end_deg: float = -45.0       # cover shoe arc runs from -90 deg to here
+    # Chosen values; film-back.md leaves them open or gives a range.
+    y_rear: float = -2.23             # rear rim face = cover inner face at the gate (17.3)
+    boss_wall: float = 2.5            # film-back.md 13: wall around a pin or insert hole
+    pin_press_hole: float = 2.90      # press fit for a 3.0mm steel pin (tune; a Fit value, kept here until Fit has one)
+    throat_gap: float = 0.6           # film throat at the cassette chamber exit (17.5)
+    locator_recess_d: float = 7.0     # cassette bottom locator, for the spool stub
+    locator_recess_depth: float = 3.0 # 2.5mm stub + 0.5
+    tower_id: float = 7.6
+    tower_wall: float = 2.0
+    oring_bore: float = 4.8           # O-ring counterbore under the tower top, round the shaft
+    oring_depth: float = 1.0
+    flange_gap: float = 0.5           # bottom bosses stop this far under the sprocket and spool flanges
+    takeup_boss_top_z: float = -26.0  # 0.5mm under the drive collar hub (transport: hub bottom Z -25.5)
+    collar_bore: float = 8.4          # sprocket top hub (8.0) passes through this collar
+    collar_wall: float = 1.6
+    index_mark_w: float = 0.6         # fixed index mark on the collar, at the pawl line
+    index_mark_depth: float = 0.4
+    cheek_half_len: float = 3.0       # pawl cheeks along the lever, each side of the pivot
+    cheek_wall: float = 2.0           # cheek material under the pivot pin hole
+    shelf_t: float = 3.0              # pawl spring shelf thickness
+    spring_cup_h: float = 1.5         # ring that centres the spring on the shelf
+    button_lug_rest_z: float = 29.3   # mirrors Pawl.button_lug_z (transport): lug underside at rest
+    button_slot_deg: float = 0.0      # vertical leg of the bayonet slot, plan angle from +X (transport: lug on +X)
+    button_hold_deg: float = -90.0    # quarter turn clockwise from above, lug toward -Y, under the ceiling
 
 
 @dataclass(frozen=True)
@@ -195,11 +227,78 @@ class BodyLink:
     body_rear_wall: float = 2.5
     latch_cantilever_top_z: float = -27.0
     latch_hook_h: float = 1.8         # reaches 0.3mm above the pin centre so the pin cannot ride out
+    # Film-back side of the interface (film-back.md 17.8); added by the shell stream.
+    hook_half_x: float = 36.0
+    hook_front_y: float = 7.7
+    hook_bottom_z: float = 27.0
+    latch_pin_len: float = 48.0
+    lug_x: tuple = (22.0, 24.0)       # each lug spans this |X| range
+    lug_z: tuple = (-30.0, -22.0)     # chosen: inside the body's latch notch (Z -29 to -21)
+    lug_front_y: float = 11.5         # chosen: pin hole + boss wall; the body notch reaches Y +13
 
 
 @dataclass(frozen=True)
 class Cover:
-    """Rear cover, turn buttons and slot plug (film-back.md 17.3). Owned by cad/parts/shell.py."""
+    """Rear cover, turn buttons, slot plug and their bought parts (film-back.md 5, 10, 17.2-17.3).
+
+    Owned by cad/parts/shell.py. Values marked chosen are left open by the docs.
+    """
+    tongue_w: float = 1.6
+    tongue_len: float = 2.5
+    groove_depth: float = 3.0
+    groove_foam: float = 1.5          # foam strip in the groove bottom
+    lap_top: float = 3.0              # chosen: 3mm on the rear face of the top wall + 3mm over the top = 6mm lap
+    lap_foam: float = 1.0             # chosen: compressed foam under the top lip
+    lip_t: float = 2.0                # chosen
+    pad_w: float = 75.0
+    pad_h: float = 33.0
+    pad_rim_h: float = 0.5            # chosen: the pad recess is a locating rim on the inner face
+    pad_rim_w: float = 1.2
+    shoe_start_deg: float = -90.0
+    shoe_t: float = 2.0               # chosen: radial thickness of the shoe arc
+    shoe_w: float = 34.6
+    shoe_film_gap: float = 0.3        # shoe inner radius = hub + film + this
+    shoe_groove_w: float = 2.6
+    shoe_groove_depth: float = 1.0
+    throat_ridge_w: float = 1.9       # chosen: rear land of the film throat, a ridge on the cover
+    throat_ridge_half_h: float = 18.5 # chosen: covers the 35mm film band
+    # Hinge. Chosen split: the shell carries two 30mm end knuckles with the pin pressed in; the cover's one
+    # middle knuckle spins on the pin. The axis sits at the tongue's mid-depth, so the tongue leaves its
+    # groove with under 0.2mm of sideways drift, and 0.3mm under the shell bottom so the cover knuckle
+    # clears it.
+    hinge_pin_len: float = 171.0
+    hinge_inset: float = 2.0
+    knuckle_od: float = 7.0
+    shell_knuckle_len: float = 30.0
+    hinge_axis_y: float = -0.98       # Shell.y_rear + tongue_len / 2
+    hinge_axis_z: float = -33.8       # Shell.z_min - fdm_clearance - knuckle_od / 2
+    open_deg: float = 100.0
+    # Turn buttons. Chosen: centre pivot at X = +/-button_x, Y = button_y, clear of the rewind tower,
+    # sprocket collar, release button, advance knob and the dark slide handle over a full turn.
+    button_len: float = 20.0
+    button_w: float = 8.0
+    button_t: float = 3.0
+    button_x: float = 42.5
+    button_y: float = 5.6             # boss edge 0.3mm in front of the cover lip
+    button_chamfer: float = 0.5
+    insert_len: float = 5.0           # docs/bom.md M3 x 5 x 4 (measure)
+    insert_below: float = 2.0         # insert boss hangs under the ceiling so the hole keeps a floor
+    m3_len: float = 8.0
+    m3_head_d: float = 5.5
+    m3_head_h: float = 3.0
+    # Dark slide (docs/bom.md: 71mm wide, about 75mm tall with handle) and slot plug (film-back.md 17.2).
+    slide_t: float = 0.5
+    slide_w: float = 71.0
+    slide_plate_top_z: float = 32.0   # chosen: plate stands 0.5mm proud of the slot mouth
+    slide_top_z: float = 60.0
+    handle_w: float = 40.0            # chosen: narrower than the slot so the turn buttons sweep past it
+    finger_hole_w: float = 24.0
+    finger_hole_h: float = 8.0
+    plug_t: float = 0.5
+    plug_depth: float = 10.0
+    plug_grip_w: float = 40.0
+    plug_grip_h: float = 5.0
+    plug_grip_t: float = 1.6
 
 
 @dataclass(frozen=True)

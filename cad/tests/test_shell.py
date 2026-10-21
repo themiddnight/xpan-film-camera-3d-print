@@ -1,6 +1,74 @@
 """Seeded errors for the shell checks; collected by test_checks.py."""
-from dataclasses import replace  # noqa: F401
+from dataclasses import replace
 
-from params import CAMERA  # noqa: F401
+from params import CAMERA
 
-SEEDS: dict = {}
+C = CAMERA
+
+SEEDS: dict = {
+    "gate aperture printed 66mm wide": (
+        replace(C, film=replace(C.film, frame_w=66.0)),
+        {"gate aperture 65.0 x 24.0, centred, rounded and bevelled (geometry)"},
+    ),
+    "rails moved onto the perforations": (
+        replace(C, gate=replace(C.gate, rail_z=15.5)),
+        {"rails on the film edge band, proud of the gate recess (geometry)"},
+    ),
+    "gate recess only 0.1mm under the rails": (
+        replace(C, gate=replace(C.gate, recess=0.1)),
+        {"rails on the film edge band, proud of the gate recess (geometry)"},
+    ),
+    "2.5mm front wall moves the body datum": (
+        replace(C, gate=replace(C.gate, front_wall=2.5)),
+        {"body datum face at Y = 4.20 and the body bay clear (geometry)"},
+    ),
+    "dark slide slot too tight for the sheet": (
+        replace(C, gate=replace(C.gate, slot=0.6)),
+        {"dark slide slot width, depth and mouth (geometry)"},
+    ),
+    "press holes bigger than the pins": (
+        replace(C, shell=replace(C.shell, pin_press_hole=3.1)),
+        {"pin, shaft, insert and collar bore fits (geometry)"},
+    ),
+    "cover tongue as wide as its groove": (
+        replace(C, cover=replace(C.cover, tongue_w=2.2)),
+        {"cover tongue fits its groove with clearance (geometry)"},
+    ),
+    "pad rim tall enough to hit the fences": (
+        replace(C, cover=replace(C.cover, pad_rim_h=2.5)),
+        {"rear cover closes on the shell and swings open clear of it (geometry)"},
+    ),
+    "hinge axis at the tongue tip": (
+        replace(C, cover=replace(C.cover, hinge_axis_y=1.27)),
+        {"rear cover closes on the shell and swings open clear of it (geometry)",
+         "hinge axis at the tongue mid-depth, cover knuckle under the shell bottom"},
+    ),
+    "left turn button swings into the rewind tower": (
+        replace(C, cover=replace(C.cover, button_x=48.0)),
+        {"turn buttons clear the tower, collars, knob, release button and slide handle (geometry)"},
+    ),
+    "shell longer than the print bed": (
+        replace(C, shell=replace(C.shell, x_max=105.0)),
+        {"shell-module printed parts fit the print bed (geometry)"},
+    ),
+    "pawl cheeks pinch the lever": (
+        replace(C, pawl=replace(C.pawl, cheek_gap=3.0)),
+        {"pawl cheeks, spring shelf and button bayonet match the pawl interface (geometry)"},
+    ),
+    "bayonet leg cut through the top of the wall": (
+        replace(C, shell=replace(C.shell, button_lug_rest_z=30.5)),
+        {"pawl cheeks, spring shelf and button bayonet match the pawl interface (geometry)"},
+    ),
+    "film throat pinches the film": (
+        replace(C, shell=replace(C.shell, throat_gap=0.2)),
+        {"film throat centres the film with clearance (geometry)"},
+    ),
+    "cover shoe presses the film into the hub": (
+        replace(C, cover=replace(C.cover, shoe_film_gap=-0.05)),
+        {"cover shoe holds the film on the sprocket teeth (geometry)"},
+    ),
+    "pad foam too thick for the cover gap": (
+        replace(C, shell=replace(C.shell, pad_foam=2.5)),
+        {"pressure pad squeeze and coverage (geometry)"},
+    ),
+}
