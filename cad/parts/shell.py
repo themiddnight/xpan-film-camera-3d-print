@@ -11,7 +11,8 @@ open, chosen here and kept as params:
   walls start at the film plane; the left one is the front land of the 0.6mm film throat and a
   ridge on the cover is its rear land.
 - Top lap: the cover overlaps the 3mm rear face of the top wall, then a 2mm lip reaches 3mm over
-  the top on 1mm of foam (6mm in all) and stops short of the dark slide slot mouth.
+  the top on 1mm of foam (6mm in all) and stops short of the dark slide slot mouth. The lip is
+  notched round the advance knob (26mm, just over the shell top), so the lap there is the 3mm face only.
 - Hinge: the shell carries two 30mm end knuckles with the pin pressed in; the cover's one middle
   knuckle spins on it. The axis is at the tongue's mid-depth (Y = -0.98) and 0.3mm under the shell
   bottom (Z = -33.8), so the tongue leaves its groove without binding. The knuckles hang under the
@@ -22,10 +23,15 @@ open, chosen here and kept as params:
   dark slide handle, which is 40mm wide for that reason. Each boss overhangs the body bay by 2mm
   above Z = 31.5.
 - Pawl: cheeks 5.7mm thick so the 15mm pin ends flush; the spring shelf hangs from the front wall
-  with a 1.5mm ring that centres the spring; the release button collar rises to Z = 34.0, with the
-  lug's top at the collar top at rest and the L-slot's hold leg a quarter turn counter-clockwise.
+  with a 1.5mm ring that centres the spring. Release button bayonet (as the transport parts model
+  it): a plain 6.6mm bore through the top wall, no raised collar since the pressed cap comes down to
+  Z = 32.0; the lug's leg runs through the wall on the +X side, open underneath and roofed at the
+  top; pressed, the lug turns a quarter turn clockwise under the ceiling, and that sweep is cut out
+  of the near cheek.
 - Bushings: the sprocket pin goes through the shell bottom (pin Z -30 to +30); the take-up bottom
-  bushing is blind with a 1.2mm floor for light; the top one hangs 1.5mm under the ceiling.
+  bushing is blind with a 1.2mm floor for light, on a 1mm boss under the drive collar; the top one
+  is the 3mm top wall alone, so the clutch spring bears on the ceiling. The rewind O-ring
+  counterbore is on the underside of the tower top.
 - The slot plug is placed in its working pose in the slot mouth, so it overlaps the dark slide,
   which is in at rest. Only one is ever in the slot.
 """
@@ -358,11 +364,18 @@ def _shoe(c: Camera) -> Part:
     return shoe
 
 
+def advance_knob_keepout(c: Camera) -> Part:
+    """The advance knob sits on the shaft just over the shell top and overhangs the lip, so the lip is notched."""
+    d = c.takeup.knob_d + 2 * c.fit.fdm_clearance
+    return zcyl(c.layout.spool_x, c.layout.spool_y, d, c.shell.z_max + 0.01, lip_top(c) + c.cover.button_t)
+
+
 def build_cover(c: Camera) -> Part:
     s, cv, f = c.shell, c.cover, c.fit
     y_out = s.y_rear - s.cover_thickness
     part = box(s.x_min, s.x_max, y_out, s.y_rear, s.z_min, lip_top(c))
     part += box(s.x_min, s.x_max, s.y_rear - 0.01, s.y_rear + cv.lap_top, lip_bottom(c), lip_top(c))
+    part -= advance_knob_keepout(c)
     for x0, x1, z0, z1 in tongue_path(c, cv.tongue_w, side_groove_top(c) - f.fdm_clearance):
         part += box(x0, x1, s.y_rear - 0.01, s.y_rear + cv.tongue_len, z0, z1)
     # Pressure pad recess: a locating rim round the pad.

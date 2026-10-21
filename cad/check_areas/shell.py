@@ -208,7 +208,7 @@ def _(c, b):
 @shell_check("rear cover closes on the shell and swings open clear of it (geometry)")
 def _(c, b):
     cv = c.cover
-    fixed = b.placed("shell") + b.placed("sprocket")
+    fixed = b.placed("shell") + b.placed("sprocket") + sh.advance_knob_keepout(c)
     cover = b.placed("rear_cover")
     axis = Axis((0, cv.hinge_axis_y, cv.hinge_axis_z), (1, 0, 0))
     worst = max(((cover.rotate(axis, a) & fixed).volume, a) for a in (0, 2, 5, 10, 15, 20, 30, 45, 60, 80, cv.open_deg))
