@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react'
 import { Box3, Plane } from 'three'
 import { PartNodes } from '../scene/partNodes'
 import {
-  type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type ViewName,
+  type Cycle, type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type ViewName,
 } from '../types'
 import { CyclePlayer } from './cycle'
 import { Motion } from './motion'
@@ -20,6 +20,8 @@ export interface ViewerState {
   /** Rest-pose world box of each loaded part. */
   boxes: Readonly<Record<string, Box3>>
   failed: ReadonlySet<string>
+  /** Parts the `mechanism` view frames: those the focused cycle moves. */
+  framed: readonly string[]
 }
 
 /** What a part shows right now, after its own toggles, its group's toggles and the kind filter. */
@@ -80,6 +82,12 @@ function boundsSelector(parts: readonly PartManifest[]): (s: ViewerState) => Box
   }
 }
 
+/** Every part a cycle moves, through the mechanisms its keys set. */
+function cycleParts(manifest: Manifest, cycle: Cycle): string[] {
+  const moving = new Set(cycle.keys.flatMap(k => Object.keys(k.values)))
+  return manifest.mechanisms.filter(m => moving.has(m.id)).flatMap(m => m.drives.map(d => d.part))
+}
+
 export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
   const store = createStore<ViewerState>({
     parts: Object.fromEntries(manifest.parts.map(p => [p.name, SHOWN])),
@@ -91,6 +99,7 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
     viewRequest: 0,
     boxes: {},
     failed: new Set(),
+    framed: manifest.cycles.length > 0 ? cycleParts(manifest, manifest.cycles[0]) : [],
   })
   const selectBounds = boundsSelector(manifest.parts)
   const motion = new Motion(manifest.mechanisms)
@@ -125,7 +134,7 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
         const { ghost, hide } = player.cycle.focus
         for (const name of ghost) parts[name] = on ? { visible: true, ghost: true } : SHOWN
         for (const name of hide) parts[name] = on ? { visible: false, ghost: false } : SHOWN
-        return { ...s, parts }
+        return { ...s, parts, framed: cycleParts(manifest, player.cycle), view: on ? 'mechanism' : 'iso', viewRequest: s.viewRequest + 1 }
       }),
       reportFailed: (name, error) => {
         console.error(`Part ${name} failed to load:`, error)

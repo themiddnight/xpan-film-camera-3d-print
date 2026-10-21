@@ -103,8 +103,24 @@ def _(c, b):
 INTERFERENCE_TOLERANCE_MM3 = 0.01
 """Overlap below this is tessellation noise or a touching face, not a clash."""
 
-INTENDED_OVERLAPS: dict[frozenset[str], str] = {}
-"""Pairs that overlap on purpose (press fits), with the reason."""
+INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, str]] = {
+    frozenset(("hinge_pin", "shell")): (30.0, "pin pressed into the two 30mm end knuckles"),
+    frozenset(("pawl_pin", "shell")): (6.0, "pin pressed into the pivot cheeks"),
+    frozenset(("sprocket_pin", "shell")): (6.0, "pin pressed into the floor boss"),
+    frozenset(("latch_pin", "shell")): (2.5, "pin pressed into the latch lugs"),
+    frozenset(("rewind_o_ring", "shell")): (1.0, "O-ring squeezed in its counterbore, which is its job"),
+    frozenset(("dark_slide", "slot_plug")): (500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
+    frozenset(("film", "shell")): (0.5, "film lies on the rails; facets of the curved strip graze them"),
+    frozenset(("film", "sprocket")): (0.2, "film wraps the hub; facets of the curved strip graze it"),
+    frozenset(("film", "film_roll")): (0.5, "the strip's last wrap lies on the roll; facets graze it"),
+}
+"""Pairs that overlap on purpose, with the most volume allowed and the reason. More than that is a clash."""
+
+
+def _boxes_meet(a, b) -> bool:
+    # BoundBox.overlaps in build123d 0.13 is False when one box contains the other, which would skip
+    # every part inside the shell's box, so compare the ranges directly.
+    return all(getattr(a.min, k) <= getattr(b.max, k) and getattr(b.min, k) <= getattr(a.max, k) for k in 'XYZ')
 
 
 def overlaps(b: Built) -> list[tuple[str, str, float]]:
@@ -115,7 +131,7 @@ def overlaps(b: Built) -> list[tuple[str, str, float]]:
     found = []
     for i, a in enumerate(names):
         for other in names[i + 1:]:
-            if not boxes[a].overlaps(boxes[other]):
+            if not _boxes_meet(boxes[a], boxes[other]):
                 continue
             shared = placed[a] & placed[other]
             volume = shared.volume if shared is not None else 0.0
@@ -124,11 +140,12 @@ def overlaps(b: Built) -> list[tuple[str, str, float]]:
     return sorted(found, key=lambda t: -t[2])
 
 
-@check("no parts overlap except named press fits (geometry)")
+@check("no parts overlap beyond the intended fits (geometry)")
 def _(c, b):
-    clashes = [(a, o, v) for a, o, v in overlaps(b) if frozenset((a, o)) not in INTENDED_OVERLAPS]
+    clashes = [(a, o, v) for a, o, v in overlaps(b)
+               if v > INTENDED_OVERLAPS.get(frozenset((a, o)), (0.0, ""))[0]]
     if not clashes:
-        return True, f"{len(PARTS)} parts, {len(INTENDED_OVERLAPS)} named press fits"
+        return True, f"{len(PARTS)} parts, {len(INTENDED_OVERLAPS)} intended overlaps within their limits"
     return False, "; ".join(f"{a} x {o} {v:.2f}mm3" for a, o, v in clashes[:8])
 
 

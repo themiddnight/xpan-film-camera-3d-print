@@ -6,9 +6,8 @@ Both are reference solids at their true size and position, built in camera coord
 Values chosen where a doc gave a range or left a value open:
 - Lip envelope 29.5mm is read as the cassette's extent along X, centred on the axis, because the
   chamber is only 32mm wide. The lip block reaches X = cassette_x + 14.75 on the gate side.
-- Spool top end is a 6.0mm cylinder, key slot 2.6mm wide and 4.5mm deep cut along X from the tip.
-  The BOM gives the slot, not the end diameter. The rewind fork also has a 2.6mm slot, so the
-  fork and this spool end do not mate as modeled; the fork stream decides which side holds the blade.
+- Spool top end is a 6.0mm cylinder whose top 4.5mm is a key blade along X, `spool_key_blade` thick,
+  standing in the rewind fork's 2.6mm slot (the cassette's crossbar). Measure the real blade.
 - Bottom stub is 5.0mm in diameter and 2.5mm long (doc gives the length only).
 - Felt lips are one block with a 0.33mm slit around the film (0.10mm clearance each side),
   starting 3.0mm behind the cassette axis, 37mm long between the end caps.
@@ -185,14 +184,42 @@ def _strip(c: Camera, path: FilmPath) -> Part:
 
 
 def build_film(c: Camera) -> Part:
-    path = FilmPath.of(c)
-    f = c.film
+    """The strip from the cassette lips to its last wrap on the roll, with both perforation rows."""
+    return _strip(c, FilmPath.of(c))
+
+
+def build_film_roll(c: Camera) -> Part:
+    """Film already wound on the take-up core, under the strip's last wrap."""
+    path, f = FilmPath.of(c), c.film
     roll_r = c.bought.roll_d / 2
     core_r = c.takeup.core_d / 2
-    annulus = Pos(path.spool[0], path.spool[1], 0) * (
-        Cylinder(roll_r - f.thickness, f.width) - Cylinder(core_r, f.width)
-    )
-    return _strip(c, path) + annulus
+    return Pos(path.spool[0], path.spool[1], 0) * (Cylinder(roll_r - f.thickness, f.width) - Cylinder(core_r, f.width))
+
+
+STRIP_SAMPLE_MM = 0.5
+"""Spacing of the path samples the viewer builds its moving strip from; fine enough for the 10.6mm hub."""
+
+
+def strip_manifest(c: Camera) -> dict:
+    """The strip's centre line and perforation layout, so the viewer can draw it moving with the advance."""
+    path, f = FilmPath.of(c), c.film
+    n = int((path.s_max - path.s_min) / STRIP_SAMPLE_MM)
+    ds = (path.s_max - path.s_min) / n
+    points = [[round(v, 4) for v in path.at(path.s_min + i * ds)[:2]] for i in range(n + 1)]
+    return {
+        "part": "film",
+        "mechanism": "advance",
+        "advance_per_unit": f.advance,
+        "s0": path.s_min,
+        "ds": ds,
+        "points": points,
+        "width": f.width,
+        "pitch": f.perf_pitch,
+        "perf_along": f.perf_along,
+        "perf_across": f.perf_across,
+        "perf_row_z": f.perf_row_z,
+        "first_perf_s": perforation_positions(c, path)[0],
+    }
 
 
 def build_cassette(c: Camera) -> Part:
@@ -209,9 +236,12 @@ def build_cassette(c: Camera) -> Part:
 
     top_len = m.spool_top_protrusion
     spool_end = Pos(cx, cy, half_h + top_len / 2) * Cylinder(b.spool_end_d / 2, top_len)
-    spool_end -= Pos(cx, cy, half_h + top_len - m.spool_key_depth / 2) * Box(
-        b.spool_end_d + OVERSHOOT, m.spool_key_slot, m.spool_key_depth
-    )
+    # Keep only a blade along X at the tip: the fork's tines take the space either side of it.
+    side = (b.spool_end_d + OVERSHOOT) / 2
+    for sign in (-1, 1):
+        spool_end -= Pos(cx, cy + sign * (b.spool_key_blade / 2 + side / 2), half_h + top_len - m.spool_key_depth / 2) * Box(
+            b.spool_end_d + OVERSHOOT, side, m.spool_key_depth
+        )
     part += spool_end
     part += Pos(cx, cy, -half_h - b.spool_stub_len / 2) * Cylinder(b.spool_stub_d / 2, b.spool_stub_len)
 
@@ -231,4 +261,5 @@ def build_cassette(c: Camera) -> Part:
 PARTS = {
     "cassette": PartSpec(build=build_cassette, place=at_origin, group="film-back", kind="bought", color="#5b7a99"),
     "film": PartSpec(build=build_film, place=at_origin, group="film-back", kind="bought", color="#8a5a2b"),
+    "film_roll": PartSpec(build=build_film_roll, place=at_origin, group="film-back", kind="bought", color="#6e4722"),
 }

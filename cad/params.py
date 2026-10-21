@@ -23,6 +23,7 @@ class Fit:
     tooth_tip_fillet: float = 0.25
     pad_squeeze: float = 0.15
     insert_hole_m3: float = 4.0
+    pin_press_hole: float = 2.90      # press fit for a 3.0mm steel pin
 
 
 @dataclass(frozen=True)
@@ -115,7 +116,6 @@ class Shell:
     # Chosen values; film-back.md leaves them open or gives a range.
     y_rear: float = -2.23             # rear rim face = cover inner face at the gate (17.3)
     boss_wall: float = 2.5            # film-back.md 13: wall around a pin or insert hole
-    pin_press_hole: float = 2.90      # press fit for a 3.0mm steel pin (tune; a Fit value, kept here until Fit has one)
     throat_gap: float = 0.6           # film throat at the cassette chamber exit (17.5)
     locator_recess_d: float = 7.0     # cassette bottom locator, for the spool stub
     locator_recess_depth: float = 3.0 # 2.5mm stub + 0.5
@@ -466,6 +466,7 @@ class Bought:
     # Cassette. Shell, lip envelope, cap height and spool protrusion are in `Measured`.
     cassette_cap_t: float = 1.0       # end cap thickness, inside the 39.0mm height
     cassette_cap_chamfer: float = 0.3
+    spool_key_blade: float = 2.0      # crossbar on the spool tip, inside the fork's 2.6mm slot (measure)
     spool_end_d: float = 6.0          # top key end; not in the BOM, chosen
     spool_stub_len: float = 2.5       # bottom stub, film-back.md 17.5
     spool_stub_d: float = 5.0         # not in the BOM, chosen; fits the 7mm bottom locator recess

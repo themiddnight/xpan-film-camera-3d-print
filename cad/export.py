@@ -10,6 +10,7 @@ from pathlib import Path
 from build123d import Compound, Pos, Rot, export_gltf, export_step, export_stl
 
 from mechanisms import manifest_entries
+from parts.film import strip_manifest
 from params import CAMERA
 from parts import PARTS
 
@@ -61,6 +62,7 @@ def main() -> int:
         "parts": manifest,
         "mechanisms": mechanisms,
         "cycles": cycles,
+        "film_strip": strip_manifest(CAMERA),
     }, indent=2))
     return 0
 

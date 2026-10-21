@@ -72,13 +72,14 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 | `uv run python cad/export.py` | Builds every part in `cad/parts/`, writes `out/stl` (print orientation), `out/step` and `out/glb` (camera coordinates) and `out/manifest.json` |
 | `uv run python cad/checks.py` | Layout checks from `cad/params.py` plus geometry checks on the built solids; exit 1 on any failure |
 | `uv run python cad/tests/test_checks.py` | Seeds known design errors and proves the checks catch each one |
-| `pnpm --dir viewer install` (once), then `pnpm --dir viewer dev` and open `http://localhost:8642/` | Vite + React + react-three-fiber viewer reading `out/`: part toggles by group and kind, ghosting, section planes, exploded view, play/scrub sliders for each mechanism in the manifest |
+| `pnpm --dir viewer install` (once), then `pnpm --dir viewer dev` and open `http://localhost:8642/` | Vite + React + react-three-fiber viewer reading `out/`: the whole camera with part toggles by group and kind, ghosting, section planes and exploded view; **Operate** plays one frame advance (button or Space, Loop, Show mechanism cutaway and camera) with the film moving on its path; a play/scrub slider for each mechanism |
 | `pnpm --dir viewer build` | Typechecks and builds a static viewer into `viewer/dist/` (includes the current `out/` files) |
 | `node docs/figures/film-transport/build.mjs` | Writes the film-transport figure pages (add `--light` for the light page, `--audit` to check the geometry); needs the anatomy skill (`ANATOMY_HOME`, default `~/.claude/skills/anatomy`) |
 
 - The viewer only reads `out/manifest.json` and `out/glb/`. Run the export first; the dev server picks up new files on reload.
 - Every dimension lives in `cad/params.py`. `Fit` holds printer-dependent values; `Measured` holds values to confirm on bought parts. Do not put numbers in part files.
-- Register each new part in `cad/parts/__init__.py` and add geometry checks for anything a part must get right.
+- Each module in `cad/parts/` exports `PARTS` (a `PartSpec` per part: build, assembled placement, group, printed or bought, print rotation); `cad/parts/__init__.py` merges them. Add geometry checks for anything a part must get right in `cad/check_areas/<area>.py`, each with a seeded error in `cad/tests/test_<area>.py`.
+- `cad/mechanisms.py` holds the moving systems the viewer animates and the frame-advance cycle, all derived from params. `cad/checks.py` holds the assembly checks: no overlaps beyond the named fits in `INTENDED_OVERLAPS`, every printed part on the 180mm bed, and the lock and ride checks.
 - `out/` is generated and gitignored until the final print package.
 
 ---

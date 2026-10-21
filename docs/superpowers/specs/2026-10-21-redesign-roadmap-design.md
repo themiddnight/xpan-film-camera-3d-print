@@ -61,8 +61,8 @@ user's printer, spring force, and light leaks. The plan handles them in two ways
 |---|---|---|
 | 1. Design review and sourcing | Review risky and unfinished items in the module docs. Fill every dimension a printed part needs. Research off-the-shelf parts with standard sizes (M2/M3 screws and inserts, 3-4mm steel shafts or dowel pins, compression and torsion springs, ready-made M42 parts such as extension tubes or adapter rings, 0.1mm brass shim, dark slide sheet, light-seal velvet or foam). Design around sizes that can be bought. | Updated design docs; `docs/bom.md` with part, size, search terms or example source, approximate price |
 | 2. Tooling | build123d project: shared parameter module, one module per part, assembly, export script, check script, three.js viewer page | Viewer showing a trial part; check script that catches a seeded error |
-| 3. Film back | Model all film-back parts and its assembly | Models + check report |
-| 4. Body and pinhole module | 50mm dark chamber, M42 mount, body latch, wire-frame viewfinder, pinhole holder, sliding shutter | Models + check report |
+| 3. Film back | Model all film-back parts and its assembly. Done 2026-10-22 ([plan](2026-10-22-phase3-4-parts.md)) | Models + check report |
+| 4. Body and pinhole module | 50mm dark chamber, M42 mount, body latch, wire-frame viewfinder, pinhole holder, sliding shutter. Done 2026-10-22 | Models + check report |
 | 5. Full assembly review | Exploded view, section views, light path, mechanism motion. Optional `/anatomy` explainer figures of the transport and lock. | Review renders and viewer states |
 | 6. Print package | Per-part STL and STEP, print orientation and settings, print order starting with test coupons, assembly guide | `out/` export set + print and assembly guide |
 

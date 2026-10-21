@@ -95,6 +95,29 @@ export interface Cycle {
   focus: { ghost: readonly string[]; hide: readonly string[] }
 }
 
+/**
+ * The film strip as a path, so the viewer can draw it moving: the perforations travel along the
+ * centre line as the advance mechanism turns. It replaces the static GLB of `part`.
+ */
+export interface FilmStrip {
+  part: string
+  mechanism: string
+  /** Film travel in mm per unit of the mechanism value. */
+  advance_per_unit: number
+  /** Arc length of the first point; points are spaced `ds` apart along the centre line, in XY. */
+  s0: number
+  ds: number
+  points: readonly (readonly [number, number])[]
+  width: number
+  pitch: number
+  perf_along: number
+  perf_across: number
+  /** Perforation rows sit at Z = +/- this. */
+  perf_row_z: number
+  /** Arc length of one perforation centre at rest. */
+  first_perf_s: number
+}
+
 export interface Manifest {
   /** GLB files are in metres; multiply by this to get millimetres. */
   glb_unit_scale: number
@@ -102,6 +125,7 @@ export interface Manifest {
   parts: readonly PartManifest[]
   mechanisms: readonly Mechanism[]
   cycles: readonly Cycle[]
+  film_strip: FilmStrip | null
 }
 
 /** World coordinates are camera-design coordinates in mm: X film travel, Y front, Z up. */
@@ -119,6 +143,7 @@ export interface Section {
   flip: boolean
 }
 
-export type ViewName = 'iso' | 'front' | 'rear' | 'top'
+/** `mechanism` frames only the parts a cycle moves, from the rear right, like the anatomy figure. */
+export type ViewName = 'iso' | 'front' | 'rear' | 'top' | 'mechanism'
 
 export type KindFilter = 'all' | Kind

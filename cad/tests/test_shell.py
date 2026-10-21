@@ -27,7 +27,7 @@ SEEDS: dict = {
         {"dark slide slot width, depth and mouth (geometry)"},
     ),
     "press holes bigger than the pins": (
-        replace(C, shell=replace(C.shell, pin_press_hole=3.1)),
+        replace(C, fit=replace(C.fit, pin_press_hole=3.1)),
         {"pin, shaft, insert and collar bore fits (geometry)"},
     ),
     "cover tongue as wide as its groove": (

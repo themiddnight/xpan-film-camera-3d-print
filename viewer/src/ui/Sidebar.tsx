@@ -6,8 +6,8 @@ import { PartsPanel } from './PartsPanel'
 import { SectionPanel } from './SectionPanel'
 
 const SLIDER_STEPS = 100
-const VIEWS: ViewName[] = ['iso', 'front', 'rear', 'top']
-const VIEW_LABELS: Record<ViewName, string> = { iso: 'Iso', front: 'Front', rear: 'Rear', top: 'Top' }
+const VIEWS: ViewName[] = ['iso', 'front', 'rear', 'top', 'mechanism']
+const VIEW_LABELS: Record<ViewName, string> = { iso: 'Iso', front: 'Front', rear: 'Rear', top: 'Top', mechanism: 'Mechanism' }
 
 function ViewPanel() {
   const { showView } = useViewer().actions

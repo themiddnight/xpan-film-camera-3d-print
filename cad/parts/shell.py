@@ -210,8 +210,8 @@ def _takeup(c: Camera, part: Part) -> Part:
     sx, sy = L.sprocket_x, c.sprocket_y
     # Sprocket pin: pressed into a bottom boss, through the shell bottom.
     boss_top = -(sp.flange_gap / 2 + sp.flange_t) - s.flange_gap
-    part += zcyl(sx, sy, s.pin_press_hole + 2 * s.boss_wall, floor - 0.01, boss_top)
-    part -= zcyl(sx, sy, s.pin_press_hole, s.z_min - 1, boss_top + 1)
+    part += zcyl(sx, sy, c.fit.pin_press_hole + 2 * s.boss_wall, floor - 0.01, boss_top)
+    part -= zcyl(sx, sy, c.fit.pin_press_hole, s.z_min - 1, boss_top + 1)
     # Collar for the sprocket top hub, with the fixed index mark on the pawl line.
     part += zcyl(sx, sy, sprocket_collar_od(c), s.z_max - 0.01, sp.top_hub_z1)
     part -= zcyl(sx, sy, s.collar_bore, s.ceiling_z - 1, sp.top_hub_z1 + 1)
@@ -232,12 +232,12 @@ def _pawl_mounts(c: Camera, part: Part) -> Part:
     px, py = c.pawl_pivot
     # Pivot cheeks hang from the ceiling either side of the lever; the pin ends flush with them.
     cheek_t = (p.pivot_pin_len - p.cheek_gap) / 2
-    z0 = p.pivot_z - s.pin_press_hole / 2 - s.cheek_wall
+    z0 = p.pivot_z - c.fit.pin_press_hole / 2 - s.cheek_wall
     for side in (-1, 1):
         v0, v1 = sorted((side * p.cheek_gap / 2, side * (p.cheek_gap / 2 + cheek_t)))
         part += plan_box(px, py, p.angle_deg, -s.cheek_half_len, s.cheek_half_len, v0, v1, z0, s.ceiling_z + 0.01)
     pin = Location((px, py, p.pivot_z), (0, 0, p.angle_deg)) * Rot(90, 0, 0) * Cylinder(
-        s.pin_press_hole / 2, p.pivot_pin_len + 2)
+        c.fit.pin_press_hole / 2, p.pivot_pin_len + 2)
     part -= pin
     # Spring shelf under the button end, hung from the front wall, with a ring that centres the spring.
     bx, by = c.pawl_button
@@ -271,7 +271,7 @@ def _body_interface(c: Camera, part: Part) -> Part:
     for side in (-1, 1):
         x0, x1 = sorted((side * k.lug_x[0], side * k.lug_x[1]))
         part += box(x0, x1, g.datum_y - 0.01, k.lug_front_y, *k.lug_z)
-    part -= xcyl(k.latch_pin_y, k.latch_pin_z, s.pin_press_hole, -k.lug_x[1] - 1, k.lug_x[1] + 1)
+    part -= xcyl(k.latch_pin_y, k.latch_pin_z, c.fit.pin_press_hole, -k.lug_x[1] - 1, k.lug_x[1] + 1)
     return part
 
 
@@ -305,7 +305,7 @@ def _hinge(c: Camera, part: Part) -> Part:
     for x0, x1 in shell_knuckle_spans(c):
         part += xcyl(ay, az, cv.knuckle_od, x0, x1)
         part += box(x0, x1, web_y0, ay + r, az, s.z_min + 0.01)
-        part -= xcyl(ay, az, s.pin_press_hole, x0 - 1, x1 + 1)
+        part -= xcyl(ay, az, c.fit.pin_press_hole, x0 - 1, x1 + 1)
     return part
 
 

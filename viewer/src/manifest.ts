@@ -1,5 +1,5 @@
 import {
-  GROUPS, KINDS, type Cycle, type CycleKey, type Drive, type Manifest, type Mechanism, type PartManifest, type Readout,
+  GROUPS, KINDS, type Cycle, type CycleKey, type Drive, type FilmStrip, type Manifest, type Mechanism, type PartManifest, type Readout,
   type Vec3,
 } from './types'
 
@@ -137,11 +137,41 @@ function cycle(x: unknown, path: string): Cycle {
   }
 }
 
+function filmStrip(x: unknown, path: string): FilmStrip | null {
+  if (x === undefined || x === null) return null
+  const o = record(x, path)
+  const points = array(o.points, `${path}.points`).map((p, i): readonly [number, number] => {
+    const xy = array(p, `${path}.points[${i}]`)
+    if (xy.length !== 2) fail(`${path}.points[${i}]`, 'two numbers', p)
+    return [number(xy[0], `${path}.points[${i}][0]`), number(xy[1], `${path}.points[${i}][1]`)]
+  })
+  if (points.length < 2) fail(`${path}.points`, 'two or more points', o.points)
+  const positive = (key: string) => {
+    const v = number(o[key], `${path}.${key}`)
+    return v > 0 ? v : fail(`${path}.${key}`, 'a positive number', v)
+  }
+  return {
+    part: string(o.part, `${path}.part`),
+    mechanism: string(o.mechanism, `${path}.mechanism`),
+    advance_per_unit: number(o.advance_per_unit, `${path}.advance_per_unit`),
+    s0: number(o.s0, `${path}.s0`),
+    ds: positive('ds'),
+    points,
+    width: positive('width'),
+    pitch: positive('pitch'),
+    perf_along: positive('perf_along'),
+    perf_across: positive('perf_across'),
+    perf_row_z: positive('perf_row_z'),
+    first_perf_s: number(o.first_perf_s, `${path}.first_perf_s`),
+  }
+}
+
 /** Validates parsed JSON once and returns the domain type; everything downstream trusts it. */
 export function parseManifest(json: unknown): Manifest {
   const o = record(json, 'manifest')
   const parts = array(o.parts, 'manifest.parts').map((p, i) => part(p, `manifest.parts[${i}]`))
   const mechanisms = array(o.mechanisms, 'manifest.mechanisms').map((m, i) => mechanism(m, `manifest.mechanisms[${i}]`))
+  const strip = filmStrip(o.film_strip, 'manifest.film_strip')
   const cycles = o.cycles === undefined ? [] : array(o.cycles, 'manifest.cycles').map((c, i) => cycle(c, `manifest.cycles[${i}]`))
   if (parts.length === 0) throw new ManifestError('manifest.parts: the list is empty')
 
@@ -172,12 +202,16 @@ export function parseManifest(json: unknown): Manifest {
     }
   })
 
+  if (strip && !names.has(strip.part)) throw new ManifestError(`manifest.film_strip.part: no part named ${JSON.stringify(strip.part)}`)
+  if (strip && !ids.has(strip.mechanism)) throw new ManifestError(`manifest.film_strip.mechanism: no mechanism ${JSON.stringify(strip.mechanism)}`)
+
   return {
     glb_unit_scale: number(o.glb_unit_scale, 'manifest.glb_unit_scale'),
     film_advance_mm: number(o.film_advance_mm, 'manifest.film_advance_mm'),
     parts,
     mechanisms,
     cycles,
+    film_strip: strip,
   }
 }
 

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from params import Camera
-from parts import transport
+from parts import shell, transport
 
 Vec = tuple[float, float, float]
 
@@ -99,6 +99,12 @@ def pawl_ride_deg(c: Camera) -> float:
     return hi
 
 
+def dark_slide_pull(c: Camera) -> float:
+    """Lift that brings the slide's bottom edge 3mm above the slot mouth in the shell top."""
+    bottom = shell.PARTS["dark_slide"].build(c).bounding_box().min.Z
+    return c.shell.z_max - bottom + 3.0
+
+
 def advance_fraction_to_clear_pocket(c: Camera) -> float:
     """Sprocket turn (fraction of one frame) after which the pocket has left the nose."""
     s, p = c.sprocket, c.pawl
@@ -138,6 +144,23 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
         Mechanism(
             "pawl_ride", "Pawl rides on the cam",
             (Drive("pawl", "rotate", axis, pawl_ride_deg(c), pivot),),
+        ),
+        Mechanism(
+            "turn_buttons", "Turn the cover latches",
+            tuple(Drive(f"turn_button_{side}", "rotate", UP, 90.0, (sign * c.cover.button_x, c.cover.button_y, 0.0))
+                  for side, sign in (("left", -1), ("right", 1))),
+        ),
+        Mechanism(
+            "cover", "Open rear cover",
+            # About +X, a positive turn swings the cover's top backward (-Y), away from the shell.
+            tuple(Drive(p, "rotate", (1.0, 0.0, 0.0), c.cover.open_deg, (0.0, c.cover.hinge_axis_y, c.cover.hinge_axis_z))
+                  for p in ("rear_cover", "pressure_pad")),
+            Readout(c.cover.open_deg, "deg open"),
+        ),
+        Mechanism(
+            "dark_slide", "Pull dark slide",
+            (Drive("dark_slide", "slide", UP, dark_slide_pull(c)),),
+            Readout(dark_slide_pull(c), "mm pulled"),
         ),
         Mechanism(
             "rewind", "Lift rewind knob",

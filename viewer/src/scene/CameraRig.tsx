@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
-import { Vector3 } from 'three'
+import { Box3, Vector3 } from 'three'
 import { useViewer, useViewerState } from '../state/viewer'
 import type { ViewName } from '../types'
 import { explodedBounds } from './explode'
@@ -10,8 +10,11 @@ const VIEW_DIRECTIONS: Record<ViewName, [number, number, number]> = {
   front: [0, 1, 0.0001],
   rear: [0, -1, 0.0001],
   top: [0.0001, 0.0001, 1],
+  mechanism: [0.5, -0.7, 0.62],
 }
 const DISTANCE_FACTOR = 2.0
+/** The mechanism view frames a few small parts, so it comes in closer than the whole-camera views. */
+const MECHANISM_DISTANCE_FACTOR = 1.5
 const DISTANCE_MARGIN_MM = 20
 
 interface Controls {
@@ -31,9 +34,19 @@ export function CameraRig() {
   useEffect(() => {
     if (!bounds || bounds.isEmpty() || !controls) return
     // The explode amount at the moment of the request sets the framing; moving the slider does not move the camera.
-    const framed = explodedBounds(bounds, viewer.store.getState().explode)
+    const state = viewer.store.getState()
+    let framed = explodedBounds(bounds, state.explode)
+    let factor = DISTANCE_FACTOR
+    if (view === 'mechanism') {
+      const parts = new Box3()
+      for (const name of state.framed) if (state.boxes[name]) parts.union(state.boxes[name])
+      if (!parts.isEmpty()) {
+        framed = parts
+        factor = MECHANISM_DISTANCE_FACTOR
+      }
+    }
     const centre = framed.getCenter(new Vector3())
-    const radius = framed.getSize(new Vector3()).length() * DISTANCE_FACTOR + DISTANCE_MARGIN_MM
+    const radius = framed.getSize(new Vector3()).length() * factor + DISTANCE_MARGIN_MM
     const dir = new Vector3(...VIEW_DIRECTIONS[view]).normalize()
     camera.position.copy(centre).addScaledVector(dir, radius)
     controls.target.copy(centre)

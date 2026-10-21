@@ -262,7 +262,7 @@ def _(c, b):
     (ux, uy), (vx, vy) = sh.pawl_axes(c)
     px, py = c.pawl_pivot
     v = Vector(vx, vy, 0)
-    above = Vector(px, py, p.pivot_z + s.pin_press_hole / 2 + 0.5)
+    above = Vector(px, py, p.pivot_z + c.fit.pin_press_hole / 2 + 0.5)
     gap = _edge(shell, above, v, 0, 5) + _edge(shell, above, -v, 0, 5)
     cheek = Vector(px + (p.cheek_gap / 2 + 1) * vx, py + (p.cheek_gap / 2 + 1) * vy, p.pivot_z)
     hole_top, hole_bottom = _edge(shell, cheek, Z, 0, 3), _edge(shell, cheek, -Z, 0, 3)
