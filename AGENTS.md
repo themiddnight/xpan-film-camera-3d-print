@@ -59,7 +59,7 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 ## Software Stack
 
 - **build123d (Python)** — primary tool for all mechanical parts, chosen 2026-10-21 (see `docs/superpowers/specs/2026-10-21-redesign-roadmap-design.md`). The earlier OpenSCAD models were removed; OpenSCAD is no longer available.
-- **three.js** — web viewer for GLB exports, for review only.
+- **Vite + React + react-three-fiber** (`viewer/`) — web viewer for GLB exports, for review only. Dependencies are pinned; pnpm's minimum release age policy stays on.
 - Whatever the tool, models stay parametric: named variables at the top, no magic numbers.
 - **Blender** — visualization or organic shapes only; secondary tool.
 
@@ -72,8 +72,10 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 | `uv run python cad/export.py` | Builds every part in `cad/parts/`, writes `out/stl` (print orientation), `out/step` and `out/glb` (camera coordinates) and `out/manifest.json` |
 | `uv run python cad/checks.py` | Layout checks from `cad/params.py` plus geometry checks on the built solids; exit 1 on any failure |
 | `uv run python cad/tests/test_checks.py` | Seeds known design errors and proves the checks catch each one |
-| `python3 -m http.server 8642` then open `http://localhost:8642/viewer/` | three.js viewer: part toggles, ghosting, section planes, exploded view, sprocket rotation |
+| `pnpm --dir viewer install` (once), then `pnpm --dir viewer dev` and open `http://localhost:8642/` | Vite + React + react-three-fiber viewer reading `out/`: part toggles, ghosting, section planes, exploded view, sprocket rotation |
+| `pnpm --dir viewer build` | Typechecks and builds a static viewer into `viewer/dist/` (includes the current `out/` files) |
 
+- The viewer only reads `out/manifest.json` and `out/glb/`. Run the export first; the dev server picks up new files on reload.
 - Every dimension lives in `cad/params.py`. `Fit` holds printer-dependent values; `Measured` holds values to confirm on bought parts. Do not put numbers in part files.
 - Register each new part in `cad/parts/__init__.py` and add geometry checks for anything a part must get right.
 - `out/` is generated and gitignored until the final print package.
