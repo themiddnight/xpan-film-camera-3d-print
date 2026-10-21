@@ -21,7 +21,12 @@ open, chosen here and kept as params:
 - Turn buttons: centre pivots at X = +/-42.5, Y = 5.6 on raised insert bosses flush with the lip
   top. A full turn clears the rewind tower, sprocket collar, release button, advance knob and the
   dark slide handle, which is 40mm wide for that reason. Each boss overhangs the body bay by 2mm
-  above Z = 31.5.
+  above Z = 31.5. The hinge is 68mm under the lip, so opening slides the lip straight back: a flat
+  button on the lip would not hold it. Each button carries a 3 x 2 x 1mm dog under its rear end,
+  7.5mm from the pivot, in an arc groove in the 2.5mm lip (1.2mm floor); opening drives the
+  groove's front wall into the dog. The groove runs the dog's quarter turn counter-clockwise from
+  above, out past the lip's front edge, so released the dog hangs over the shell top. The buttons
+  print top down, dog up.
 - Pawl: cheeks 5.7mm thick so the 15mm pin ends flush; the spring shelf hangs from the front wall
   with a 1.5mm ring that centres the spring. Release button bayonet (as the transport parts model
   it): a plain 6.6mm bore through the top wall, no raised collar since the pressed cap comes down to
@@ -309,16 +314,8 @@ def _hinge(c: Camera, part: Part) -> Part:
     return part
 
 
-def _key(c: Camera) -> tuple:
-    return (c.fit, c.measured, c.film, c.gate, c.shell, c.layout, c.sprocket, c.pawl, c.takeup, c.rewind,
-            c.body_link, c.cover, c.print)
-
-
 @lru_cache(maxsize=8)
-def _build_shell(key: tuple) -> Part:
-    c = Camera(fit=key[0], measured=key[1], film=key[2], gate=key[3], shell=key[4], layout=key[5],
-               sprocket=key[6], pawl=key[7], takeup=key[8], rewind=key[9], body_link=key[10], cover=key[11],
-               print=key[12])
+def build_shell(c: Camera) -> Part:
     part = _envelope(c) + _rim(c)
     part = _gate(c, part)
     part -= _seal_groove(c)
@@ -327,10 +324,6 @@ def _build_shell(key: tuple) -> Part:
     part = _body_interface(c, part)
     part = _turn_button_bosses(c, part)
     return _hinge(c, part)
-
-
-def build_shell(c: Camera) -> Part:
-    return _build_shell(_key(c))
 
 
 # The rear cover and what it carries.
@@ -393,20 +386,37 @@ def build_cover(c: Camera) -> Part:
     part += box(k0, k1, y_out, s.y_rear, cv.hinge_axis_z, s.z_min + 0.01)
     part += xcyl(cv.hinge_axis_y, cv.hinge_axis_z, cv.knuckle_od, k0, k1)
     part -= xcyl(cv.hinge_axis_y, cv.hinge_axis_z, f.shaft_bore, k0 - 1, k1 + 1)
+    for x, y in turn_button_pivots(c):
+        part -= latch_groove(c, x, y)
     return part
+
+
+BUTTON_REST_DEG = 90.0
+"""Plan turn of a latched button: its local +X runs forward (+Y), so the dog on local -X points back."""
+
+
+def latch_groove(c: Camera, x: float, y: float) -> Part:
+    """Arc groove in the lip top that holds the latched dog and lets it through its release turn."""
+    cv, f = c.cover, c.fit
+    r_in, r_out = cv.dog_r - cv.dog_t / 2 - f.fdm_clearance, cv.dog_r + cv.dog_t / 2 + f.fdm_clearance
+    half = math.degrees(math.atan2(cv.dog_w / 2 + f.fdm_clearance, r_in))
+    a0 = BUTTON_REST_DEG + 180
+    lo, hi = sorted((a0, a0 + cv.button_release_deg))
+    return sector(x, y, r_in, r_out, lo - half, hi + half, lip_top(c) - cv.dog_h - f.fdm_clearance, lip_top(c) + 1)
 
 
 def build_turn_button(c: Camera) -> Part:
     cv = c.cover
     part = extrude(SlotCenterToCenter(cv.button_len - cv.button_w, cv.button_w), amount=cv.button_t)
     part = chamfer(part.edges().group_by(Axis.Z)[-1], cv.button_chamfer)
+    part += box(-cv.dog_r - cv.dog_t / 2, -cv.dog_r + cv.dog_t / 2, -cv.dog_w / 2, cv.dog_w / 2, -cv.dog_h, 0.01)
     return part - zcyl(0, 0, c.fit.shaft_bore, -1, cv.button_t + 1)
 
 
 def place_turn_button(side: int):
     def place(c: Camera) -> Location:
         x, y = turn_button_pivots(c)[0 if side < 0 else 1]
-        return Location((x, y, lip_top(c)), (0, 0, 90))
+        return Location((x, y, lip_top(c)), (0, 0, BUTTON_REST_DEG))
     return place
 
 
@@ -476,9 +486,9 @@ PARTS: dict[str, PartSpec] = {
     "shell": PartSpec(build_shell, at_origin, "film-back", "printed", SHELL_COLOR, print_rotation=(0, 0, 0)),
     "rear_cover": PartSpec(build_cover, at_origin, "film-back", "printed", COVER_COLOR, print_rotation=(90, 0, 0)),
     "turn_button_left": PartSpec(build_turn_button, place_turn_button(-1), "film-back", "printed", "#4a4a52",
-                                 print_rotation=(0, 0, 0)),
+                                 print_rotation=(180, 0, 0)),
     "turn_button_right": PartSpec(build_turn_button, place_turn_button(1), "film-back", "printed", "#4a4a52",
-                                  print_rotation=(0, 0, 0)),
+                                  print_rotation=(180, 0, 0)),
     "slot_plug": PartSpec(build_slot_plug, at_origin, "film-back", "printed", "#4a4a52", print_rotation=(90, 0, 0)),
     "dark_slide": PartSpec(build_dark_slide, at_origin, "film-back", "bought", "#1c1c1f"),
     "pressure_pad": PartSpec(build_pressure_pad, at_origin, "film-back", "bought", "#101012"),

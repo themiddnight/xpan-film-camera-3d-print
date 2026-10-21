@@ -36,16 +36,28 @@ SEEDS: dict = {
     ),
     "pad rim tall enough to hit the fences": (
         replace(C, cover=replace(C.cover, pad_rim_h=2.5)),
-        {"rear cover closes on the shell and swings open clear of it (geometry)"},
+        {"rear cover closes on the shell and swings open clear of it and the released latches (geometry)"},
     ),
     "hinge axis at the tongue tip": (
         replace(C, cover=replace(C.cover, hinge_axis_y=1.27)),
-        {"rear cover closes on the shell and swings open clear of it (geometry)",
+        {"rear cover closes on the shell and swings open clear of it and the released latches (geometry)",
          "hinge axis at the tongue mid-depth, cover knuckle under the shell bottom"},
     ),
     "left turn button swings into the rewind tower": (
         replace(C, cover=replace(C.cover, button_x=48.0)),
         {"turn buttons clear the tower, collars, knob, release button and slide handle (geometry)"},
+    ),
+    "latch dog too short to stop the cover": (
+        replace(C, cover=replace(C.cover, dog_h=0.1)),
+        {"latched turn buttons stop the cover opening (geometry)"},
+    ),
+    "latch groove cut for the opposite turn": (
+        replace(C, cover=replace(C.cover, button_release_deg=-90.0)),
+        {"turn buttons turn a quarter to release, clear of everything round them (geometry)"},
+    ),
+    "turn buttons so far back the released dog sits in the lip": (
+        replace(C, cover=replace(C.cover, button_y=1.0)),
+        {"rear cover closes on the shell and swings open clear of it and the released latches (geometry)"},
     ),
     "shell longer than the print bed": (
         replace(C, shell=replace(C.shell, x_max=105.0)),

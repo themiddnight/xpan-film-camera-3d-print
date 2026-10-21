@@ -314,7 +314,7 @@ class Cover:
     groove_foam: float = 1.5          # foam strip in the groove bottom
     lap_top: float = 3.0              # chosen: 3mm on the rear face of the top wall + 3mm over the top = 6mm lap
     lap_foam: float = 1.0             # chosen: compressed foam under the top lip
-    lip_t: float = 2.0                # chosen
+    lip_t: float = 2.5                # chosen: holds the latch groove over a min_wall floor
     pad_w: float = 75.0
     pad_h: float = 33.0
     pad_rim_h: float = 0.5            # chosen: the pad recess is a locating rim on the inner face
@@ -346,6 +346,14 @@ class Cover:
     button_x: float = 42.5
     button_y: float = 5.6             # boss edge 0.3mm in front of the cover lip
     button_chamfer: float = 0.5
+    # Latch dog: a block under the rear end of each button that drops into an arc groove in the lip top.
+    # Opening drives the groove's front wall back into the dog; the groove follows the dog's quarter turn
+    # out over the shell top. Chosen: walls each side of the groove >= min_wall, floor = min_wall.
+    dog_r: float = 7.5                # dog centre, from the pivot along the button
+    dog_t: float = 2.0                # radial
+    dog_w: float = 3.0                # across the button
+    dog_h: float = 1.0                # below the lip top
+    button_release_deg: float = 90.0  # mirrors the turn_buttons drive (mechanisms.py): counter-clockwise from above
     insert_len: float = 5.0           # docs/bom.md M3 x 5 x 4 (measure)
     insert_below: float = 2.0         # insert boss hangs under the ceiling so the hole keeps a floor
     m3_len: float = 8.0
