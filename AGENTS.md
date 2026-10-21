@@ -71,7 +71,7 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 |---|---|
 | `uv run python cad/export.py` | Builds every part in `cad/parts/`, writes `out/stl` (print orientation), `out/step` and `out/glb` (camera coordinates) and `out/manifest.json` |
 | `uv run python cad/checks.py` | Layout checks from `cad/params.py` plus geometry checks on the built solids; exit 1 on any failure |
-| `uv run python cad/test_checks.py` | Seeds known design errors and proves the checks catch each one |
+| `uv run python cad/tests/test_checks.py` | Seeds known design errors and proves the checks catch each one |
 | `python3 -m http.server 8642` then open `http://localhost:8642/viewer/` | three.js viewer: part toggles, ghosting, section planes, exploded view, sprocket rotation |
 
 - Every dimension lives in `cad/params.py`. `Fit` holds printer-dependent values; `Measured` holds values to confirm on bought parts. Do not put numbers in part files.
@@ -82,10 +82,21 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 
 ## Design Document
 
-`camera_design.md` is the system-level source of truth. Detailed module design is split into:
-- `film_back_design.md` — film transport, gate, dark slide, body interface, and sprocket lock
-- `simple_body_design.md` — simple 50mm-depth pinhole body
-- `lens_design.md` — M42 pinhole module and future lens module notes
+`docs/design/camera.md` is the system-level source of truth. Detailed module design is split into:
+- `docs/design/film-back.md` — film transport, gate, dark slide, body interface, and sprocket lock
+- `docs/design/simple-body.md` — simple 50mm-depth pinhole body
+- `docs/design/lens.md` — M42 pinhole module and future lens module notes
+
+Other documents: `docs/bom.md` (bought parts), `docs/research/` (background research; the optics study uses an older 60x24mm frame), `docs/images/` (reference photos and sketches), `docs/superpowers/specs/` (roadmap and specs).
+
+### Repository layout
+
+| Path | Contents |
+|---|---|
+| `docs/` | Design docs, BOM, research, images, specs |
+| `cad/` | build123d source: `params.py`, `parts/`, `export.py`, `checks.py`, `tests/` |
+| `viewer/` | Vite + React + react-three-fiber viewer for the GLB exports |
+| `out/` | Generated exports (gitignored) |
 
 ---
 

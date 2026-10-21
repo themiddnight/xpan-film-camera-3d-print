@@ -41,7 +41,7 @@ module and the mirror/WLF lens body also stay out of scope; the M42 interface ke
 | CAD tool | build123d (Python), written by the agent | Parametric like OpenSCAD, real B-rep with fillets and STEP export, scriptable checks |
 | Preview | three.js web viewer loading GLB exports | Interactive review for the user; the agent screenshots the same page to check its own work |
 
-Locked parameters from [camera_design.md](../../../camera_design.md) stay unchanged unless phase 1
+Locked parameters from [docs/design/camera.md](../../design/camera.md) stay unchanged unless phase 1
 finds one wrong; any change is logged in that file's decision log.
 
 ## 4. Risk handling without early prints
@@ -59,7 +59,7 @@ user's printer, spring force, and light leaks. The plan handles them in two ways
 
 | Phase | Work | Output |
 |---|---|---|
-| 1. Design review and sourcing | Review risky and unfinished items in the module docs. Fill every dimension a printed part needs. Research off-the-shelf parts with standard sizes (M2/M3 screws and inserts, 3-4mm steel shafts or dowel pins, compression and torsion springs, ready-made M42 parts such as extension tubes or adapter rings, 0.1mm brass shim, dark slide sheet, light-seal velvet or foam). Design around sizes that can be bought. | Updated design docs; `bom.md` with part, size, search terms or example source, approximate price |
+| 1. Design review and sourcing | Review risky and unfinished items in the module docs. Fill every dimension a printed part needs. Research off-the-shelf parts with standard sizes (M2/M3 screws and inserts, 3-4mm steel shafts or dowel pins, compression and torsion springs, ready-made M42 parts such as extension tubes or adapter rings, 0.1mm brass shim, dark slide sheet, light-seal velvet or foam). Design around sizes that can be bought. | Updated design docs; `docs/bom.md` with part, size, search terms or example source, approximate price |
 | 2. Tooling | build123d project: shared parameter module, one module per part, assembly, export script, check script, three.js viewer page | Viewer showing a trial part; check script that catches a seeded error |
 | 3. Film back | Model all film-back parts and its assembly | Models + check report |
 | 4. Body and pinhole module | 50mm dark chamber, M42 mount, body latch, wire-frame viewfinder, pinhole holder, sliding shutter | Models + check report |
@@ -89,20 +89,25 @@ part, the assembly, the exploded view and the sections before calling a phase do
 
 ## 7. Repository layout
 
+Revised 2026-10-21 after phase 2: documents moved under `docs/`, and the viewer became a Vite + React + react-three-fiber app.
+
 ```
+docs/
+  design/         camera.md, film-back.md, simple-body.md, lens.md
+  research/       background research
+  images/         reference photos and sketches
+  bom.md          bought parts
+  superpowers/    specs and plans
 cad/              build123d source
   params.py       every shared dimension and tunable fit value
-  parts/          one module per printed part
-  assembly.py     positions parts in camera coordinates
+  parts/          one module per printed part, plus the registry that places them
   export.py       writes STL, STEP and GLB to out/
   checks.py       automated checks from section 6
-viewer/           three.js viewer page (loads out/glb/)
-out/              generated exports and renders (rebuilt by export.py; gitignored
-                  until phase 6, which commits the final print set)
-bom.md            bought parts
-docs/             specs and plans
+  tests/          seeded-error tests for the checks
+viewer/           Vite + React + react-three-fiber viewer (loads out/manifest.json)
+out/              generated exports (rebuilt by export.py; gitignored until phase 6,
+                  which commits the final print set)
 ```
 
-Design documents stay at the repository root. The coordinate convention from
-[camera_design.md](../../../camera_design.md) applies to all CAD code: X is film travel from
+The coordinate convention from [camera.md](../../design/camera.md) applies to all CAD code: X is film travel from
 cartridge to take-up, +Y is the front/body side.

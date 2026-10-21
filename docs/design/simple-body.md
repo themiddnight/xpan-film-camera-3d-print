@@ -47,7 +47,7 @@ The simple body uses the shared film back interface:
 - Body pivots down and clamps against the film rail/body datum.
 - Body does not contact cartridge or take-up chambers.
 
-Detailed interface geometry is defined in [film_back_design.md](film_back_design.md).
+Detailed interface geometry is defined in [film-back.md](film-back.md).
 
 ---
 
@@ -72,7 +72,7 @@ Initial viewfinder: foldable wire frame.
 
 ## 7. Modeling Parameters (v02 baseline)
 
-Same origin and axes as [film_back_design.md](film_back_design.md) section 17: film plane at Y = 0, +Y toward the pinhole.
+Same origin and axes as [film-back.md](film-back.md) section 17: film plane at Y = 0, +Y toward the pinhole.
 
 | Item | Value |
 |---|---:|
@@ -94,7 +94,7 @@ M42 mount values: see section 8.
 M42 caps are sold as a pair (body cap + rear lens cap) for about ฿39-50 on Lazada TH. A rear lens cap has the female thread, because it screws onto a lens's male rear thread. A body cap has the male thread.
 
 - **Body (female):** cut the centre out of the rear lens cap to a 36mm opening and glue the threaded ring into a printed pocket in the front plate.
-- **Pinhole module (male):** the body cap, drilled through, carries the pinhole and the printed shutter (see [lens_design.md](lens_design.md)).
+- **Pinhole module (male):** the body cap, drilled through, carries the pinhole and the printed shutter (see [lens.md](lens.md)).
 
 Neither cap's dimensions are published. Buy the pair and measure before phase 4:
 

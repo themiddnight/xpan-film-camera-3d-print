@@ -3,7 +3,7 @@
 Coordinates: origin at the gate centre on the film plane (emulsion surface).
 X = film travel (cassette to take-up), +Y = front toward the pinhole, Z = up.
 
-Values come from film_back_design.md section 17 and simple_body_design.md
+Values come from docs/design/film-back.md section 17 and docs/design/simple-body.md
 sections 7-8. `Fit` holds printer-dependent values that get a test coupon;
 `Measured` holds values to confirm with calipers on bought parts.
 """
@@ -27,7 +27,7 @@ class Fit:
 
 @dataclass(frozen=True)
 class Measured:
-    """Nominals until the bought parts arrive (bom.md, 'Measure on arrival')."""
+    """Nominals until the bought parts arrive (docs/bom.md, 'Measure on arrival')."""
     cassette_d: float = 25.0
     cassette_lip_envelope: float = 29.5
     cassette_cap_height: float = 39.0

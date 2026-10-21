@@ -1,10 +1,14 @@
 """Proves the checks catch known mistakes. Run from the repository root:
-uv run python cad/test_checks.py
+uv run python cad/tests/test_checks.py
 
 Each seed is a past or plausible design error; the named checks must fail on it,
 and the shipped parameters must pass everything.
 """
+import sys
 from dataclasses import replace
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # cad/ holds params, parts and checks
 
 from checks import run_checks
 from params import CAMERA

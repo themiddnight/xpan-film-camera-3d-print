@@ -3,10 +3,10 @@
 **Module:** Shared film back  
 **Frame format:** 65 x 24mm on 135 film  
 **Design priority:** Simple, printable, mechanically understandable, and easy to repair  
-**Reference drawing:** [images/proto-film-back-rough-design.png](images/proto-film-back-rough-design.png)  
+**Reference drawing:** [proto-film-back-rough-design.png](../images/proto-film-back-rough-design.png)  
 **Modeling values:** section 17 holds the single value for every dimension the CAD uses. Ranges elsewhere in this document are background; section 17 wins.
 
-This document is the detailed design spec for the film back. The system-level camera architecture remains in [camera_design.md](camera_design.md).
+This document is the detailed design spec for the film back. The system-level camera architecture remains in [camera.md](camera.md).
 
 ---
 

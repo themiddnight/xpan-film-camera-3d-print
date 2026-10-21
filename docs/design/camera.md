@@ -6,9 +6,9 @@
 
 This document is the system-level source of truth. Detailed mechanical design lives in the module documents:
 
-- [film_back_design.md](film_back_design.md) - shared film transport, gate, dark slide, body interface, and sprocket lock
-- [simple_body_design.md](simple_body_design.md) - simple 50mm-depth body for pinhole use
-- [lens_design.md](lens_design.md) - lens module and future lens-body research
+- [film-back.md](film-back.md) - shared film transport, gate, dark slide, body interface, and sprocket lock
+- [simple-body.md](simple-body.md) - simple 50mm-depth body for pinhole use
+- [lens.md](lens.md) - lens module and future lens-body research
 
 ---
 
@@ -79,7 +79,7 @@ The film back is the shared transport module. It contains:
 - Hand-cut foam pressure pad on the rear cover over the gate, plus a printed shoe on the cover that holds the film on the sprocket
 - Top-hook + bottom-latch body module lock
 
-Design detail: [film_back_design.md](film_back_design.md)
+Design detail: [film-back.md](film-back.md)
 
 ### 4.2 Simple Body
 
@@ -94,7 +94,7 @@ The simple body is a dark chamber with:
 
 It does not include a mirror or ground glass. This keeps the first working camera simple.
 
-Design detail: [simple_body_design.md](simple_body_design.md)
+Design detail: [simple-body.md](simple-body.md)
 
 ### 4.3 Pinhole Module
 
@@ -119,7 +119,7 @@ The lens module will use the same M42 interface. Possible approaches:
 - DIY leaf shutter if needed
 - Higher-quality enlarger or taking lens if image circle covers 69.3mm
 
-Design/research detail: [lens_design.md](lens_design.md)
+Design/research detail: [lens.md](lens.md)
 
 ### 4.5 Lens Body With Mirror / WLF
 
