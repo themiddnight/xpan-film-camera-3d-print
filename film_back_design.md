@@ -73,7 +73,7 @@ left                    center                         right
 
 The cartridge and take-up chambers may taper inward toward the center bridge. This keeps the body module from touching chamber walls and makes the bridge face the only mating datum.
 
-OpenSCAD coordinate convention:
+CAD coordinate convention:
 
 | Axis | Direction | Meaning |
 |---|---|---|

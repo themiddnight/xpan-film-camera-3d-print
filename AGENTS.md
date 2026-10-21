@@ -58,7 +58,8 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 
 ## Software Stack
 
-- **OpenSCAD** — primary tool for all mechanical parts. Parametric, variables at top, no magic numbers.
+- **Mechanical CAD tool: to be chosen.** The earlier OpenSCAD models were removed (none were usable) and OpenSCAD is no longer available. Pick the tool when the redesign reaches the modeling stage.
+- Whatever the tool, models stay parametric: named variables at the top, no magic numbers.
 - **Blender** — visualization or organic shapes only; secondary tool.
 
 ---
@@ -72,10 +73,10 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 
 ---
 
-## Instructions for Codex
+## Instructions for agents
 
-- **Design first, model later** — finalize all dimensions and mechanisms before opening OpenSCAD
+- **Design first, model later** — finalize all dimensions and mechanisms before opening any CAD tool
 - If uncertain about camera mechanics, film standards, or optical principles — **search the web before answering**
 - Key film standard: 135 perforation pitch = 4.750mm (KS-1870)
 - Prefer simple and proven mechanisms over clever and complex ones
-- Always write parametric OpenSCAD (variables at top, no magic numbers)
+- Always model parametrically (variables at top, no magic numbers)
