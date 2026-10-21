@@ -150,6 +150,19 @@ class Pawl:
     rest_gap: float = 0.2             # lever underside above the cam top at rest
     button_d: float = 6.0
     button_travel: float = 2.5
+    # Interface values shared by the shell (cheeks, spring shelf, button collar) and the transport
+    # parts (lever, button). Fixed before parallel modeling; change only with both sides.
+    pivot_z: float = 24.2             # pivot pin axis, the lever's mid-thickness at rest
+    pivot_pin_len: float = 15.0
+    width: float = 3.0                # lever width in plan, across its length
+    cheek_gap: float = 3.6            # between the shell's pivot cheeks: width + 2 x fdm_clearance
+    spring_od: float = 3.5
+    spring_free_len: float = 8.0
+    spring_shelf_z: float = 17.2      # shell shelf under the button end; spring works at 6.0mm
+    button_hole_d: float = 6.6        # collar bore: button_d + 2 x fdm_clearance
+    button_lug_w: float = 1.5         # quarter-turn lug on the button, in an L-slot in the collar
+    button_lug_len: float = 1.0
+    button_lug_h: float = 1.5
 
 
 @dataclass(frozen=True)
@@ -186,7 +199,7 @@ class BodyLink:
 
 @dataclass(frozen=True)
 class Cover:
-    """Rear cover, turn buttons and slot plug (film-back.md 17.3). Owned by cad/parts/cover.py."""
+    """Rear cover, turn buttons and slot plug (film-back.md 17.3). Owned by cad/parts/shell.py."""
 
 
 @dataclass(frozen=True)
@@ -206,7 +219,7 @@ class PinholeModule:
 
 @dataclass(frozen=True)
 class Bought:
-    """Reference solids for bought parts (docs/bom.md). Owned by cad/parts/bought.py."""
+    """Cassette and film reference solids (docs/bom.md). Owned by cad/parts/film.py."""
 
 
 @dataclass(frozen=True)
