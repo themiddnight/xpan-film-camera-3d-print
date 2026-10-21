@@ -1,2 +1,204 @@
-"""Geometry checks for the body parts."""
-from checklib import check  # noqa: F401
+"""Geometry checks for the body and the pinhole module, probed on the placed solids."""
+from build123d import Edge, Part, Pos, Rot, Solid, Vector
+
+from checklib import EPS, check
+from params import Camera
+from parts import PARTS
+from parts.body import rect_wire
+
+CONE_MARGIN = 0.5
+SEAT_TOL = 0.01
+PINHOLE_TOL = 0.3
+FIELD_DEPTH = 25.0
+APEX_HALF = 0.01
+
+
+def _runs(part: Part, start, direction, length: float) -> list[tuple[float, float]]:
+    """Solid intervals (distance from start) along a segment."""
+    s, d = Vector(*start), Vector(*direction).normalized()
+    hits = part.intersect(Edge.make_line(s, s + d * length))
+    if not hits:
+        return []
+    spans = []
+    for e in hits.edges():
+        a, b = (e.position_at(0) - s).dot(d), (e.position_at(1) - s).dot(d)
+        spans.append((min(a, b), max(a, b)))
+    return sorted(spans)
+
+
+def _first_run(part, start, direction, length=40.0):
+    runs = _runs(part, start, direction, length)
+    return runs[0] if runs else None
+
+
+def _apex_y(b) -> float:
+    return b.placed("pinhole_shim").bounding_box().min.Y
+
+
+def _loft(y0, hw0, hh0, y1, hw1, hh1) -> Solid:
+    return Solid.make_loft([rect_wire(y0, hw0, hh0), rect_wire(y1, hw1, hh1)])
+
+
+def _image_cone(c: Camera, apex: float, margin: float) -> Solid:
+    """Every ray from the 65 x 24 frame to the pinhole, grown by margin."""
+    return _loft(0.0, c.film.frame_w / 2 + margin, c.film.frame_h / 2 + margin, apex, APEX_HALF + margin, APEX_HALF + margin)
+
+
+def _field_cone(c: Camera, apex: float, margin: float) -> Solid:
+    """The same rays continued in front of the pinhole: the field of view."""
+    k = FIELD_DEPTH / c.optics.pinhole_y
+    return _loft(apex, APEX_HALF, APEX_HALF, apex + FIELD_DEPTH,
+                 c.film.frame_w / 2 * k + margin, c.film.frame_h / 2 * k + margin)
+
+
+def _hit(a: Part, b: Part) -> float:
+    r = a & b
+    return r.volume if r is not None else 0.0
+
+
+@check("pinhole plane 50.0 from the film plane, M42 stack seated (geometry)")
+def _(c, b):
+    r = (c.optics.m42_thread_d / 2 + c.measured.m42_rear_cap_od / 2) / 2
+    start = c.body.m42_floor_y - 1.0
+    spans = {n: _first_run(b.placed(n), (0, start, r), (0, 1, 0), 30.0)
+             for n in ("body", "m42_shim_ring", "m42_rear_cap_ring", "m42_body_cap")}
+    if None in spans.values():
+        return False, f"probe at r={r:.1f} missed {[n for n, s in spans.items() if s is None]}"
+    order = list(spans.values())
+    seated = all(abs(order[i][1] - order[i + 1][0]) < SEAT_TOL for i in range(len(order) - 1))
+    plane = start + order[-1][1]
+    apex = _apex_y(b)
+    ok = seated and abs(plane - c.optics.pinhole_y) <= PINHOLE_TOL and abs(apex - plane) < SEAT_TOL
+    return ok, f"pinhole plane Y {plane:.2f} (shim at {apex:.2f}), stack seated {seated}"
+
+
+@check("body cap flange seats on the ring, not the body (geometry)")
+def _(c, b):
+    r = (c.measured.m42_rear_cap_od / 2 + c.measured.m42_body_cap_od / 2) / 2
+    start = c.body.m42_floor_y
+    face = _first_run(b.placed("body"), (0, start, r), (0, 1, 0))
+    cap = _first_run(b.placed("m42_body_cap"), (0, start, r), (0, 1, 0))
+    gap = cap[0] - face[1]
+    return gap >= 0.2 - EPS, f"body front face {gap:.2f}mm behind the cap flange"
+
+
+@check("baffles clear the image cone by 0.5mm (geometry)")
+def _(c, b):
+    hit = _hit(_image_cone(c, _apex_y(b), CONE_MARGIN), b.placed("body"))
+    return hit < EPS, f"cone from the frame edges to the pinhole, grown {CONE_MARGIN}mm, cuts {hit:.3f} mm3 of body"
+
+
+@check("M42 mount and shutter clear the corner rays (geometry)")
+def _(c, b):
+    apex = _apex_y(b)
+    rear = _image_cone(c, apex, CONE_MARGIN)
+    front = _field_cone(c, apex, CONE_MARGIN)
+    hits = {n: _hit(rear, b.placed(n)) for n in ("m42_shim_ring", "m42_rear_cap_ring", "m42_body_cap")}
+    hits |= {n: hits.get(n, 0.0) + _hit(front, b.placed(n))
+             for n in ("m42_body_cap", "shutter_housing", "shutter_lock_pin")}
+    hits["pinhole_shim"] = _hit(_field_cone(c, apex, 0.0), b.placed("pinhole_shim"))
+    bad = {n: round(v, 3) for n, v in hits.items() if v > EPS}
+    return not bad, f"hits {bad}" if bad else f"clear, rays grown {CONE_MARGIN}mm"
+
+
+@check("body rear face on the datum, inside the bridge span (geometry)")
+def _(c, b):
+    body = b.placed("body")
+    bb = body.bounding_box()
+    y = c.gate.datum_y
+    on_datum = abs(bb.min.Y - y) < SEAT_TOL
+    corners = [(c.body.rear_half_w - 1, 0), (0, c.body.z_max - 1), (c.body.rear_half_w - 1, c.body.z_min + 1),
+               (-c.body.rear_half_w + 1, c.body.z_min + 1)]
+    contact = all(body.is_inside(Vector(x, y + 0.05, z)) for x, z in corners)
+    span = c.shell.bridge_half_span - max(abs(bb.min.X), abs(bb.max.X))
+    ok = on_datum and contact and span >= 0.5 - EPS
+    return ok, f"rear face Y {bb.min.Y:.2f}, contact {contact}, {span:.2f}mm inside the bridge span"
+
+
+@check("body tongue fits the hook slot with clearance (geometry)")
+def _(c, b):
+    k, clr = c.body_link, c.fit.fdm_clearance
+    body = b.placed("body")
+    z = (k.hook_slot_top_z + c.body.z_max) / 2 + 0.5
+    y_run = _first_run(body, (0, k.hook_slot_y[0] - 1, z), (0, 1, 0), 5.0)
+    if y_run is None:
+        return False, "no tongue in the hook slot"
+    y0, y1 = k.hook_slot_y[0] - 1 + y_run[0], k.hook_slot_y[0] - 1 + y_run[1]
+    top = c.body.z_max + _first_run(body, (0, (y0 + y1) / 2, c.body.z_max), (0, 0, 1), 10.0)[1]
+    gaps = (y0 - k.hook_slot_y[0], k.hook_slot_y[1] - y1, k.hook_slot_top_z - top)
+    return min(gaps) >= clr - EPS, "Y {:.2f}/{:.2f}, top {:.2f}mm".format(*gaps)
+
+
+@check("latch hook sits behind the pin and rises past its centre (geometry)")
+def _(c, b):
+    k, body = c.body_link, b.placed("body")
+    pin_rear = k.latch_pin_y - c.measured.rod_d / 2
+    z = k.latch_cantilever_top_z + 0.5
+    run = _first_run(body, (0, c.gate.datum_y - 1, z), (0, 1, 0), 10.0)
+    front = c.gate.datum_y - 1 + run[1]
+    up = _first_run(body, (0, front - 0.2, c.body.z_min - 1), (0, 0, 1), 10.0)
+    top = c.body.z_min - 1 + up[1]
+    free = not body.is_inside(Vector(0, (c.body.notch_y1 + c.body.latch_root_y) / 2,
+                                     k.latch_cantilever_top_z + c.body.latch_gap / 2))
+    ok = 0 <= pin_rear - front <= 0.5 and top >= k.latch_pin_z + 0.2 and free
+    return ok, f"hook front {pin_rear - front:.2f}mm behind the pin, top {top - k.latch_pin_z:+.2f}mm over its centre, beam free {free}"
+
+
+@check("shutter blade covers the pinhole closed and clears the field open (geometry)")
+def _(c, b):
+    p, blade = c.pinhole, b.placed("shutter_blade")
+    mid = (blade.bounding_box().min.Y + blade.bounding_box().max.Y) / 2
+    r = p.rear_opening_d / 2
+    covers = all(blade.is_inside(Vector(x, mid, z)) for x, z in ((0, 0), (r, 0), (-r, 0), (0, r), (0, -r)))
+    opened = Pos(p.blade_travel, 0, 0) * blade
+    field = _hit(_field_cone(c, _apex_y(b), CONE_MARGIN), opened)
+    pin = b.placed("shutter_lock_pin")
+    locks = _hit(pin, blade) < EPS and _hit(pin, opened) > EPS
+    return covers and field < EPS and locks, f"covers closed {covers}, open blade in field {field:.3f} mm3, pin locks {locks}"
+
+
+def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
+    bd, p, v = c.body, c.pinhole, c.viewfinder
+    from parts.body import nut_z0
+    from parts.pinhole import cap_front_y, slot_y
+    nut_top = nut_z0(c) + bd.nut_t + bd.nut_clearance
+    s0, s1 = slot_y(c)
+    pocket = (bd.m42_floor_y + bd.front_face_y) / 2
+    rays = [("body", f"side wall Y{y:.0f}", (0, y, 0), (1, 0, 0)) for y in (c.gate.datum_y + 1, 30.0)]
+    rays += [("body", f"{n} wall", (0, c.gate.datum_y + 3, 0), (0, 0, s)) for n, s in (("top", 1), ("bottom", -1))]
+    rays += [("body", f"M42 pocket wall {n}", (0, pocket, 0), d) for n, d in (("X", (1, 0, 0)), ("top", (0, 0, 1)), ("bottom", (0, 0, -1)))]
+    rays += [("body", "M42 pocket wall at the front face", (0, bd.front_face_y - 0.1, 0), (1, 0, 0))]
+    rays += [
+        ("body", "nut pocket to M42 pocket", (0, bd.tripod_y, nut_top - 0.05), (0, 1, 0)),
+        ("body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
+        ("body", "nut pocket to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
+        ("body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
+        ("shutter_housing", "blade rail", (0, (s0 + s1) / 2, 0), (0, 0, 1)),
+        ("shutter_housing", "rear plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, -1, 0)),
+        ("shutter_housing", "front plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, 1, 0)),
+        ("shutter_housing", "pin boss", (0, cap_front_y(c) + p.pin_boss_len - 0.5, p.pin_z), (0, 0, -1)),
+        ("viewfinder_hinge_right", "hinge over the wire", (v.hinge_x, v.axle_y, v.axle_z), (0, 0, 1)),
+    ]
+    return rays
+
+
+@check("body and pinhole walls >= min wall (geometry)")
+def _(c, b):
+    thin = []
+    for part, label, start, d in _wall_rays(c, b):
+        run = _first_run(b.placed(part), start, d)
+        t = run[1] - run[0] if run else 0.0
+        if t < c.print.min_wall - EPS:
+            thin.append(f"{label} {t:.2f}")
+    return not thin, f"thin: {thin}" if thin else f"all {len(_wall_rays(c, b))} probed walls >= {c.print.min_wall}mm"
+
+
+@check("body and pinhole printed parts fit the print bed (geometry)")
+def _(c, b):
+    over = []
+    for name, spec in PARTS.items():
+        if spec.group in ("body", "pinhole") and spec.print_rotation is not None:
+            size = (Rot(*spec.print_rotation) * b.local(name)).bounding_box().size
+            if max(size.X, size.Y) > c.print.bed:
+                over.append(f"{name} {size.X:.0f} x {size.Y:.0f}")
+    return not over, f"over: {over}" if over else "all fit"

@@ -205,16 +205,95 @@ class Cover:
 @dataclass(frozen=True)
 class Body:
     """Simple 50mm body (simple-body.md 7-8). Owned by cad/parts/body.py."""
+    rear_half_w: float = 39.0         # rear footprint X = +/-39, 1mm inside the bridge span
+    z_min: float = -29.0
+    z_max: float = 26.5
+    wall: float = 2.5
+    tongue_half_w: float = 34.0       # mirrors the hook slot X = +/-36 less 2mm (film-back.md 17.8)
+    chamber_rear_w: float = 69.0
+    chamber_h: float = 28.0
+    chamber_front_w: float = 36.0     # the chamber narrows to the M42 bore width
+    front_face_y: float = 47.5        # 0.5 behind the cap seat, so the cap seats on the ring only
+    m42_floor_y: float = 39.0         # pocket floor; the shim ring fills floor-to-ring
+    m42_pocket_gap: float = 0.2       # radial glue gap around the rear cap ring
+    m42_shim_min: float = 0.6         # thinnest shim ring worth printing
+    m42_shim_id: float = 38.0         # clears the 36mm ring bore
+    m42_ring_lip: float = 1.5         # what is left of the rear cap's end wall after cutting it to 36mm
+    baffle_y: tuple = (15.0, 27.0)    # rib centres; the M42 pocket floor is the third baffle (doc: Y = +39)
+    baffle_t: float = 1.5             # at the opening edge; the rear side runs out at 45 deg to the wall
+    baffle_clearance: float = 1.0     # opening outside the image cone
+    notch_half_w: float = 25.0
+    notch_y1: float = 13.0
+    notch_top_z: float = -21.0
+    latch_half_w: float = 4.0         # 8mm cantilever
+    latch_root_y: float = 25.0        # free length 20.8mm to the hook, strain about 1.2% at 1.8mm flex
+    latch_gap: float = 1.0            # air gap around the cantilever in its slot
+    latch_ramp: float = 1.8           # 45 deg lead-in on the hook's rear top edge
+    tripod_y: float = 32.0
+    tripod_boss_d: float = 14.0
+    tripod_proud: float = 0.5         # boss face below the film-back bottom, so a tripod plate seats on it
+    tripod_floor: float = 2.0         # under the nut
+    tripod_screw_hole: float = 6.6    # 1/4"-20 screw clearance
+    tripod_screw_depth: float = 5.0   # clearance above the nut for a long screw
+    nut_af: float = 11.1              # mirrors docs/bom.md (est.)
+    nut_t: float = 5.6
+    nut_bore: float = 6.35
+    nut_clearance: float = 0.3
+    hinge_pocket_depth: float = 1.5
 
 
 @dataclass(frozen=True)
 class Viewfinder:
     """Wire-frame finder and its hinge blocks (simple-body.md 5 and 7). Owned by cad/parts/body.py."""
+    wire_d: float = 1.0
+    frame_w: float = 104.0
+    frame_h: float = 38.4
+    peep_to_frame: float = 80.0
+    peep_d: float = 3.0
+    axle_y: float = 42.0
+    axle_z: float = 33.0              # folded arms clear the 31.5 film-back top
+    hinge_x: float = 22.0
+    block_w: float = 6.0
+    block_d: float = 8.0
+    block_above_axle: float = 2.5
+    tenon_w: float = 4.0
+    tenon_d: float = 6.0
+    wire_hole: float = 1.3
+    arm_x: float = 37.5               # rear arms pass outside the 71mm dark slide
+    arm_bend_y: float = 8.0
 
 
 @dataclass(frozen=True)
 class PinholeModule:
     """Shutter housing, blade and lock pin on the M42 body cap (lens.md 2). Owned by cad/parts/pinhole.py."""
+    cap_boss_len: float = 5.0
+    cap_boss_wall: float = 1.5
+    cap_drill_d: float = 6.0
+    shim_d: float = 12.0
+    shim_t: float = 0.05
+    shim_recess: float = 0.1
+    housing_half: float = 14.0
+    rear_plate: float = 1.5
+    slot: float = 0.8
+    front_plate: float = 1.5
+    rear_opening_d: float = 4.0
+    front_opening: tuple = (7.0, 4.0)
+    blade_t: float = 0.5
+    blade_len: float = 32.0
+    blade_h: float = 23.0
+    blade_side_gap: float = 0.5
+    blade_travel: float = 10.0        # +X opens: the blade hole moves onto the pinhole
+    blade_hole_d: float = 4.0
+    detent_x: float = -6.0
+    detent_z: float = 8.0
+    detent_d: float = 1.2
+    detent_h: float = 0.25
+    dimple_d: float = 1.5
+    pin_z: float = -8.0               # below the pinhole, outside the 27 deg vertical field
+    pin_len: float = 20.0
+    pin_boss_d: float = 7.0
+    pin_boss_len: float = 6.0
+    blade_pin_hole: float = 3.2
 
 
 @dataclass(frozen=True)
@@ -228,6 +307,7 @@ class Optics:
     pinhole_y: float = 50.0
     wavelength: float = 0.00055
     m42_bore: float = 36.0
+    m42_thread_d: float = 42.0
     m42_depth_behind_pinhole: float = 10.0
 
 
