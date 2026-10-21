@@ -109,6 +109,8 @@ INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, float, str]] = {
     frozenset(("sprocket_pin", "shell")): (3.0, 6.0, "pin pressed into the floor boss"),
     frozenset(("latch_pin", "shell")): (1.0, 2.5, "pin pressed into the latch lugs"),
     frozenset(("rewind_o_ring", "shell")): (0.2, 1.0, "O-ring squeezed in its counterbore, which is its job"),
+    frozenset(("shutter_lock_pivot", "shutter_housing")): (0.8, 2.0, "pivot rod pressed into both housing plates"),
+    frozenset(("shutter_lock_pivot", "shutter_lock_cap")): (0.5, 1.2, "cap pressed onto the pivot tip"),
     frozenset(("dark_slide", "slot_plug")): (0.0, 500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
     frozenset(("film", "shell")): (0.0, 0.5, "film lies on the rails; facets of the curved strip graze them"),
     frozenset(("film", "sprocket")): (0.0, 0.2, "film wraps the hub; facets of the curved strip graze it"),
@@ -440,8 +442,14 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
         frozenset(("film", "takeup_spool")): "the strip winds on with the spool",
         frozenset(("film_roll", "takeup_spool")): "the roll turns with the spool",
     },
+    "shutter_lock": {
+        frozenset(("shutter_housing", "shutter_lock")): "the lever's sprung finger flexes 0.4mm over its detent rail between the two notches",
+    },
     "release": {
-        frozenset(("pawl", "pawl_spring")): "the spring compresses under the lever; it is drawn at its rest length",
+        frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's 0.4mm sideways arc; a straight tube cannot",
+    },
+    "pawl_ride": {
+        frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's sideways arc; a straight tube cannot",
     },
 }
 """Pairs a mechanism may overlap while moving, per mechanism, with the reason."""
@@ -484,7 +492,7 @@ def posed(c: Camera, b: Built, values: dict[str, float]) -> dict:
 def sweep_clashes(c: Camera, b: Built, m) -> list[tuple[float, str, str, float]]:
     """Overlaps beyond the intended fits while one mechanism runs (with its prerequisites set)."""
     base = dict(m.requires)
-    allowed = MOTION_ALLOWED.get(m.id, {})
+    allowed = {pair for i in (m.id, *base) for pair in MOTION_ALLOWED.get(i, {})}
     moving = {d.part for m2 in mechanisms.mechanisms(c) if m2.id in base or m2.id == m.id for d in m2.drives}
     found = []
     for i in range(1, SWEEP_STEPS + 1):

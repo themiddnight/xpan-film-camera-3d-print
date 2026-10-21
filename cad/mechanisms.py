@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from params import Camera
-from parts import shell, transport
+from parts import pinhole, shell, transport
 
 Vec = tuple[float, float, float]
 
@@ -194,13 +194,14 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             Readout(c.rewind.lift, "mm lifted"),
         ),
         Mechanism(
-            "shutter_pin", "Pull shutter lock pin",
-            (Drive("shutter_lock_pin", "slide", (0.0, 1.0, 0.0), c.pinhole.pin_len),),
+            "shutter_lock", "Unlock shutter",
+            (Drive("shutter_lock", "rotate", pinhole.lock_axis(c)[0], c.pinhole.lock_unlock_deg, pinhole.lock_axis(c)[1]),),
         ),
         Mechanism(
             "shutter", "Open shutter",
-            (Drive("shutter_blade", "slide", (1.0, 0.0, 0.0), c.pinhole.blade_travel),),
-            requires=(("shutter_pin", 1.0),),
+            tuple(Drive(p, "slide", (1.0, 0.0, 0.0), c.pinhole.blade_travel) for p in ("shutter_blade", "shutter_knob")),
+            Readout(c.pinhole.blade_travel, "mm open"),
+            requires=(("shutter_lock", 1.0),),
         ),
     )
 
