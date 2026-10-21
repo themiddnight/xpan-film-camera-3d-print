@@ -50,7 +50,8 @@ Coordinate convention for CAD files: X is film travel from cartridge to take-up,
 | Film type | 135 / 35mm still film | Standard cartridge |
 | Perforation pitch | 4.750mm | KS-1870 pitch |
 | Perforations per frame | 14 | 14 x 4.750 = 66.5mm |
-| Film advance per frame | about 67.0mm | 66.5mm plus small frame gap/tolerance |
+| Film advance per frame | 66.5mm | Exactly 14 perforations; the tooth count sets it, so hub diameter error does not accumulate. Gap between 65mm frames is 1.5mm |
+| Frames per 36-exp roll | about 19-20 | 36 x 38mm = 1368mm of image film / 66.5mm, minus loading waste. XPan gets 21 |
 | Sprocket teeth | 14 | One sprocket revolution = one frame |
 | Sprocket pitch diameter | 21.17mm | 66.5 / pi |
 | Lens/body module mount | M42 x 1mm | Male lens module, female body mount |
@@ -73,9 +74,9 @@ The film back is the shared transport module. It contains:
 - Center 65 x 24mm film gate and film rails
 - Non-printed dark slide inserted from the top
 - Right 14-tooth sprocket roller with one-notch cam auto-lock
-- Right take-up spool driven directly by the advance knob
+- Right take-up spool driven by the advance knob through a felt friction clutch
 - One-piece main film-back shell with one bottom-hinged rear cover
-- Hand-cut foam pressure pad on the rear cover, covering gate through sprocket
+- Hand-cut foam pressure pad on the rear cover over the gate, plus a printed shoe on the cover that holds the film on the sprocket
 - Top-hook + bottom-latch body module lock
 
 Design detail: [film_back_design.md](film_back_design.md)
@@ -165,10 +166,11 @@ Chosen interface: **M42 x 1mm**.
 These are deliberate choices for a DIY prototype:
 
 - No frame counter in the first version.
-- No take-up spool friction clutch; the user stops advancing when the sprocket clicks.
-- Rewind requires holding the sprocket release button.
+- The take-up clutch is a felt washer and a spring, not a calibrated slip clutch; the user stops advancing when the sprocket clicks.
+- Rewind uses the release button held down by a quarter-turn, not a separate rewind clutch.
 - Foam pressure pad is hand-cut and stuck to the rear cover instead of printed as a calibrated spring plate.
-- Dark slide is cut from aluminum, HIPS, or PVC sheet instead of printed.
+- Dark slide is cut from 0.5mm aluminum sheet instead of printed.
+- M42 threads come from bought caps, not printed threads.
 - Light traps use velvet/felt rather than complex printed labyrinths everywhere.
 
 ---
@@ -183,13 +185,27 @@ These are deliberate choices for a DIY prototype:
 | 2026-05 | Modular architecture | Film back can serve multiple bodies |
 | 2026-05-06 | 14-tooth single sprocket | One revolution per frame; no gear reduction |
 | 2026-05-06 | One-notch cam auto-lock | Simple physical stop after one sprocket revolution |
-| 2026-05-06 | Direct-drive take-up spool | Simplest DIY build; user stops at sprocket click |
-| 2026-05-06 | Rewind requires holding release | Avoids extra one-way clutch/ratchet complexity |
+| 2026-05-06 | Direct-drive take-up spool (superseded 2026-10-21: felt clutch) | Simplest DIY build; user stops at sprocket click |
+| 2026-05-06 | Rewind requires holding release (superseded 2026-10-21: quarter-turn hold) | Avoids extra one-way clutch/ratchet complexity |
 | 2026-05-06 | Top hook + bottom latch body lock | Printable, secure, repeatable body registration |
 | 2026-05-06 | One-piece film-back shell | Keeps film rail and chamber alignment in one printed datum |
 | 2026-05-06 | One-piece bottom-hinged rear cover | Opens the full film path and chambers as one loading door |
 | 2026-05-06 | Foam pressure pad, non-printed | Easier to tune by hand |
 | 2026-05-06 | Dark slide as cut sheet | More durable and flatter than printed PETG |
+| 2026-10-21 | v01 OpenSCAD models removed; redesign in build123d per the roadmap spec | None of the v01 models were usable |
+| 2026-10-21 | Film advance is exactly 66.5mm; about 19-20 frames per 36-exp roll | Tooth count sets the advance; the old "about 67mm" and "about 14 frames" were wrong |
+| 2026-10-21 | Sprocket hub 21.04mm, film on an S path with 49-63 deg wrap (about 2 teeth) and a cover-mounted shoe | Hub = pitch diameter minus film thickness; two teeth are enough when the clutch limits tension and the shoe keeps the film seated |
+| 2026-10-21 | Rails on the film edge band, 1.2mm wide | Keeps rails off the perforations and the image |
+| 2026-10-21 | Sprocket and cam printed as one part on a fixed 3mm pin | The notch cannot slip out of phase with the teeth |
+| 2026-10-21 | Felt-washer friction clutch on the take-up spool | Without it, thumb torque goes into the perforations once the sprocket locks |
+| 2026-10-21 | Quarter-turn hold on the release button for rewind | Avoids holding the button through about 20 rewind turns |
+| 2026-10-21 | 3.0mm stainless rod for every shaft and pin | One stock; dowel pins are too short for the shafts |
+| 2026-10-21 | M42 from a bought body cap (male) and rear lens cap (female) | Cheap, real threads; printed M42 threads are unreliable |
+| 2026-10-21 | Tripod socket: captured 1/4"-20 nut in the body bottom | Pinhole exposures need a tripod; no 1/4"-20 insert is sold locally |
+| 2026-10-21 | Every printed part fits 180 x 180mm; film back is 175mm wide | Printer not chosen yet |
+| 2026-10-21 | Face-notch cam with a horizontal-pivot pawl lever | A vertical button press can lift only a lever on a horizontal pivot |
+| 2026-10-21 | Pressure pad on the gate only, light preload | Pad drag must stay below the clutch slip force |
+| 2026-10-21 | Dark slide slot gets flocked lips and a plug | The open slot mouth leads straight to the gate |
 
 ---
 

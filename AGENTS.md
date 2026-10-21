@@ -45,10 +45,10 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 | Frame size | 65 × 24mm |
 | Perforation pitch | 4.750mm (KS-1870) |
 | Perforations per frame | 14 |
-| Film advance per frame | ~67.0mm |
-| Sprocket outer Ø | 21.2mm |
+| Film advance per frame | 66.5mm exactly (set by tooth count, 1.5mm gap between frames) |
+| Sprocket pitch Ø | 21.17mm (film-contact hub Ø 21.04 = pitch Ø − film thickness) |
 | Sprocket teeth | 14 (1 rev = 1 frame) |
-| Frames per 36-exp roll | ~14 |
+| Frames per 36-exp roll | about 19-20 (XPan gets 21) |
 | Lens mount | M42 × 1mm pitch |
 | Pinhole diameter | 0.30mm |
 | Pinhole-to-film distance | 50.0mm |
@@ -58,7 +58,8 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 
 ## Software Stack
 
-- **Mechanical CAD tool: to be chosen.** The earlier OpenSCAD models were removed (none were usable) and OpenSCAD is no longer available. Pick the tool when the redesign reaches the modeling stage.
+- **build123d (Python)** — primary tool for all mechanical parts, chosen 2026-10-21 (see `docs/superpowers/specs/2026-10-21-redesign-roadmap-design.md`). The earlier OpenSCAD models were removed; OpenSCAD is no longer available.
+- **three.js** — web viewer for GLB exports, for review only.
 - Whatever the tool, models stay parametric: named variables at the top, no magic numbers.
 - **Blender** — visualization or organic shapes only; secondary tool.
 
