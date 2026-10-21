@@ -7,7 +7,8 @@ Values chosen here where the docs give a range or nothing (all live in params.py
 - Pawl: the lever runs from u = -(tip_arm + nose_len / 2) to u = button_arm + button_end along the 45 deg line
   (u = 0 at the pivot, + toward the button). A 1.8 x 1.8mm nose drops from the tip underside into the pocket
   and rests 0.05mm above the pocket floor, so the lever underside stays 0.2mm over the cam when the spring
-  presses the nose down. The pivot boss is 5.7mm OD. A 2.4mm spigot under the button end seats the spring.
+  presses the nose down. Its face toward the sprocket axis is an arc of 7.0mm about the pivot axis, so the
+  lower corner does not swing into the pocket wall as the lever turns. The pivot boss is 5.7mm OD. A 2.4mm spigot under the button end seats the spring.
   The lever prints on its side; the nose and spigot need tiny supports.
 - Release button: 6.6mm cap, 2.5mm tall, with a coin slot for the quarter turn. The cap is as wide as the
   advance knob allows (1.1mm to it). The lug sits so that pressed it is 0.2mm under the ceiling, and a
@@ -164,6 +165,7 @@ def build_pawl(c: Camera) -> Part:
     boss = Pos(0, 0, p.pivot_z) * Rot(90, 0, 0) * Cylinder(p.boss_od / 2, p.width)
     nose_bottom = s.cam_z0 + s.cam_t - s.notch_depth + p.nose_floor_gap
     nose = Pos(-p.tip_arm, 0, (nose_bottom + z0 + 0.1) / 2) * Box(p.nose_len, p.tip_w, z0 + 0.1 - nose_bottom)
+    nose &= Pos(0, 0, p.pivot_z) * Rot(90, 0, 0) * Cylinder(p.nose_swing_r, p.tip_w + 1)
     spigot = Pos(p.button_arm, 0, 0) * _cylinder(p.spigot_d / 2, z0 - p.spigot_len, z0 + 0.1)
 
     part = lever + boss + nose + spigot

@@ -199,6 +199,10 @@ class Pawl:
     tip_w: float = 1.8                # film-back.md 17.6: tip 1.8mm wide over the 2.2mm pocket
     nose_len: float = 1.8             # along the lever; the pocket is notch_len = 2.4 long
     nose_floor_gap: float = 0.05      # nose underside above the pocket floor at rest
+    # The nose face toward the sprocket axis is an arc about the pivot axis of this radius. Turning the
+    # lever then slides the face along itself, where a square face swings its bottom corner (7.5mm from
+    # the pivot axis) into the pocket wall (7.2mm away). From 7.5 up the nose stays square.
+    nose_swing_r: float = 7.0
     button_end: float = 1.5           # lever runs this far past the button axis, so the button face bears on it
     boss_od: float = 5.7              # pivot boss: shaft_bore + 2 x min_wall, rounded up
     tip_chamfer: float = 0.8          # on the tip's top edge, keeps the lifted tip under the ceiling
