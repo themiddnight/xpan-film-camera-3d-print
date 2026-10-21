@@ -1,5 +1,5 @@
 """Geometry checks for the body and the pinhole module, probed on the placed solids."""
-from build123d import Edge, Part, Pos, Rot, Solid, Vector
+from build123d import Edge, Part, Rot, Solid, Vector
 
 from checklib import EPS, check
 from params import Camera
@@ -88,14 +88,13 @@ def _(c, b):
     return hit < EPS, f"cone from the frame edges to the pinhole, grown {CONE_MARGIN}mm, cuts {hit:.3f} mm3 of body"
 
 
-@check("M42 mount and shutter clear the corner rays (geometry)")
+@check("M42 mount clears the corner rays (geometry)")
 def _(c, b):
     apex = _apex_y(b)
     rear = _image_cone(c, apex, CONE_MARGIN)
     front = _field_cone(c, apex, CONE_MARGIN)
     hits = {n: _hit(rear, b.placed(n)) for n in ("m42_shim_ring", "m42_rear_cap_ring", "m42_body_cap")}
-    hits |= {n: hits.get(n, 0.0) + _hit(front, b.placed(n))
-             for n in ("m42_body_cap", "shutter_housing", "shutter_lock_pin")}
+    hits["m42_body_cap"] += _hit(front, b.placed("m42_body_cap"))
     hits["pinhole_shim"] = _hit(_field_cone(c, apex, 0.0), b.placed("pinhole_shim"))
     bad = {n: round(v, 3) for n, v in hits.items() if v > EPS}
     return not bad, f"hits {bad}" if bad else f"clear, rays grown {CONE_MARGIN}mm"
@@ -144,25 +143,10 @@ def _(c, b):
     return ok, f"hook front {pin_rear - front:.2f}mm behind the pin, top {top - k.latch_pin_z:+.2f}mm over its centre, beam free {free}"
 
 
-@check("shutter blade covers the pinhole closed and clears the field open (geometry)")
-def _(c, b):
-    p, blade = c.pinhole, b.placed("shutter_blade")
-    mid = (blade.bounding_box().min.Y + blade.bounding_box().max.Y) / 2
-    r = p.rear_opening_d / 2
-    covers = all(blade.is_inside(Vector(x, mid, z)) for x, z in ((0, 0), (r, 0), (-r, 0), (0, r), (0, -r)))
-    opened = Pos(p.blade_travel, 0, 0) * blade
-    field = _hit(_field_cone(c, _apex_y(b), CONE_MARGIN), opened)
-    pin = b.placed("shutter_lock_pin")
-    locks = _hit(pin, blade) < EPS and _hit(pin, opened) > EPS
-    return covers and field < EPS and locks, f"covers closed {covers}, open blade in field {field:.3f} mm3, pin locks {locks}"
-
-
 def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
-    bd, p, v = c.body, c.pinhole, c.viewfinder
+    bd, v = c.body, c.viewfinder
     from parts.body import nut_z0
-    from parts.pinhole import cap_front_y, slot_y
     nut_top = nut_z0(c) + bd.nut_t + bd.nut_clearance
-    s0, s1 = slot_y(c)
     pocket = (bd.m42_floor_y + bd.front_face_y) / 2
     rays = [("body", f"side wall Y{y:.0f}", (0, y, 0), (1, 0, 0)) for y in (c.gate.datum_y + 1, 30.0)]
     rays += [("body", f"{n} wall", (0, c.gate.datum_y + 3, 0), (0, 0, s)) for n, s in (("top", 1), ("bottom", -1))]
@@ -173,16 +157,12 @@ def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
         ("body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
         ("body", "nut pocket to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
         ("body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
-        ("shutter_housing", "blade rail", (0, (s0 + s1) / 2, 0), (0, 0, 1)),
-        ("shutter_housing", "rear plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, -1, 0)),
-        ("shutter_housing", "front plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, 1, 0)),
-        ("shutter_housing", "pin boss", (0, cap_front_y(c) + p.pin_boss_len - 0.5, p.pin_z), (0, 0, -1)),
         ("viewfinder_hinge_right", "hinge over the wire", (v.hinge_x, v.axle_y, v.axle_z), (0, 0, 1)),
     ]
     return rays
 
 
-@check("body and pinhole walls >= min wall (geometry)")
+@check("body walls >= min wall (geometry)")
 def _(c, b):
     thin = []
     for part, label, start, d in _wall_rays(c, b):

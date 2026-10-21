@@ -29,7 +29,28 @@ The first working module should be the pinhole module because it is the simplest
 | Hole check | Measure under magnification or scan at 2400dpi | Target 0.30mm +/-0.03 |
 | Shutter | Sliding blade in a printed housing glued to the cap front | Simple manual exposure |
 | Blade material | 0.5mm aluminum, offcut of the dark slide sheet | One purchase covers both; painted matte black |
-| Safety | Detent bump plus a removable 3.0mm steel locking pin | Prevents accidental exposure in a bag |
+| Handle | Printed ridged knob glued on the blade's +X tongue | Stands 10.5mm past the housing edge, 14mm tall; slides 10mm |
+| Travel stops | Stadium slot in the blade around the lock pivot pin | Stops the blade at closed and at 10mm open, and keeps it captive |
+| Safety | Captive lock lever on a pressed 3.0mm steel pin, with a click detent | Positive lock in a bag; nothing to remove |
+
+### 2.1 Shutter operation
+
+To open, push the lock lever's thumb pad toward the lens axis until it clicks (25 degrees), then
+slide the knob outward until it stops. The blade's 4mm hole is then on the pinhole. To close, slide
+the knob back until it stops, then push the pad back until it clicks.
+
+The lever's tooth sits 2.5mm deep in a notch in the knob's bottom face. The pivot is level with the
+middle of that engagement, so a push on the knob loads the tooth straight through the pivot and
+cannot turn the lever: the lock holds by shape, not friction. The tooth can only enter the notch
+with the blade closed.
+
+The lever stays where it is put. An arc spring finger on the lever clicks into one of two notches in
+a printed rail on the housing face, 0.4mm deep, at the locked and unlocked positions. A printed cap
+pressed and glued on the pivot tip keeps the lever on. The pivot is a 9mm length of the 3mm rod,
+pressed into both housing plates, with its rear end on the body cap face.
+
+A bump on the blade channel's rear face meets a dimple hole in the blade at closed and at open. It
+clicks only when the blade is pressed rearward, so the lock, not the bump, keeps the shutter shut.
 
 ---
 

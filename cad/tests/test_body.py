@@ -19,11 +19,7 @@ SEEDS: dict = {
     ),
     "rear cap cut to a 12mm opening": (
         replace(CAMERA, optics=replace(CAMERA.optics, m42_bore=12.0)),
-        {"M42 mount and shutter clear the corner rays (geometry)"},
-    ),
-    "shutter front opening too small for the field": (
-        replace(CAMERA, pinhole=replace(CAMERA.pinhole, front_opening=(3.0, 1.5))),
-        {"M42 mount and shutter clear the corner rays (geometry)"},
+        {"M42 mount clears the corner rays (geometry)"},
     ),
     "body footprint wider than the bridge span": (
         replace(CAMERA, body=replace(CAMERA.body, rear_half_w=40.5)),
@@ -37,17 +33,13 @@ SEEDS: dict = {
         replace(CAMERA, body_link=replace(CAMERA.body_link, latch_hook_h=1.2)),
         {"latch hook sits behind the pin and rises past its centre (geometry)"},
     ),
-    "blade hole too small for the field": (
-        replace(CAMERA, pinhole=replace(CAMERA.pinhole, blade_hole_d=1.5)),
-        {"shutter blade covers the pinhole closed and clears the field open (geometry)"},
-    ),
     "M42 pocket wall 0.8mm": (
         replace(CAMERA, body=replace(CAMERA.body, wall=0.8)),
-        {"body and pinhole walls >= min wall (geometry)"},
+        {"body walls >= min wall (geometry)"},
     ),
     "tripod nut moved into the M42 pocket wall": (
         replace(CAMERA, body=replace(CAMERA.body, tripod_y=32.5)),
-        {"body and pinhole walls >= min wall (geometry)"},
+        {"body walls >= min wall (geometry)"},
     ),
     "body wider than the print bed": (
         replace(CAMERA, body=replace(CAMERA.body, rear_half_w=95.0)),

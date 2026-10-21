@@ -448,7 +448,10 @@ class Viewfinder:
 
 @dataclass(frozen=True)
 class PinholeModule:
-    """Shutter housing, blade and lock pin on the M42 body cap (lens.md 2). Owned by cad/parts/pinhole.py."""
+    """Shutter housing, blade, slider knob and captive lock lever on the M42 body cap (lens.md 2).
+
+    Owned by cad/parts/pinhole.py. X and Z below are camera coordinates on the housing front face.
+    """
     cap_boss_len: float = 5.0
     cap_boss_wall: float = 1.5
     cap_drill_d: float = 6.0
@@ -461,22 +464,66 @@ class PinholeModule:
     front_plate: float = 1.5
     rear_opening_d: float = 4.0
     front_opening: tuple = (7.0, 4.0)
+    # Blade: 0.5mm aluminium, closed pose. +X opens: the blade hole moves onto the pinhole.
     blade_t: float = 0.5
-    blade_len: float = 32.0
+    blade_x0: float = -16.0           # -X end, 2mm out of the housing so it can be pushed back by hand
     blade_h: float = 23.0
     blade_side_gap: float = 0.5
-    blade_travel: float = 10.0        # +X opens: the blade hole moves onto the pinhole
+    blade_travel: float = 10.0
     blade_hole_d: float = 4.0
-    detent_x: float = -6.0
+    tongue_len: float = 7.5           # narrow end glued into the knob slit
+    tongue_h: float = 11.0
+    stop_clearance: float = 0.15      # stop slot around the pivot pin, each side; stops sit +/-0.15 from nominal
+    # Blade detent: a bump on the channel's rear face, touching the centred blade, and one dimple hole
+    # in the blade for each end of the travel.
+    detent_x: float = 4.0
     detent_z: float = 8.0
     detent_d: float = 1.2
-    detent_h: float = 0.25
     dimple_d: float = 1.5
-    pin_z: float = -8.0               # below the pinhole, outside the 27 deg vertical field
-    pin_len: float = 20.0
-    pin_boss_d: float = 7.0
-    pin_boss_len: float = 6.0
-    blade_pin_hole: float = 3.2
+    # Slider knob, glued on the tongue just outside the housing's +X edge.
+    knob_gap: float = 0.5             # to the housing edge when closed
+    knob_len: float = 10.0
+    knob_h: float = 14.0
+    knob_rear_gap: float = 0.3        # rear face to the body cap front face it slides over
+    knob_proud: float = 4.0           # front face ahead of the housing front face
+    glue_gap: float = 0.05
+    ridge_pitch: float = 1.6
+    ridge_w: float = 0.6
+    ridge_h: float = 0.5
+    # Lock lever on the housing front face. Its pivot sits at the height of the middle of the tooth's
+    # engagement, so the knob's push on the tooth runs through the pivot and cannot turn the lever.
+    lock_pivot_x: float = 9.0
+    lock_gap: float = 0.2             # lever rear face to the housing front face
+    lock_t: float = 3.0
+    lock_hub_r: float = 4.0
+    lock_unlock_deg: float = 25.0     # about +Y; the tooth swings down out of the knob notch
+    lock_arm_w: float = 3.2
+    tooth_x: float = 18.0
+    tooth_w: float = 3.0
+    tooth_engage: float = 2.5         # into the knob's bottom face
+    notch_clearance: float = 0.3
+    flag_w: float = 4.0
+    flag_len: float = 14.5            # pivot to the thumb pad centre, straight down when locked
+    pad_w: float = 8.0
+    pad_h: float = 5.0
+    pad_depth: float = 6.0            # front-to-back, from the lever's rear face
+    # Lever detent: an arc spring finger on the lever, concentric with the pivot, whose nose clicks into
+    # two notches in a printed rail on the housing face.
+    finger_r: float = 8.0             # beam centre radius
+    finger_t: float = 1.2
+    finger_root_deg: float = -100.0   # angles in the lever's X-Z frame, 0 = +X, -90 = straight down
+    finger_tip_deg: float = -150.0
+    nose_r: float = 0.7
+    detent_depth: float = 0.4         # radial flex of the finger tip between the notches
+    rail_w: float = 1.7
+    rail_overrun_deg: float = 8.0     # rail past each notch, so the nose must climb out either way
+    notch_play: float = 0.05
+    # Pivot: 3mm steel rod pressed into both housing plates; a printed cap pressed on its tip keeps
+    # the lever on.
+    pivot_len: float = 9.0
+    cap_d: float = 7.0
+    cap_t: float = 2.5
+    cap_gap: float = 0.1              # lever front face to cap
 
 
 @dataclass(frozen=True)
