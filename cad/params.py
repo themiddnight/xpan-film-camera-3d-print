@@ -185,6 +185,31 @@ class BodyLink:
 
 
 @dataclass(frozen=True)
+class Cover:
+    """Rear cover, turn buttons and slot plug (film-back.md 17.3). Owned by cad/parts/cover.py."""
+
+
+@dataclass(frozen=True)
+class Body:
+    """Simple 50mm body (simple-body.md 7-8). Owned by cad/parts/body.py."""
+
+
+@dataclass(frozen=True)
+class Viewfinder:
+    """Wire-frame finder and its hinge blocks (simple-body.md 5 and 7). Owned by cad/parts/body.py."""
+
+
+@dataclass(frozen=True)
+class PinholeModule:
+    """Shutter housing, blade and lock pin on the M42 body cap (lens.md 2). Owned by cad/parts/pinhole.py."""
+
+
+@dataclass(frozen=True)
+class Bought:
+    """Reference solids for bought parts (docs/bom.md). Owned by cad/parts/bought.py."""
+
+
+@dataclass(frozen=True)
 class Optics:
     pinhole_d: float = 0.30
     pinhole_y: float = 50.0
@@ -213,6 +238,11 @@ class Camera:
     takeup: TakeUp = field(default_factory=TakeUp)
     rewind: Rewind = field(default_factory=Rewind)
     body_link: BodyLink = field(default_factory=BodyLink)
+    cover: Cover = field(default_factory=Cover)
+    body: Body = field(default_factory=Body)
+    viewfinder: Viewfinder = field(default_factory=Viewfinder)
+    pinhole: PinholeModule = field(default_factory=PinholeModule)
+    bought: Bought = field(default_factory=Bought)
     optics: Optics = field(default_factory=Optics)
     print: Print = field(default_factory=Print)
 

@@ -4,11 +4,14 @@ uv run python cad/tests/test_checks.py
 Each seed is a past or plausible design error; the named checks must fail on it,
 and the shipped parameters must pass everything.
 """
+import importlib
 import sys
 from dataclasses import replace
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # cad/ holds params, parts and checks
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))  # cad/ holds params, parts and checks
+sys.path.insert(0, str(HERE))
 
 from checks import run_checks
 from params import CAMERA
@@ -75,6 +78,15 @@ SEEDS = {
         {"rewind fork lifts inside the tower"},
     ),
 }
+
+
+# Each area adds its own seeds in tests/test_<area>.py as a SEEDS dict of the same shape.
+for _path in sorted(HERE.glob("test_*.py")):
+    if _path.stem != "test_checks":
+        _area = importlib.import_module(_path.stem).SEEDS
+        if _area.keys() & SEEDS.keys():
+            raise ValueError(f"{_path.name} repeats a seed label")
+        SEEDS.update(_area)
 
 
 def failed_names(camera) -> set[str]:

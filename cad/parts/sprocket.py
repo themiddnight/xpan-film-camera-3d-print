@@ -5,9 +5,10 @@ with the first tooth on local +X and the lock notch half a pitch later.
 """
 import math
 
-from build123d import Axis, Cylinder, Polygon, Pos, Rot, extrude, fillet, Part
+from build123d import Axis, Cylinder, Location, Polygon, Pos, Rot, extrude, fillet, Part
 
 from params import Camera
+from parts.spec import PartSpec
 
 
 def tooth_angles(c: Camera) -> list[float]:
@@ -76,3 +77,15 @@ def build(c: Camera) -> Part:
         s.index_dot_d / 2, s.index_dot_depth
     )
     return part
+
+
+PARTS = {
+    "sprocket": PartSpec(
+        build=build,
+        place=lambda c: Location((c.layout.sprocket_x, c.sprocket_y, 0), (0, 0, rest_rotation(c))),
+        group="film-back",
+        kind="printed",
+        color="#c9a227",
+        print_rotation=(0, 0, 0),
+    ),
+}

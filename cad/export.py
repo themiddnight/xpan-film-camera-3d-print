@@ -9,6 +9,7 @@ from pathlib import Path
 
 from build123d import Compound, Pos, Rot, export_gltf, export_step, export_stl
 
+from mechanisms import manifest_entries
 from params import CAMERA
 from parts import PARTS
 
@@ -27,8 +28,9 @@ def main() -> int:
         if not part.is_valid:
             print(f"{name}: invalid solid", file=sys.stderr)
             return 1
-        printed = Rot(*spec.print_rotation) * part
-        export_stl(Pos(0, 0, -printed.bounding_box().min.Z) * printed, OUT / "stl" / f"{name}.stl")
+        if spec.print_rotation is not None:
+            printed = Rot(*spec.print_rotation) * part
+            export_stl(Pos(0, 0, -printed.bounding_box().min.Z) * printed, OUT / "stl" / f"{name}.stl")
         location = spec.place(CAMERA)
         placed = location * part
         export_step(placed, OUT / "step" / f"{name}.step")
@@ -45,16 +47,18 @@ def main() -> int:
         manifest.append({
             "name": name,
             "glb": f"glb/{name}.glb",
+            "group": spec.group,
+            "kind": spec.kind,
             "color": spec.color,
             "volume_mm3": round(part.volume, 1),
             "size_mm": [round(bb.size.X, 2), round(bb.size.Y, 2), round(bb.size.Z, 2)],
-            "spin_axis_xy": [round(location.position.X, 4), round(location.position.Y, 4)] if spec.spins else None,
         })
         print(f"{name}: {part.volume:.0f} mm3, {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm")
     (OUT / "manifest.json").write_text(json.dumps({
         "glb_unit_scale": GLB_UNIT_SCALE,
         "film_advance_mm": CAMERA.film.advance,
         "parts": manifest,
+        "mechanisms": manifest_entries(CAMERA, set(PARTS)),
     }, indent=2))
     return 0
 

@@ -5,3 +5,5 @@ out/
 .serena/
 viewer/node_modules/
 viewer/dist/
+
+.worktrees/

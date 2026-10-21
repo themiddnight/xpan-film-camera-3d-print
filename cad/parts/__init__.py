@@ -1,29 +1,13 @@
-"""Registry of printed parts: how to build each, where it sits, how it prints."""
-from dataclasses import dataclass
-from typing import Callable
+"""Registry of every part: how to build it, where it sits, how it prints.
 
-from build123d import Location, Part
+Each module owns its parts (docs/superpowers/specs/2026-10-22-phase3-4-parts.md, section 2).
+"""
+from parts import body, bought, cover, pinhole, shell, sprocket, transport
+from parts.spec import PartSpec
 
-from params import Camera
-from parts import sprocket
-
-
-@dataclass(frozen=True)
-class PartSpec:
-    build: Callable[[Camera], Part]
-    place: Callable[[Camera], Location]
-    print_rotation: tuple[float, float, float]
-    color: str
-    spins: bool = False
-    """Turns about the vertical axis through its placement origin (mechanism preview)."""
-
-
-PARTS: dict[str, PartSpec] = {
-    "sprocket": PartSpec(
-        build=sprocket.build,
-        place=lambda c: Location((c.layout.sprocket_x, c.sprocket_y, 0), (0, 0, sprocket.rest_rotation(c))),
-        print_rotation=(0, 0, 0),
-        color="#c9a227",
-        spins=True,
-    ),
-}
+PARTS: dict[str, PartSpec] = {}
+for _module in (shell, sprocket, transport, cover, body, pinhole, bought):
+    for _name, _spec in _module.PARTS.items():
+        if _name in PARTS:
+            raise ValueError(f"part {_name} registered twice")
+        PARTS[_name] = _spec
