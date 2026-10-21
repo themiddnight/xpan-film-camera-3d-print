@@ -1,0 +1,53 @@
+import { useLayoutEffect, useRef, useSyncExternalStore } from 'react'
+import { useViewer } from '../state/viewer'
+import type { Mechanism } from '../types'
+
+const SLIDER_STEP = 0.001
+
+/**
+ * One slider and play button per mechanism. The slider and readout are uncontrolled and painted
+ * straight from the motion value, so a playing mechanism re-renders nothing in React.
+ */
+function MechanismRow({ mechanism }: { mechanism: Mechanism }) {
+  const { motion } = useViewer()
+  const { id, label, readout } = mechanism
+  const playing = useSyncExternalStore(motion.subscribePlaying, () => motion.isPlaying(id))
+  const slider = useRef<HTMLInputElement>(null)
+  const output = useRef<HTMLOutputElement>(null)
+
+  useLayoutEffect(() => {
+    const paint = (value: number) => {
+      if (slider.current) slider.current.value = String(value)
+      if (output.current && readout) output.current.textContent = `${(value * readout.per_unit).toFixed(1)} ${readout.unit}`
+    }
+    paint(motion.get(id))
+    return motion.subscribeValue(id, paint)
+  }, [motion, id, readout])
+
+  return (
+    <div className="mech">
+      <div className="mech-head">
+        <span>{label}</span>
+        <button className={playing ? 'on' : ''} aria-pressed={playing} onClick={() => motion.setPlaying(id, !playing)}>
+          {playing ? 'Pause' : 'Play'}
+        </button>
+      </div>
+      <input
+        ref={slider} type="range" min={0} max={1} step={SLIDER_STEP} defaultValue={0} aria-label={label}
+        onChange={e => motion.set(id, e.currentTarget.valueAsNumber)}
+      />
+      {readout && <output ref={output} className="sub" />}
+    </div>
+  )
+}
+
+export function MechanismPanel() {
+  const { mechanisms } = useViewer().motion
+  if (mechanisms.length === 0) return null
+  return (
+    <section>
+      <h2>Mechanisms</h2>
+      {mechanisms.map(m => <MechanismRow key={m.id} mechanism={m} />)}
+    </section>
+  )
+}

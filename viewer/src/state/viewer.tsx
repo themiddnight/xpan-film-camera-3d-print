@@ -1,0 +1,135 @@
+import { createContext, useContext } from 'react'
+import { Box3, Plane } from 'three'
+import { PartNodes } from '../scene/partNodes'
+import {
+  type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type ViewName,
+} from '../types'
+import { Motion } from './motion'
+import { createStore, useSelector, type Store } from './store'
+
+export interface ViewerState {
+  parts: Readonly<Record<string, PartView>>
+  groups: Readonly<Record<Group, PartView>>
+  filter: KindFilter
+  section: Section
+  explode: number
+  view: ViewName
+  /** Increments to move the camera to `view` again even when it has not changed. */
+  viewRequest: number
+  /** Rest-pose world box of each loaded part. */
+  boxes: Readonly<Record<string, Box3>>
+  failed: ReadonlySet<string>
+}
+
+/** What a part shows right now, after its own toggles, its group's toggles and the kind filter. */
+export type PartMode = 'solid' | 'ghost' | 'hidden'
+
+export function partMode(s: ViewerState, part: PartManifest): PartMode {
+  const own = s.parts[part.name]
+  const group = s.groups[part.group]
+  if (!own.visible || !group.visible || (s.filter !== 'all' && s.filter !== part.kind)) return 'hidden'
+  return own.ghost || group.ghost ? 'ghost' : 'solid'
+}
+
+export interface Viewer {
+  manifest: Manifest
+  /** Where the manifest was fetched from; part GLB paths resolve against it. */
+  baseUrl: string
+  store: Store<ViewerState>
+  /** Mechanism values, outside React state because they change every frame. */
+  motion: Motion
+  nodes: PartNodes
+  /** The one section plane every part clips against; the section controls move it in place. */
+  clipPlane: Plane
+  /** Union of all part boxes once every part has loaded or failed; null until then. */
+  selectBounds: (s: ViewerState) => Box3 | null
+  /** True when a section is on and its bounds are known. */
+  selectClipActive: (s: ViewerState) => boolean
+  actions: {
+    setPartView: (name: string, patch: Partial<PartView>) => void
+    setGroupView: (group: Group, patch: Partial<PartView>) => void
+    setFilter: (filter: KindFilter) => void
+    setSection: (section: Section) => void
+    setExplode: (amount: number) => void
+    showView: (view: ViewName) => void
+    reportBox: (name: string, box: Box3 | null) => void
+    reportFailed: (name: string, error: Error) => void
+  }
+}
+
+const SHOWN: PartView = { visible: true, ghost: false }
+
+function boundsSelector(parts: readonly PartManifest[]): (s: ViewerState) => Box3 | null {
+  let lastBoxes: ViewerState['boxes'] | null = null
+  let lastFailed: ViewerState['failed'] | null = null
+  let last: Box3 | null = null
+  return s => {
+    if (s.boxes === lastBoxes && s.failed === lastFailed) return last
+    lastBoxes = s.boxes
+    lastFailed = s.failed
+    // A part that failed to load counts as settled, so the rest still frame and report.
+    if (!parts.every(p => s.boxes[p.name] || s.failed.has(p.name))) return (last = null)
+    const all = new Box3()
+    for (const p of parts) if (s.boxes[p.name]) all.union(s.boxes[p.name])
+    return (last = all)
+  }
+}
+
+export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
+  const store = createStore<ViewerState>({
+    parts: Object.fromEntries(manifest.parts.map(p => [p.name, SHOWN])),
+    groups: { 'film-back': SHOWN, body: SHOWN, pinhole: SHOWN },
+    filter: 'all',
+    section: { axis: 'off', t: 0.5, flip: false },
+    explode: 0,
+    view: 'iso',
+    viewRequest: 0,
+    boxes: {},
+    failed: new Set(),
+  })
+  const selectBounds = boundsSelector(manifest.parts)
+
+  return {
+    manifest,
+    baseUrl,
+    store,
+    motion: new Motion(manifest.mechanisms),
+    nodes: new PartNodes(),
+    clipPlane: new Plane(),
+    selectBounds,
+    selectClipActive: s => s.section.axis !== 'off' && selectBounds(s) !== null,
+    actions: {
+      setPartView: (name, patch) => store.update(s => ({ ...s, parts: { ...s.parts, [name]: { ...s.parts[name], ...patch } } })),
+      setGroupView: (group, patch) => store.update(s => ({ ...s, groups: { ...s.groups, [group]: { ...s.groups[group], ...patch } } })),
+      setFilter: filter => store.update(s => (s.filter === filter ? s : { ...s, filter })),
+      setSection: section => store.update(s => ({ ...s, section })),
+      setExplode: explode => store.update(s => (s.explode === explode ? s : { ...s, explode })),
+      showView: view => store.update(s => ({ ...s, view, viewRequest: s.viewRequest + 1 })),
+      reportBox: (name, box) => store.update(s => {
+        if (box === null) {
+          if (!(name in s.boxes)) return s
+          const { [name]: _removed, ...rest } = s.boxes
+          return { ...s, boxes: rest }
+        }
+        return s.boxes[name]?.equals(box) ? s : { ...s, boxes: { ...s.boxes, [name]: box } }
+      }),
+      reportFailed: (name, error) => {
+        console.error(`Part ${name} failed to load:`, error)
+        store.update(s => (s.failed.has(name) ? s : { ...s, failed: new Set(s.failed).add(name) }))
+      },
+    },
+  }
+}
+
+export const ViewerContext = createContext<Viewer | null>(null)
+
+export function useViewer(): Viewer {
+  const viewer = useContext(ViewerContext)
+  if (!viewer) throw new Error('useViewer needs a ViewerContext.Provider above it')
+  return viewer
+}
+
+/** Subscribes to one slice of viewer state; the selector must return a stable value for a given state. */
+export function useViewerState<T>(selector: (s: ViewerState) => T): T {
+  return useSelector(useViewer().store, selector)
+}

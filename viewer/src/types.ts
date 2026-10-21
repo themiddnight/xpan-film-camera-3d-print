@@ -1,19 +1,71 @@
-/** Shape of out/manifest.json, written by cad/export.py. */
+/** Shape of out/manifest.json, written by cad/export.py and parsed in manifest.ts. */
+
+/** Rear to front along the camera's Y axis; the order also sets the exploded-view layers. */
+export const GROUPS = ['film-back', 'body', 'pinhole'] as const
+export type Group = (typeof GROUPS)[number]
+
+export const GROUP_LABELS: Record<Group, string> = {
+  'film-back': 'Film back',
+  body: 'Body',
+  pinhole: 'Pinhole module',
+}
+
+export const KINDS = ['printed', 'bought'] as const
+export type Kind = (typeof KINDS)[number]
+
+export type Vec3 = readonly [number, number, number]
+
 export interface PartManifest {
   name: string
   glb: string
+  group: Group
+  kind: Kind
   color: string
   volume_mm3: number
-  size_mm: [number, number, number]
-  /** Camera-plan (x, y) of the vertical axis the part turns about, or null if it does not turn. */
-  spin_axis_xy: [number, number] | null
+  size_mm: Vec3
+}
+
+interface DriveBase {
+  /** Name of the part this drive moves. */
+  part: string
+  /** Direction of the rotation axis or slide, in camera mm coordinates. Never zero-length. */
+  axis: Vec3
+}
+
+/** Turns `amount` degrees about `axis` through `origin` at mechanism value 1. */
+export interface RotateDrive extends DriveBase {
+  kind: 'rotate'
+  origin: Vec3
+  amount: number
+}
+
+/** Moves `amount` mm along `axis` at mechanism value 1. */
+export interface SlideDrive extends DriveBase {
+  kind: 'slide'
+  amount: number
+}
+
+export type Drive = RotateDrive | SlideDrive
+
+export interface Readout {
+  per_unit: number
+  unit: string
+}
+
+export interface Mechanism {
+  id: string
+  label: string
+  readout: Readout | null
+  /** Applied to each part in this order. */
+  drives: readonly Drive[]
 }
 
 export interface Manifest {
   /** GLB files are in metres; multiply by this to get millimetres. */
   glb_unit_scale: number
   film_advance_mm: number
-  parts: PartManifest[]
+  parts: readonly PartManifest[]
+  mechanisms: readonly Mechanism[]
 }
 
 /** World coordinates are camera-design coordinates in mm: X film travel, Y front, Z up. */
@@ -32,3 +84,5 @@ export interface Section {
 }
 
 export type ViewName = 'iso' | 'front' | 'rear' | 'top'
+
+export type KindFilter = 'all' | Kind

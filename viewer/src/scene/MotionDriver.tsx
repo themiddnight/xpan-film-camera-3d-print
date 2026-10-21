@@ -1,0 +1,65 @@
+import { useEffect, useMemo } from 'react'
+import { useFrame } from '@react-three/fiber'
+import { Matrix4, Vector3 } from 'three'
+import { useViewer, useViewerState, type ViewerState } from '../state/viewer'
+import { writeSectionPlane } from './frames'
+import { explodeOffset, spreadDirections } from './explode'
+
+interface Applied {
+  revision: number
+  explode: number
+  nodes: number
+  boxes: ViewerState['boxes'] | null
+  spread: Map<string, Vector3>
+}
+
+/**
+ * The one place part transforms are written. Each frame it advances playing mechanisms, and when a
+ * mechanism value, the explode amount, a part box or the set of nodes changed, it recomputes every
+ * part's matrix: explode offset after the part's drives. Idle frames do no work.
+ */
+export function MotionDriver() {
+  const viewer = useViewer()
+  const scratch = useMemo(() => ({ matrix: new Matrix4(), offset: new Vector3() }), [])
+  const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, spread: new Map() }), [])
+
+  useFrame((_, seconds) => {
+    const { motion, nodes, store, manifest } = viewer
+    motion.tick(seconds)
+    const { explode, boxes } = store.getState()
+    if (
+      applied.revision === motion.revision && applied.explode === explode &&
+      applied.nodes === nodes.version && applied.boxes === boxes
+    ) return
+
+    if (applied.boxes !== boxes) applied.spread = spreadDirections(manifest.parts, boxes)
+    applied.revision = motion.revision
+    applied.explode = explode
+    applied.nodes = nodes.version
+    applied.boxes = boxes
+
+    for (const part of manifest.parts) {
+      const node = nodes.get(part.name)
+      if (!node) continue
+      motion.partMatrix(scratch.matrix, part.name)
+      explodeOffset(scratch.offset, part.group, applied.spread.get(part.name), explode)
+      // A translation applied after the drives only adds to the matrix's translation column.
+      const e = scratch.matrix.elements
+      scratch.matrix.setPosition(e[12] + scratch.offset.x, e[13] + scratch.offset.y, e[14] + scratch.offset.z)
+      scratch.matrix.decompose(node.position, node.quaternion, node.scale)
+    }
+  })
+
+  return null
+}
+
+/** Keeps the shared clip plane at the section position as the slider or the bounds change. */
+export function ClipSync() {
+  const viewer = useViewer()
+  const section = useViewerState(s => s.section)
+  const bounds = useViewerState(viewer.selectBounds)
+  useEffect(() => {
+    if (bounds) writeSectionPlane(viewer.clipPlane, section, bounds)
+  }, [viewer.clipPlane, section, bounds])
+  return null
+}

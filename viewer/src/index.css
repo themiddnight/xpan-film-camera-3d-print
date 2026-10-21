@@ -26,9 +26,24 @@ h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: v
 .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
 .part { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center;
   padding: 6px 0; border-bottom: 1px solid var(--line); }
-.swatch { width: 12px; height: 12px; border-radius: 3px; }
+.swatch { width: 12px; height: 12px; border-radius: 3px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 30%, transparent); }
 .part small { color: var(--muted); display: block; font-size: 11px; }
 label { cursor: pointer; }
+.pname { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: start; min-width: 0;
+  overflow-wrap: anywhere; }
+.pname input { margin: 2px 0 0; }
+.swatch.bought { border-radius: 50%; }
+.seg { margin-bottom: 8px; }
+.group { margin-top: 6px; }
+.group[data-hidden="true"] .part { opacity: .45; }
+.ghead { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center;
+  padding: 4px 0; border-bottom: 1px solid var(--line); }
+.twirl { text-align: left; font-weight: 600; border-color: transparent; background: transparent; padding: 4px 0; }
+.count { color: var(--muted); font-weight: 400; font-size: 11px; margin-left: 4px; }
+.mech { margin: 8px 0 12px; }
+.mech-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+output { display: block; }
 input[type=range] { width: 100%; accent-color: var(--accent); }
 select, button { font: inherit; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
