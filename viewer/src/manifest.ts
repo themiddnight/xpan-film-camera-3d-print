@@ -75,9 +75,10 @@ function drive(x: unknown, path: string): Drive {
   const axis = vec3(o.axis, `${path}.axis`)
   if (axis.every(c => c === 0)) fail(`${path}.axis`, 'a non-zero vector', axis)
   const base = { part: string(o.part, `${path}.part`), axis, amount: number(o.amount, `${path}.amount`) }
-  const kind = oneOf(o.kind, ['rotate', 'slide'], `${path}.kind`)
+  const kind = oneOf(o.kind, ['rotate', 'slide', 'stretch'], `${path}.kind`)
   switch (kind) {
     case 'rotate':
+    case 'stretch':
       return { ...base, kind, origin: o.origin === undefined ? [0, 0, 0] : vec3(o.origin, `${path}.origin`) }
     case 'slide':
       return { ...base, kind }

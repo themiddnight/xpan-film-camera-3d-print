@@ -5,6 +5,7 @@ import type { Drive } from '../types'
 export type CompiledDrive =
   | { kind: 'rotate'; axis: Vector3; origin: Vector3; radians: number }
   | { kind: 'slide'; offset: Vector3 }
+  | { kind: 'stretch'; axis: Vector3; origin: Vector3; amount: number }
 
 export function compileDrive(d: Drive): CompiledDrive {
   const axis = new Vector3().fromArray(d.axis).normalize()
@@ -13,6 +14,8 @@ export function compileDrive(d: Drive): CompiledDrive {
       return { kind: 'rotate', axis, origin: new Vector3().fromArray(d.origin), radians: MathUtils.degToRad(d.amount) }
     case 'slide':
       return { kind: 'slide', offset: axis.multiplyScalar(d.amount) }
+    case 'stretch':
+      return { kind: 'stretch', axis, origin: new Vector3().fromArray(d.origin), amount: d.amount }
     default: {
       const _exhaustive: never = d
       return _exhaustive
@@ -30,6 +33,19 @@ export function driveMatrix(out: Matrix4, d: CompiledDrive, value: number): Matr
     case 'rotate': {
       out.makeRotationAxis(d.axis, d.radians * value)
       // Rotating about a point o is R(p - o) + o, so the translation is o - R o.
+      rotated.copy(d.origin).applyMatrix4(out)
+      return out.setPosition(d.origin.x - rotated.x, d.origin.y - rotated.y, d.origin.z - rotated.z)
+    }
+    case 'stretch': {
+      // S = I + (f - 1) a a^T about the origin: p' = o + S (p - o).
+      const k = d.amount * value
+      const { x, y, z } = d.axis
+      out.set(
+        1 + k * x * x, k * x * y, k * x * z, 0,
+        k * y * x, 1 + k * y * y, k * y * z, 0,
+        k * z * x, k * z * y, 1 + k * z * z, 0,
+        0, 0, 0, 1,
+      )
       rotated.copy(d.origin).applyMatrix4(out)
       return out.setPosition(d.origin.x - rotated.x, d.origin.y - rotated.y, d.origin.z - rotated.z)
     }

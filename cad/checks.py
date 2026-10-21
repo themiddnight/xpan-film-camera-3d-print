@@ -6,7 +6,7 @@ Exit code 1 if any check fails.
 """
 import math
 
-from build123d import Rot, Vector
+from build123d import Pos, Rot, Vector
 
 import check_areas  # noqa: F401  registers the per-area checks
 import mechanisms
@@ -429,6 +429,126 @@ def _(c, b):
     clear = let_go.values["advance"] >= needed
     return ok and rising and clear, (f"{cy.keys[-1].values['advance'] * c.film.advance:.1f}mm, button starts up at "
                                      f"{let_go.values['advance']:.3f} of a turn, pocket clear at {needed:.3f}")
+
+
+SWEEP_STEPS = 8
+"""Positions per mechanism, from just off rest to fully moved; enough to catch a part swinging through another."""
+
+MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
+    "advance": {
+        frozenset(("film", "sprocket")): "the strip travels with the teeth; the viewer moves it, the checks prove the perforations sit on the teeth",
+        frozenset(("film", "takeup_spool")): "the strip winds on with the spool",
+        frozenset(("film_roll", "takeup_spool")): "the roll turns with the spool",
+    },
+    "release": {
+        frozenset(("pawl", "pawl_spring")): "the spring compresses under the lever; it is drawn at its rest length",
+    },
+}
+"""Pairs a mechanism may overlap while moving, per mechanism, with the reason."""
+
+
+def _stretch(shape, origin, axis, factor):
+    """Scale along one coordinate axis about origin, as a spring compresses."""
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_GTransform
+    from OCP.gp import gp_GTrsf, gp_XYZ
+    i = [abs(a) for a in axis].index(1.0)
+    g = gp_GTrsf()
+    g.SetValue(i + 1, i + 1, factor)
+    shift = [0.0, 0.0, 0.0]
+    shift[i] = origin[i] * (1 - factor)
+    g.SetTranslationPart(gp_XYZ(*shift))
+    return type(shape)(BRepBuilderAPI_GTransform(shape.wrapped, g, True).Shape())
+
+
+def _drive_shape(shape, d, value: float):
+    from build123d import Axis as _Axis
+    if d.kind == "rotate":
+        return shape.rotate(_Axis(d.origin, d.axis), d.amount * value)
+    if d.kind == "stretch":
+        return _stretch(shape, d.origin, d.axis, 1 + d.amount * value)
+    return Pos(*(a * d.amount * value for a in d.axis)) * shape
+
+
+def posed(c: Camera, b: Built, values: dict[str, float]) -> dict:
+    """Every driven part placed with the given mechanism values, drives applied in mechanism order."""
+    shapes = {}
+    for m in mechanisms.mechanisms(c):
+        v = values.get(m.id, 0.0)
+        if v == 0.0:
+            continue
+        for d in m.drives:
+            shapes[d.part] = _drive_shape(shapes.get(d.part, b.placed(d.part)), d, v)
+    return shapes
+
+
+def sweep_clashes(c: Camera, b: Built, m) -> list[tuple[float, str, str, float]]:
+    """Overlaps beyond the intended fits while one mechanism runs (with its prerequisites set)."""
+    base = dict(m.requires)
+    allowed = MOTION_ALLOWED.get(m.id, {})
+    moving = {d.part for m2 in mechanisms.mechanisms(c) if m2.id in base or m2.id == m.id for d in m2.drives}
+    found = []
+    for i in range(1, SWEEP_STEPS + 1):
+        v = i / SWEEP_STEPS
+        shapes = posed(c, b, {**base, m.id: v})
+        for part in moving:
+            shape = shapes.get(part, b.placed(part))
+            box = shape.bounding_box()
+            for other in PARTS:
+                if other == part or (other in moving and other < part):
+                    continue
+                pair = frozenset((part, other))
+                if pair in allowed:
+                    continue
+                other_shape = shapes.get(other, b.placed(other))
+                if not _boxes_meet(box, other_shape.bounding_box()):
+                    continue
+                vol = _shared_volume(shape, other_shape)
+                if vol > INTENDED_OVERLAPS.get(pair, (0.0, INTERFERENCE_TOLERANCE_MM3, ""))[1]:
+                    found.append((v, part, other, vol))
+    return found
+
+
+CYCLE_SAMPLES_PER_KEY = 4
+
+
+@check("frame cycle runs without a clash (geometry)")
+def _(c, b):
+    cy = mechanisms.frame_cycle(c)
+    ms = {m.id: m for m in mechanisms.mechanisms(c)}
+    ids = {k for key in cy.keys for k in key.values}
+    allowed = {pair for i in ids for pair in MOTION_ALLOWED.get(i, {})}
+    moving = {d.part for i in ids for d in ms[i].drives}
+    problems = []
+    for k1, k2 in zip(cy.keys, cy.keys[1:]):
+        for j in range(1, CYCLE_SAMPLES_PER_KEY + 1):
+            f = j / CYCLE_SAMPLES_PER_KEY
+            values = {i: k1.values[i] + (k2.values[i] - k1.values[i]) * f for i in ids}
+            shapes = posed(c, b, values)
+            for part in moving:
+                shape = shapes.get(part, b.placed(part))
+                for other in PARTS:
+                    pair = frozenset((part, other))
+                    if other == part or (other in moving and other < part) or pair in allowed:
+                        continue
+                    other_shape = shapes.get(other, b.placed(other))
+                    if not _boxes_meet(shape.bounding_box(), other_shape.bounding_box()):
+                        continue
+                    vol = _shared_volume(shape, other_shape)
+                    if vol > INTENDED_OVERLAPS.get(pair, (0.0, INTERFERENCE_TOLERANCE_MM3, ""))[1]:
+                        problems.append(f"t={k1.t + (k2.t - k1.t) * f:.2f}s {part} x {other} {vol:.2f}mm3")
+    return not problems, f"{len(cy.keys) - 1} segments x {CYCLE_SAMPLES_PER_KEY} poses clear" if not problems else "; ".join(problems[:6])
+
+
+@check("every mechanism moves through its range without a clash (geometry)")
+def _(c, b):
+    problems = []
+    for m in mechanisms.mechanisms(c):
+        if m.internal:
+            continue
+        for v, part, other, vol in sweep_clashes(c, b, m)[:2]:
+            problems.append(f"{m.id} at {v:.2f}: {part} x {other} {vol:.2f}mm3")
+    count = sum(not m.internal for m in mechanisms.mechanisms(c))
+    return not problems, f"{count} mechanisms swept in {SWEEP_STEPS} steps" if not problems else "; ".join(problems[:8])
 
 
 def run_checks(c: Camera = CAMERA) -> list[Result]:

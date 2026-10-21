@@ -45,7 +45,14 @@ export interface SlideDrive extends DriveBase {
   amount: number
 }
 
-export type Drive = RotateDrive | SlideDrive
+/** Scales the part along `axis` about `origin` by 1 + amount x value, as a spring compresses. */
+export interface StretchDrive extends DriveBase {
+  kind: 'stretch'
+  origin: Vec3
+  amount: number
+}
+
+export type Drive = RotateDrive | SlideDrive | StretchDrive
 
 export interface Readout {
   per_unit: number

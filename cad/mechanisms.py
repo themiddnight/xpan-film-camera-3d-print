@@ -17,12 +17,13 @@ Vec = tuple[float, float, float]
 @dataclass(frozen=True)
 class Drive:
     part: str
-    kind: Literal["rotate", "slide"]
+    kind: Literal["rotate", "slide", "stretch"]
     axis: Vec
     amount: float
-    """Degrees for rotate, millimetres for slide, at mechanism value 1."""
+    """Degrees for rotate, millimetres for slide, at mechanism value 1. For stretch, the change of
+    length factor along the axis: the part scales by 1 + amount x value about the origin."""
     origin: Vec = (0.0, 0.0, 0.0)
-    """A point on the rotation axis; unused for slide."""
+    """A point on the rotation axis, or the fixed end of a stretch; unused for slide."""
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,9 @@ class Mechanism:
     cyclic: bool = False
     internal: bool = False
     """Driven only by cycles; the viewer gives it no slider."""
+    requires: tuple[tuple[str, float], ...] = ()
+    """Mechanisms that must be at (at least) these values before this one moves, e.g. the cover
+    latches turned before the cover opens. The viewer applies them; the sweep check sets them."""
 
 
 @dataclass(frozen=True)
@@ -107,6 +111,12 @@ def dark_slide_pull(c: Camera) -> float:
     return c.shell.z_max - bottom + 3.0
 
 
+def pawl_spring_squeeze(c: Camera, lever_deg: float) -> float:
+    """Length-factor change of the pawl spring when the lever turns by lever_deg (button end goes down)."""
+    length = transport.lever_z(c)[0] - c.pawl.spring_shelf_z
+    return -c.pawl.button_arm * math.sin(math.radians(lever_deg)) / length
+
+
 def advance_fraction_to_clear_pocket(c: Camera) -> float:
     """Sprocket turn (fraction of one frame) after which the pocket has left the nose.
 
@@ -126,6 +136,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
     # on its -X side heading +Y).
     spool_deg = -c.film.advance / (math.pi * c.bought.roll_d) * 360
     axis, pivot = pawl_axis(c)
+    spring_base = (*c.pawl_button, c.pawl.spring_shelf_z)
     return (
         Mechanism(
             "advance", "Advance knob",
@@ -139,18 +150,24 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             ),
             Readout(c.film.advance, "mm of film"),
             cyclic=True,
+            # Turned by hand from the slider, the sprocket would run into the locked pawl; lift it onto the cam.
+            requires=(("pawl_ride", 1.0),),
         ),
         Mechanism(
             "release", "Release button",
             (
                 Drive("release_button", "slide", DOWN, c.pawl.button_travel),
                 Drive("pawl", "rotate", axis, transport.pawl_lift_deg(c), pivot),
+                Drive("pawl_spring", "stretch", UP, pawl_spring_squeeze(c, transport.pawl_lift_deg(c)), spring_base),
             ),
             Readout(c.pawl.button_travel, "mm pressed"),
         ),
         Mechanism(
             "pawl_ride", "Pawl rides on the cam",
-            (Drive("pawl", "rotate", axis, pawl_ride_deg(c), pivot),),
+            (
+                Drive("pawl", "rotate", axis, pawl_ride_deg(c), pivot),
+                Drive("pawl_spring", "stretch", UP, pawl_spring_squeeze(c, pawl_ride_deg(c)), spring_base),
+            ),
             internal=True,
         ),
         Mechanism(
@@ -164,6 +181,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             tuple(Drive(p, "rotate", (1.0, 0.0, 0.0), c.cover.open_deg, (0.0, c.cover.hinge_axis_y, c.cover.hinge_axis_z))
                   for p in ("rear_cover", "pressure_pad")),
             Readout(c.cover.open_deg, "deg open"),
+            requires=(("turn_buttons", 1.0),),
         ),
         Mechanism(
             "dark_slide", "Pull dark slide",
@@ -182,6 +200,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
         Mechanism(
             "shutter", "Open shutter",
             (Drive("shutter_blade", "slide", (1.0, 0.0, 0.0), c.pinhole.blade_travel),),
+            requires=(("shutter_pin", 1.0),),
         ),
     )
 
@@ -226,9 +245,18 @@ def cycles(c: Camera) -> tuple[Cycle, ...]:
     return (frame_cycle(c),)
 
 
+def check_requires(ms: tuple[Mechanism, ...]) -> None:
+    ids = {m.id for m in ms}
+    for m in ms:
+        for r, _ in m.requires:
+            if r not in ids or r == m.id:
+                raise ValueError(f"mechanism {m.id} requires unknown mechanism {r}")
+
+
 def manifest_entries(c: Camera, registered: set[str]) -> tuple[list[dict], list[dict]]:
     """Mechanisms and cycles for the manifest. Every named part and mechanism must exist."""
     ms = mechanisms(c)
+    check_requires(ms)
     out_m = []
     for m in ms:
         unknown = [d.part for d in m.drives if d.part not in registered]
@@ -239,6 +267,7 @@ def manifest_entries(c: Camera, registered: set[str]) -> tuple[list[dict], list[
             "label": m.label,
             "cyclic": m.cyclic,
             "internal": m.internal,
+            "requires": [{"mechanism": r, "value": v} for r, v in m.requires],
             "readout": None if m.readout is None else {"per_unit": m.readout.per_unit, "unit": m.readout.unit},
             "drives": [{"part": d.part, "kind": d.kind, "axis": list(d.axis), "origin": list(d.origin),
                         "amount": d.amount} for d in m.drives],
