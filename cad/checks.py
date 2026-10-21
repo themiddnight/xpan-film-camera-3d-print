@@ -551,9 +551,18 @@ def _(c, b):
     return not problems, f"{count} mechanisms swept in {SWEEP_STEPS} steps" if not problems else "; ".join(problems[:8])
 
 
+def _run_one(name, fn, c: Camera, built: Built) -> Result:
+    # A design error can make a check's own maths impossible (an asin past 1, a path with no straight
+    # run); that is a failed check, not a reason to stop checking everything else.
+    try:
+        return Result(name, *fn(c, built))
+    except Exception as e:  # noqa: BLE001 - every error here is a failed check, reported with its cause
+        return Result(name, False, f"could not evaluate: {type(e).__name__}: {e}")
+
+
 def run_checks(c: Camera = CAMERA) -> list[Result]:
     built = Built(c)
-    return [Result(name, *fn(c, built)) for name, fn in CHECKS]
+    return [_run_one(name, fn, c, built) for name, fn in CHECKS]
 
 
 def main() -> int:
