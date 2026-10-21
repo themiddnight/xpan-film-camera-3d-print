@@ -5,6 +5,7 @@ from params import CAMERA
 
 POCKET = "pawl nose sits in the cam pocket at rest (geometry)"
 NOSE_FIT = "pawl nose fits the pocket (geometry)"
+SWING = "pawl nose clears the cam pocket the whole way up and down (geometry)"
 LIFT = "button travel lifts the pawl clear of the cam (geometry)"
 CEILING = "lifted pawl lever clears the ceiling (geometry)"
 SPRING = "pawl spring seats on the spigot and works between free and solid (geometry)"
@@ -44,6 +45,7 @@ SEEDS = {
     "pawl nose floats above the pocket": (_pawl(nose_floor_gap=1.5), {POCKET}),
     "pawl tip wider than the pocket": (_pawl(tip_w=2.4), {NOSE_FIT}),
     "pawl nose longer than the pocket": (_pawl(nose_len=2.6), {NOSE_FIT}),
+    "pawl nose square, its lower corner swings into the pocket wall": (_pawl(nose_swing_r=7.6), {SWING}),
     "pawl ratio 1:3 lifts the nose too little": (_pawl(tip_arm=3.0, button_arm=9.0), {LIFT}),
     "pawl button travel 1.8mm only": (_pawl(button_travel=1.8), {LIFT}),
     "pawl button travel 4mm hits the ceiling": (_pawl(button_travel=4.0), {CEILING}),

@@ -4,9 +4,12 @@ import math
 from build123d import Axis, Cylinder, Part, Pos, Rot, Vector
 
 from checklib import check
+import mechanisms
 from parts import PARTS, transport
 
 TRANSPORT_PARTS = list(transport.PARTS)
+INTERFERENCE_MM3 = 0.01  # mirrors checks.INTERFERENCE_TOLERANCE_MM3, which this package cannot import
+SWEEP_STEP_DEG = 0.5
 TOL = 1e-3  # bisection probes are good to about 1e-8; compare with a little slack
 STROKE_MARGIN = 0.5
 CEILING_MARGIN = 0.4
@@ -29,6 +32,22 @@ def _edge(part: Part, start: tuple, end: tuple, iters: int = 30) -> float:
         else:
             hi = mid
     return lo * (b - a).length
+
+
+def _turned_pawl(c, b, deg: float) -> Part:
+    axis, pivot = mechanisms.pawl_axis(c)
+    return b.placed("pawl").rotate(Axis(pivot, axis), deg)
+
+
+def _sweep_overlap(c, b, start_deg: float, end_deg: float) -> tuple[float, float]:
+    """Largest overlap of the pawl with the sprocket at rest while the lever turns start to end, and where."""
+    sprocket = b.placed("sprocket")
+    steps = max(1, math.ceil(abs(end_deg - start_deg) / SWEEP_STEP_DEG))
+    worst = (0.0, start_deg)
+    for i in range(steps + 1):
+        deg = start_deg + (end_deg - start_deg) * i / steps
+        worst = max(worst, (_overlap(_turned_pawl(c, b, deg), sprocket), deg))
+    return worst
 
 
 def _lifted_pawl(c, b) -> Part:
@@ -74,11 +93,20 @@ def _(c, b):
     rest = _min_z_over_cam(c, b.placed("pawl"))
     lifted = _lifted_pawl(c, b)
     over_cam = _min_z_over_cam(c, lifted)
-    clash = _overlap(lifted, b.placed("sprocket"))
     rise = over_cam - rest
-    ok = rise >= s.notch_depth and over_cam - cam_top >= STROKE_MARGIN and clash < 1e-3
+    ok = rise >= s.notch_depth and over_cam - cam_top >= STROKE_MARGIN
     return ok, (f"{transport.pawl_lift_deg(c):.1f} deg lifts the nose {rise:.2f}mm (pocket {s.notch_depth}mm), "
-                f"{over_cam - cam_top:.2f}mm over the cam top, overlap {clash:.3f}mm3")
+                f"{over_cam - cam_top:.2f}mm over the cam top")
+
+
+@check("pawl nose clears the cam pocket the whole way up and down (geometry)")
+def _(c, b):
+    lift, ride = transport.pawl_lift_deg(c), mechanisms.pawl_ride_deg(c)
+    release = _sweep_overlap(c, b, 0.0, lift)
+    drop = _sweep_overlap(c, b, ride, 0.0)
+    ok = release[0] < INTERFERENCE_MM3 and drop[0] < INTERFERENCE_MM3
+    return ok, (f"release 0-{lift:.1f} deg: worst overlap {release[0]:.3f}mm3 at {release[1]:.1f} deg; "
+                f"drop {ride:.1f}-0 deg: {drop[0]:.3f}mm3 at {drop[1]:.1f} deg")
 
 
 @check("lifted pawl lever clears the ceiling (geometry)")
