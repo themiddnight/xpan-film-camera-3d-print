@@ -67,7 +67,8 @@ Initial viewfinder: foldable wire frame.
 
 ## 6. Added in the Phase 1 Review
 
-- **Tripod socket.** Pinhole exposures run from seconds to minutes, so the camera needs a 1/4"-20 socket. It is a captured 1/4"-20 hex nut in the body bottom on the optical axis, where the 50mm-deep body has room for the insert. Each future body carries its own.
+- **Tripod socket.** Pinhole exposures run from seconds to minutes, so the camera needs a 1/4"-20 socket. It is a captured 1/4"-20 hex nut in a boss under the body, where the 50mm-deep body has room for the insert. Each future body carries its own.
+- **Feet (phase 4 review).** The film back's rear-cover hinge knuckles hang 7.3mm under its bottom, which left the first draft's tripod boss (0.5mm under the film-back bottom) above them: the camera tipped about 11 degrees on a table and a tripod plate reaching back past Y = +3 sat on the knuckles. The body now carries the camera's whole footprint. The tripod boss and two rear pads end in one plane, 0.75mm below the lowest knuckle, so the camera stands level on three feet and a plate seats on all three and clears the knuckles. The nut moved down into the boss so a 5mm tripod screw still reaches it.
 - **Anti-reflection.** Three internal baffle ribs plus matte black paint or flocking. Light that hits the chamber wall at a grazing angle otherwise fogs the frame edges.
 
 ## 7. Modeling Parameters (v02 baseline)
@@ -84,7 +85,8 @@ Same origin and axes as [film-back.md](film-back.md) section 17: film plane at Y
 | Chamber at the rear | 69 x 28mm inside, tapering to the M42 bore at the front |
 | Baffle ribs | Three, 1.5mm thick, at Y = +15, +27, +39, openings 1mm outside the image cone |
 | Pinhole plane | Y = +50.0 (+/-0.3) |
-| Tripod socket | Stainless 1/4"-20 hex nut captured in a printed hex pocket, 14mm boss, body bottom, X = 0. No 1/4"-20 heat-set insert is sold on Lazada TH |
+| Tripod socket | Stainless 1/4"-20 hex nut captured in a printed hex pocket inside a 16mm boss at Y = +32, X = 0, with 1.2mm of plastic under the nut. The nut slides in from the +X side. No 1/4"-20 heat-set insert is sold on Lazada TH |
+| Feet | Seat plane Z = Cover.hinge_axis_z - knuckle_od / 2 - 0.75 = -38.05 (derived, so it follows the hinge). Three feet end in it: the tripod boss (the boss runs out at 45 degrees on its rear side to print without support) and two rear pads at X = +/-27 to +/-35, Y from the datum face to +14. Every other part stays at least 0.5mm above the plane, so a tripod plate of any size seats flat. A 5mm screw engages 3.8mm (3.0 threads) of the nut; the check asks for 2.5 threads, which a 4.5mm screw still meets. On a table the rear cover can open to about 90 degrees (its lowest point is then 0.5mm above the seat plane); at the 100 degree film-loading angle its edge dips about 11mm below the table, so load film with the camera held up or tilted back |
 | Viewfinder | 1.0mm steel wire front frame 104 x 38.4mm, 80mm ahead of a 3mm rear peep, folds flat on two printed hinge blocks |
 
 M42 mount values: see section 8.

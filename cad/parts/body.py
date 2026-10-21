@@ -13,7 +13,15 @@ Values chosen where docs/design/simple-body.md gave a range or left one open:
 - Baffles run out at 45 deg on their rear side so they print without support, rear face down.
 - M42 stack: the shim ring thickness is whatever puts the pinhole at 50.0 for the measured caps
   (1.0mm nominal). Reprint it after measuring.
-- Tripod boss at Y = +32 stands 0.5mm below the film-back bottom. The nut slides in from the +X side.
+- Feet: the film back's rear-cover hinge knuckles hang 7.3mm under its bottom, so the body carries the
+  camera's whole footprint. The tripod boss (Y = +32) and two rear pads (|X| = 27 to 35, Y from the
+  datum to +14) end in one plane, 0.75mm below the lowest knuckle. Three feet stand level on any table,
+  and a tripod plate seats on all three and clears the knuckles. The seat Z comes from the cover's hinge
+  params, so it follows them.
+- The nut sits in the boss, floor 1.2mm over the seat, so a 5mm screw engages 3.8mm of it. The boss is
+  16mm across (nut corners 13.2mm plus two 1.2mm walls). The nut slides in from the +X side.
+- The boss runs out at 45 deg on its rear side and the rear pads start on the datum face, so the body
+  prints rear face down without support. The latch slot is cut through the boss so the cantilever can flex.
 - Viewfinder: two fold-flat wire elements share one axle in the two hinge blocks (Y = +42,
   Z = +33). The frame stands over the axle and folds forward. The peep U runs back 80mm, outside
   the dark slide, and folds down onto the film-back top.
@@ -101,8 +109,13 @@ def pocket_r(c: Camera) -> float:
     return c.measured.m42_rear_cap_od / 2 + c.body.m42_pocket_gap
 
 
+def seat_z(c: Camera) -> float:
+    """Plane of the tripod boss face and the rear pads, below everything else in the camera."""
+    return c.cover.hinge_axis_z - c.cover.knuckle_od / 2 - c.body.seat_clear
+
+
 def nut_z0(c: Camera) -> float:
-    return c.shell.z_min - c.body.tripod_proud + c.body.tripod_floor
+    return seat_z(c) + c.body.tripod_floor
 
 
 # Body.
@@ -128,8 +141,16 @@ def build_body(c: Camera) -> Part:
     body = extrude(Face(outline), b.z_max - b.z_min, dir=(0, 0, 1))
 
     body += box(-b.tongue_half_w, b.tongue_half_w, k.tongue_y[0], k.tongue_y[1], b.z_max, k.tongue_top_z)
-    boss_z0 = c.shell.z_min - b.tripod_proud
-    body += zcyl(b.tripod_boss_d / 2, boss_z0, b.z_min, y=b.tripod_y)
+    seat = seat_z(c)
+    r, ty = b.tripod_boss_d / 2, b.tripod_y
+    k45 = r / 2 ** 0.5
+    body += zcyl(r, seat, b.z_min + 1, y=ty)
+    body += extrude(Face(Wire.make_polygon([(0, ty - 2 * k45, seat), (k45, ty - k45, seat), (k45, ty, seat),
+                                            (-k45, ty, seat), (-k45, ty - k45, seat)], close=True)),
+                    b.z_min + 1 - seat, dir=(0, 0, 1))
+    for sign in (-1, 1):
+        xa, xb = sorted(sign * x for x in b.foot_x)
+        body += box(xa, xb, y0, b.foot_y1, seat, b.z_min + 1)
 
     floor_edge_y = b.m42_floor_y - b.baffle_t
     interior = loft_rects(y0 - 0.1, b.chamber_rear_w / 2, b.chamber_h / 2,
@@ -143,7 +164,7 @@ def build_body(c: Camera) -> Part:
     body -= box(-b.notch_half_w, b.notch_half_w, y0 - 0.1, b.notch_y1, b.z_min - 1, b.notch_top_z)
     beam_top = k.latch_cantilever_top_z
     slot = b.latch_half_w + b.latch_gap
-    body -= box(-slot, slot, y0 - 0.1, b.latch_root_y, b.z_min - 1, beam_top + b.latch_gap)
+    body -= box(-slot, slot, y0 - 0.1, b.latch_root_y, seat - 1, beam_top + b.latch_gap)
     body += box(-b.latch_half_w, b.latch_half_w, y0, b.latch_root_y + b.latch_gap, b.z_min, beam_top)
     hook_front, hook_top = y0 + k.body_rear_wall, beam_top + k.latch_hook_h
     body += yz_prism([(y0, b.z_min), (hook_front, b.z_min), (hook_front, hook_top),
@@ -154,7 +175,7 @@ def build_body(c: Camera) -> Part:
     af = b.nut_af + b.nut_clearance
     body -= Pos(0, b.tripod_y, z0) * extrude(RegularPolygon(af / 2, 6, major_radius=False), z1 - z0)
     body -= box(0, b.rear_half_w + 1, b.tripod_y - af / 2, b.tripod_y + af / 2, z0, z1)
-    body -= zcyl(b.tripod_screw_hole / 2, boss_z0 - 1, z1 + b.tripod_screw_depth, y=b.tripod_y)
+    body -= zcyl(b.tripod_screw_hole / 2, seat - 1, z1 + b.tripod_screw_depth, y=b.tripod_y)
 
     tw, td = v.tenon_w + f.fdm_clearance, v.tenon_d + f.fdm_clearance
     for sign in (-1, 1):

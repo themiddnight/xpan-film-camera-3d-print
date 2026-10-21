@@ -37,9 +37,25 @@ SEEDS: dict = {
         replace(CAMERA, body=replace(CAMERA.body, wall=0.8)),
         {"body walls >= min wall (geometry)"},
     ),
-    "tripod nut moved into the M42 pocket wall": (
-        replace(CAMERA, body=replace(CAMERA.body, tripod_y=32.5)),
+    "tripod boss 14mm: nut corners break its wall": (
+        replace(CAMERA, body=replace(CAMERA.body, tripod_boss_d=14.0)),
         {"body walls >= min wall (geometry)"},
+    ),
+    "v01 boss 0.5mm under the film-back bottom, knuckles hang lower": (
+        replace(CAMERA, body=replace(CAMERA.body, seat_clear=-6.8)),
+        {"tripod seat is the lowest plane, plate-clear of the hinge knuckles (geometry)"},
+    ),
+    "seat only 0.2mm under the knuckles": (
+        replace(CAMERA, body=replace(CAMERA.body, seat_clear=0.2)),
+        {"tripod seat is the lowest plane, plate-clear of the hinge knuckles (geometry)"},
+    ),
+    "7mm of plastic under the nut: a 5mm screw never reaches it": (
+        replace(CAMERA, body=replace(CAMERA.body, tripod_floor=7.0)),
+        {"a 5mm tripod screw reaches the nut through a clear hole (geometry)"},
+    ),
+    "rear feet 6mm apart under the latch notch: the camera tips sideways": (
+        replace(CAMERA, body=replace(CAMERA.body, foot_x=(2.0, 8.0))),
+        {"camera stands level on its three feet, centre of mass inside them (geometry)"},
     ),
     "body wider than the print bed": (
         replace(CAMERA, body=replace(CAMERA.body, rear_half_w=95.0)),
