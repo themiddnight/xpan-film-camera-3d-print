@@ -3,8 +3,10 @@ import math
 
 from build123d import Axis, Part, Rot, Vector
 
+import mechanisms
 from checklib import EPS, check
 from params import Camera
+from parts import PARTS
 from parts import shell as sh
 
 LOCKED_FRAME = (65.0, 24.0)  # AGENTS.md key specifications; checked against, never built from
@@ -41,25 +43,23 @@ def _hole_d(part: Part, centre: Vector, across: tuple[Vector, Vector], r_max: fl
 
 X, Y, Z = Vector(1, 0, 0), Vector(0, 1, 0), Vector(0, 0, 1)
 
-
-_RESULTS: dict = {}
-
-
-def shell_check(name: str):
-    """Register a check whose result depends only on the params the shell module reads. Results are
-    reused across cameras that agree on them, since most seeds in tests/ change other areas."""
-    def register(fn):
-        def run(c: Camera, b) -> tuple[bool, str]:
-            key = (name, sh._key(c))
-            if key not in _RESULTS:
-                _RESULTS[key] = fn(c, b)
-            return _RESULTS[key]
-        check(name)(run)
-        return fn
-    return register
+LATCH_STOP_MM3 = 1.0
+"""Least peak overlap of the opening cover with a latched button that counts as a stop, not a graze."""
 
 
-@shell_check("gate aperture 65.0 x 24.0, centred, rounded and bevelled (geometry)")
+def _turned_button(c: Camera, b, side: str, fraction: float) -> Part:
+    """A turn button as the viewer's turn_buttons drive turns it, fraction 0 latched to 1 released."""
+    drive = next(d for m in mechanisms.mechanisms(c) if m.id == "turn_buttons" for d in m.drives
+                 if d.part == f"turn_button_{side}")
+    axis = Axis(drive.origin, drive.axis)
+    return b.placed(drive.part).rotate(axis, drive.amount * fraction)
+
+
+def _cover_axis(c: Camera) -> Axis:
+    return Axis((0, c.cover.hinge_axis_y, c.cover.hinge_axis_z), (1, 0, 0))
+
+
+@check("gate aperture 65.0 x 24.0, centred, rounded and bevelled (geometry)")
 def _(c, b):
     g = c.gate
     shell = b.local("shell")
@@ -77,7 +77,7 @@ def _(c, b):
     return ok, f"{w:.3f} x {h:.3f}mm, centre offset {(right - left) / 2:+.3f}/{(top - bottom) / 2:+.3f}, rounded corner {rounded}, rear bevel {bevel}"
 
 
-@shell_check("rails on the film edge band, proud of the gate recess (geometry)")
+@check("rails on the film edge band, proud of the gate recess (geometry)")
 def _(c, b):
     g, f = c.gate, c.film
     shell = b.local("shell")
@@ -98,7 +98,7 @@ def _(c, b):
     return ok, f"{'; '.join(details)}; perforations end at {perf_outer:.2f}"
 
 
-@shell_check("body datum face at Y = 4.20 and the body bay clear (geometry)")
+@check("body datum face at Y = 4.20 and the body bay clear (geometry)")
 def _(c, b):
     k, s, g = c.body_link, c.shell, c.gate
     shell = b.local("shell")
@@ -115,7 +115,7 @@ def _(c, b):
     return flat and clash < 1e-3, f"face Y {min(faces):.3f}..{max(faces):.3f} (body reads {k.hook_slot_y[0]}), bay and hook slot overlap {clash:.3f}mm3"
 
 
-@shell_check("dark slide slot width, depth and mouth (geometry)")
+@check("dark slide slot width, depth and mouth (geometry)")
 def _(c, b):
     g, cv, s = c.gate, c.cover, c.shell
     shell = b.local("shell")
@@ -162,7 +162,7 @@ def _bores(c: Camera, b) -> list[tuple[str, str, float]]:
     return out
 
 
-@shell_check("pin, shaft, insert and collar bore fits (geometry)")
+@check("pin, shaft, insert and collar bore fits (geometry)")
 def _(c, b):
     rod, f, p, sp = c.measured.rod_d, c.fit, c.pawl, c.sprocket
     bad, seen = [], {}
@@ -184,7 +184,7 @@ def _(c, b):
     return not bad, (f"BAD: {', '.join(bad)}; " if bad else "") + summary + f" on a {rod}mm rod"
 
 
-@shell_check("cover tongue fits its groove with clearance (geometry)")
+@check("cover tongue fits its groove with clearance (geometry)")
 def _(c, b):
     s, cv = c.shell, c.cover
     shell, cover = b.local("shell"), b.local("rear_cover")
@@ -205,14 +205,52 @@ def _(c, b):
     return ok, "; ".join(details)
 
 
-@shell_check("rear cover closes on the shell and swings open clear of it (geometry)")
+@check("rear cover closes on the shell and swings open clear of it and the released latches (geometry)")
 def _(c, b):
     cv = c.cover
-    fixed = b.placed("shell") + b.placed("sprocket") + sh.advance_knob_keepout(c)
+    released = _turned_button(c, b, "left", 1) + _turned_button(c, b, "right", 1)
+    fixed = b.placed("shell") + b.placed("sprocket") + sh.advance_knob_keepout(c) + released
     cover = b.placed("rear_cover")
-    axis = Axis((0, cv.hinge_axis_y, cv.hinge_axis_z), (1, 0, 0))
+    axis = _cover_axis(c)
     worst = max(((cover.rotate(axis, a) & fixed).volume, a) for a in (0, 2, 5, 10, 15, 20, 30, 45, 60, 80, cv.open_deg))
     return worst[0] < 1e-3, f"worst overlap {worst[0]:.3f}mm3 at {worst[1]} deg over 0-{cv.open_deg} deg"
+
+
+@check("latched turn buttons stop the cover opening (geometry)")
+def _(c, b):
+    cover, axis = b.placed("rear_cover"), _cover_axis(c)
+    ok, details = True, []
+    for side in ("left", "right"):
+        button = b.placed(f"turn_button_{side}")
+        v = {a: (cover.rotate(axis, a) & button).volume for a in (0, 0.5, 1, 1.5, 2, 2.5, 3)}
+        opening = [x for a, x in v.items() if a > 0]
+        side_ok = v[0] < 1e-3 and max(opening) >= LATCH_STOP_MM3 and min(opening) >= 0.01
+        ok &= side_ok
+        details.append(f"{side} " + ", ".join(f"{a}:{x:.2f}" for a, x in v.items()))
+    return ok, f"overlap mm3 by deg open, closed clear, peak >= {LATCH_STOP_MM3}, never clear to 3 deg: " + "; ".join(details)
+
+
+@check("turn buttons turn a quarter to release, clear of everything round them (geometry)")
+def _(c, b):
+    reach = math.hypot(c.cover.button_len / 2, c.cover.button_w / 2) + 1
+    ok, details = True, []
+    for side, (x, y) in zip(("left", "right"), sh.turn_button_pivots(c)):
+        own = {f"turn_button_{side}", f"m3_screw_{side}", f"m3_insert_{side}"}
+        z = _turned_button(c, b, side, 0).bounding_box()
+        near = [n for n in PARTS if n not in own and _boxes_meet(b.placed(n).bounding_box(), x - reach, x + reach,
+                                                                 y - reach, y + reach, z.min.Z, z.max.Z)]
+        blockers = b.placed(near[0])
+        for n in near[1:]:
+            blockers += b.placed(n)
+        worst = max(((_turned_button(c, b, side, i / 9) & blockers).volume, i / 9) for i in range(10))
+        ok &= worst[0] < 1e-3
+        details.append(f"{side} worst {worst[0]:.3f}mm3 at {worst[1]:.0%} of the turn, against {len(near)} parts")
+    return ok, "; ".join(details)
+
+
+def _boxes_meet(box, x0: float, x1: float, y0: float, y1: float, z0: float, z1: float) -> bool:
+    return (box.min.X <= x1 and x0 <= box.max.X and box.min.Y <= y1 and y0 <= box.max.Y
+            and box.min.Z <= z1 and z0 <= box.max.Z)
 
 
 @check("hinge axis at the tongue mid-depth, cover knuckle under the shell bottom")
@@ -224,7 +262,7 @@ def _(c, b):
     return ok, f"axis Y {cv.hinge_axis_y} (tongue mid-depth {y:.2f}), Z {cv.hinge_axis_z} (knuckle under the bottom {z:.2f})"
 
 
-@shell_check("turn buttons clear the tower, collars, knob, release button and slide handle (geometry)")
+@check("turn buttons clear the tower, collars, knob, release button and slide handle (geometry)")
 def _(c, b):
     cv, t, p = c.cover, c.takeup, c.pawl
     bb = b.local("turn_button_left").bounding_box()
@@ -244,7 +282,7 @@ def _(c, b):
     return ok, f"sweep radius {sweep_r:.2f}mm; " + "; ".join(details)
 
 
-@shell_check("shell-module printed parts fit the print bed (geometry)")
+@check("shell-module printed parts fit the print bed (geometry)")
 def _(c, b):
     sizes = {}
     for name, spec in sh.PARTS.items():
@@ -255,7 +293,7 @@ def _(c, b):
     return all(max(v) <= c.print.bed for v in sizes.values()), f"largest {worst} {sizes[worst][0]:.1f} x {sizes[worst][1]:.1f}mm on a {c.print.bed}mm bed"
 
 
-@shell_check("pawl cheeks, spring shelf and button bayonet match the pawl interface (geometry)")
+@check("pawl cheeks, spring shelf and button bayonet match the pawl interface (geometry)")
 def _(c, b):
     p, s, f, sp = c.pawl, c.shell, c.fit, c.sprocket
     shell = b.local("shell")
@@ -293,7 +331,7 @@ def _(c, b):
                 f"bayonet leg open {leg_open}, roofed {roofed}, turn clear {turn_clear}, held under the ceiling {held}")
 
 
-@shell_check("film throat centres the film with clearance (geometry)")
+@check("film throat centres the film with clearance (geometry)")
 def _(c, b):
     s = c.shell
     x = -(s.bridge_half_span + s.divider_wall / 2)
@@ -305,7 +343,7 @@ def _(c, b):
     return ok, f"lands {front + rear:.2f}mm apart, {side:.2f}mm each side of the {c.film.thickness}mm film"
 
 
-@shell_check("cover shoe holds the film on the sprocket teeth (geometry)")
+@check("cover shoe holds the film on the sprocket teeth (geometry)")
 def _(c, b):
     sp, cv, f = c.sprocket, c.cover, c.film
     cover = b.local("rear_cover")
@@ -327,7 +365,7 @@ def _(c, b):
     return ok, f"film gap {film_gap:.2f}mm, tooth gap {tooth_gap:.2f}mm, shoe Z {bottom:.2f}..{top:.2f} inside flanges +/-{sp.flange_gap / 2}"
 
 
-@shell_check("pressure pad squeeze and coverage (geometry)")
+@check("pressure pad squeeze and coverage (geometry)")
 def _(c, b):
     s, g, f = c.shell, c.gate, c.film
     pad = b.placed("pressure_pad").bounding_box()

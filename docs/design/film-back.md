@@ -348,10 +348,12 @@ Reasons:
 |---|---:|---|
 | Hinge side | Bottom | Door opens downward |
 | Cover count | 1 | One cover across cartridge, gate, sprocket, and take-up zones |
-| Latch side | Top | Two printed turn-buttons, each on an M3 screw into a heat-set insert |
+| Latch side | Top | Two printed turn-buttons, each on an M3 screw into a heat-set insert. A dog under each button sits in a groove in the cover's top lip |
 | Hinge pin | 3.0mm steel pin | Same stock as the other shafts |
 | Cover seal | Velvet/felt around perimeter | Required |
 | Cover stop | Printed stop/ledge | Repeatable closed position |
+
+The hinge axis is about 68mm below the top lip, so opening the cover slides the lip almost straight back, rising at most 0.02mm. A button that only rests on the lip does not hold the cover. Each button therefore has a dog under its rear end that drops into an arc groove in the lip top. When the cover starts to open, the groove's front wall moves back into the dog and stops it. A quarter turn of the button, counter-clockwise from above, carries the dog along the groove and out past the lip's front edge, and the cover is then free to swing.
 
 The rear opening is one large loading opening under one cover. Seal geometry should sit around the outer perimeter only. Do not add internal rear cover seals between cartridge, gate, and take-up zones because they block loading access and visually interrupt the film strip.
 
@@ -581,7 +583,7 @@ Lateral fences: inner gap 35.3mm, from Y = 0 back to Y = -0.8.
 | Sprocket shoe | Printed on the cover. Arc from the bottom of the hub (-90 deg) to -45 deg, inner radius 10.95mm (hub + film + 0.3mm), 34.6mm wide so it fits between the sprocket flanges, with a 2.6 x 1.0mm groove for the teeth. It holds the film on the teeth over the whole contact arc |
 | Cover seal | Sides and bottom: tongue 1.6 x 2.5mm on the cover, into a 2.2 x 3.0mm groove in a 4.6mm shell rim (1.2mm each side of the groove), 1.5mm foam strip in the groove bottom. Top: lap joint, the cover overlaps the shell top by 6mm with foam between, so the rear opening reaches the chamber ceiling at Z = +28.5 and the cassette spool tip (Z = +27) passes under it |
 | Hinge | Bottom edge, three knuckles of 7mm OD on a 3.0mm steel pin, 171mm long, inset 2mm each end |
-| Latch | Two turn-buttons (20 x 8 x 3mm) on M3 screws into heat-set inserts in the shell top |
+| Latch | Two turn-buttons (20 x 8 x 3mm) on M3 screws into heat-set inserts in the shell top, pivots at X = +/-42.5, Y = 5.6. Each has a 3 x 2 x 1mm dog under its rear end, centred 7.5mm from the pivot. The dog sits in an arc groove in the top lip, which is 2.5mm thick for it: the groove is 1.3mm deep (1.2mm floor) with 0.3mm clearance round the dog, and runs a quarter turn counter-clockwise from above out past the lip's front edge. Latched, the cover stops after about 0.3mm of travel. Released, the dog hangs over the shell top clear of the cover's swing. The buttons print top down |
 
 The pad and the clutch work against each other: pad drag must stay well below the clutch slip force, or the knob slips before the film moves. That is why the pad covers the gate only and is barely compressed. The print package includes a drag test with go/no-go limits: pull scrap film through the closed back with a luggage scale. Drag must be at most 1.0N, and the clutch must transmit at least 3.0N before slipping.
 
