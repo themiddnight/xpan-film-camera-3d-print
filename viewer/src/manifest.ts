@@ -103,6 +103,10 @@ function mechanism(x: unknown, path: string): Mechanism {
     readout: readout(o.readout, `${path}.readout`),
     cyclic: o.cyclic === undefined ? false : boolean(o.cyclic, `${path}.cyclic`),
     internal: o.internal === undefined ? false : boolean(o.internal, `${path}.internal`),
+    requires: o.requires === undefined ? [] : array(o.requires, `${path}.requires`).map((r, i) => {
+      const q = record(r, `${path}.requires[${i}]`)
+      return { mechanism: string(q.mechanism, `${path}.requires[${i}].mechanism`), value: number(q.value, `${path}.requires[${i}].value`) }
+    }),
     drives: array(o.drives, `${path}.drives`).map((d, i) => drive(d, `${path}.drives[${i}]`)),
   }
 }
@@ -186,6 +190,11 @@ export function parseManifest(json: unknown): Manifest {
   mechanisms.forEach((m, i) => {
     if (ids.has(m.id)) throw new ManifestError(`manifest.mechanisms[${i}].id: duplicate id ${JSON.stringify(m.id)}`)
     ids.add(m.id)
+    m.requires.forEach((r, j) => {
+      if (!mechanisms.some(other => other.id === r.mechanism && other.id !== m.id)) {
+        throw new ManifestError(`manifest.mechanisms[${i}].requires[${j}]: no mechanism ${JSON.stringify(r.mechanism)}`)
+      }
+    })
     m.drives.forEach((d, j) => {
       if (!names.has(d.part)) {
         throw new ManifestError(`manifest.mechanisms[${i}].drives[${j}].part: no part named ${JSON.stringify(d.part)}`)

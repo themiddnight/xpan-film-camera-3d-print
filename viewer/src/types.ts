@@ -70,6 +70,8 @@ export interface Mechanism {
   cyclic: boolean
   /** Driven only by cycles (e.g. the pawl riding the cam); no slider, since it only makes sense in sequence. */
   internal: boolean
+  /** Mechanisms that must be at least at these values before this one moves (e.g. latches before the cover). */
+  requires: readonly { mechanism: string; value: number }[]
   /** Applied to each part in this order. */
   drives: readonly Drive[]
 }

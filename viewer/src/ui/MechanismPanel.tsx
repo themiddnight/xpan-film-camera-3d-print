@@ -38,7 +38,7 @@ function MechanismRow({ mechanism }: { mechanism: Mechanism }) {
         ref={slider} type="range" min={0} max={1} step={SLIDER_STEP} defaultValue={0} aria-label={label}
         onChange={e => {
           const v = e.currentTarget.valueAsNumber
-          motion.set(id, motion.isCyclic(id) ? Math.floor(motion.get(id)) + v : v)
+          motion.setByUser(id, motion.isCyclic(id) ? Math.floor(motion.get(id)) + v : v)
         }}
       />
       {readout && <output ref={output} className="sub" />}

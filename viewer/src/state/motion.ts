@@ -30,6 +30,7 @@ export class Motion {
   private readonly drivesByPart = new Map<string, PartDrive[]>()
   private readonly scratch = new Matrix4()
   private readonly cyclic = new Set<string>()
+  private readonly byId = new Map<string, Mechanism>()
 
   constructor(mechanisms: readonly Mechanism[]) {
     this.mechanisms = mechanisms
@@ -37,6 +38,7 @@ export class Motion {
       this.values.set(m.id, 0)
       this.valueListeners.set(m.id, new Set())
       if (m.cyclic) this.cyclic.add(m.id)
+      this.byId.set(m.id, m)
       for (const d of m.drives) {
         const list = this.drivesByPart.get(d.part) ?? []
         list.push({ mechanism: m.id, drive: compileDrive(d) })
@@ -69,6 +71,25 @@ export class Motion {
     this.playingListeners.forEach(l => l())
   }
 
+  /**
+   * A change the user makes from a slider or Play: mechanisms this one needs move first (the latches
+   * turn before the cover opens), and mechanisms that need this one go back to rest if it drops below
+   * what they need. Cycles write through `set`, since they script every value themselves.
+   */
+  setByUser(id: string, value: number): void {
+    const m = this.byId.get(id)
+    if (m && value > 0) {
+      for (const r of m.requires) if (this.get(r.mechanism) < r.value) this.set(r.mechanism, r.value)
+    }
+    this.set(id, value)
+    for (const other of this.mechanisms) {
+      if (this.get(other.id) > 0 && other.requires.some(r => r.mechanism === id && this.get(id) < r.value)) {
+        this.setPlaying(other.id, false)
+        this.set(other.id, 0)
+      }
+    }
+  }
+
   isCyclic(id: string): boolean {
     return this.cyclic.has(id)
   }
@@ -78,7 +99,7 @@ export class Motion {
     const step = Math.min(seconds, MAX_FRAME_SECONDS) / SWEEP_SECONDS
     for (const [id, direction] of this.playing) {
       if (this.cyclic.has(id)) {
-        this.set(id, this.get(id) + step)
+        this.setByUser(id, this.get(id) + step)
         continue
       }
       let value = this.get(id) + direction * step
@@ -86,7 +107,7 @@ export class Motion {
       if (value > 1) { value = 2 - value; next = -1 }
       else if (value < 0) { value = -value; next = 1 }
       this.playing.set(id, next)
-      this.set(id, value)
+      this.setByUser(id, value)
     }
   }
 
