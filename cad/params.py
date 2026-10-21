@@ -394,9 +394,11 @@ class Body:
     latch_gap: float = 1.0            # air gap around the cantilever in its slot
     latch_ramp: float = 1.8           # 45 deg lead-in on the hook's rear top edge
     tripod_y: float = 32.0
-    tripod_boss_d: float = 14.0
-    tripod_proud: float = 0.5         # boss face below the film-back bottom, so a tripod plate seats on it
-    tripod_floor: float = 2.0         # under the nut
+    tripod_boss_d: float = 16.0       # 13.2 across the nut corners + 2 x 1.2 wall (was 14 before the nut moved into the foot)
+    seat_clear: float = 0.75          # seat plane below the lowest rear-cover knuckle: a tripod plate clears them, the camera stands on the feet
+    tripod_floor: float = 1.2         # under the nut (Print.min_wall); a 5mm screw then engages 3.8mm of it
+    foot_x: tuple = (27.0, 35.0)      # each rear foot spans this |X|, clear of the latch notch (|X| <= 25) and the body side wall
+    foot_y1: float = 14.0             # rear feet run from the datum face to here
     tripod_screw_hole: float = 6.6    # 1/4"-20 screw clearance
     tripod_screw_depth: float = 5.0   # clearance above the nut for a long screw
     nut_af: float = 11.1              # mirrors docs/bom.md (est.)

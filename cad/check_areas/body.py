@@ -1,5 +1,5 @@
 """Geometry checks for the body and the pinhole module, probed on the placed solids."""
-from build123d import Edge, Part, Pos, Rot, Solid, Vector
+from build123d import Box, Edge, Part, Pos, Rot, Solid, Vector
 
 from checklib import EPS, check
 from params import Camera
@@ -11,6 +11,12 @@ SEAT_TOL = 0.01
 PINHOLE_TOL = 0.3
 FIELD_DEPTH = 25.0
 APEX_HALF = 0.01
+PLATE_CLEAR = 0.5          # a tripod plate seated on the feet must clear every other part by this much
+SCREW_LEN = 5.0            # typical 1/4"-20 tripod screw protrudes 4.5 to 6.5mm; take a short one
+THREAD_PITCH = 25.4 / 20
+MIN_THREADS = 2.5          # a 4.5mm screw still gets 2.6 threads on the shipped floor
+COM_MARGIN = 3.0           # centre of mass this far inside the support polygon
+SLICE_T = 0.05
 
 
 def _runs(part: Part, start, direction, length: float) -> list[tuple[float, float]]:
@@ -157,6 +163,80 @@ def _(c, b):
     return covers and field < EPS and locks, f"covers closed {covers}, open blade in field {field:.3f} mm3, pin locks {locks}"
 
 
+def _lowest(b) -> list[tuple[float, str]]:
+    return sorted((b.placed(n).bounding_box().min.Z, n) for n in PARTS)
+
+
+def _hull(points):
+    """Convex hull, counter-clockwise (monotone chain)."""
+    pts = sorted(set(points))
+
+    def half(seq):
+        out = []
+        for p in seq:
+            while len(out) >= 2 and (out[-1][0] - out[-2][0]) * (p[1] - out[-2][1]) - (out[-1][1] - out[-2][1]) * (p[0] - out[-2][0]) <= 0:
+                out.pop()
+            out.append(p)
+        return out[:-1]
+    return half(pts) + half(pts[::-1])
+
+
+def _inside_margin(hull, p) -> float:
+    """Smallest distance from p to a hull edge; negative when p is outside."""
+    worst = float("inf")
+    for (ax, ay), (bx, by) in zip(hull, hull[1:] + hull[:1]):
+        ex, ey = bx - ax, by - ay
+        worst = min(worst, (ex * (p[1] - ay) - ey * (p[0] - ax)) / (ex * ex + ey * ey) ** 0.5)
+    return worst
+
+
+def _seat_patches(body: Part, seat: float) -> list[list[tuple[float, float]]]:
+    """Outline points of each separate piece of the body that touches the seat plane."""
+    slab = body & (Pos(0, 0, seat + SLICE_T / 2) * Box(400, 400, SLICE_T))
+    patches = []
+    for island in slab.solids():
+        bottom = min(island.faces(), key=lambda f: f.center().Z)
+        patches.append([(p.X, p.Y) for e in bottom.edges() for p in (e @ (i / 8) for i in range(9))])
+    return patches
+
+
+@check("tripod seat is the lowest plane, plate-clear of the hinge knuckles (geometry)")
+def _(c, b):
+    seat = b.placed("body").bounding_box().min.Z
+    z, name = next((z, n) for z, n in _lowest(b) if n != "body")
+    return z - seat >= PLATE_CLEAR - EPS, f"seat Z {seat:.2f}, next lowest {name} at {z:.2f}: {z - seat:.2f}mm clear (need {PLATE_CLEAR})"
+
+
+@check("camera stands level on its three feet, centre of mass inside them (geometry)")
+def _(c, b):
+    body = b.placed("body")
+    seat = body.bounding_box().min.Z
+    patches = _seat_patches(body, seat)
+    parts = [(b.placed(n).volume, b.placed(n).center()) for n in PARTS]
+    total = sum(v for v, _ in parts)
+    com = (sum(v * p.X for v, p in parts) / total, sum(v * p.Y for v, p in parts) / total)
+    margin = _inside_margin(_hull([pt for patch in patches for pt in patch]), com) if len(patches) >= 3 else float("-inf")
+    ok = len(patches) == 3 and margin >= COM_MARGIN - EPS
+    return ok, f"{len(patches)} patches within {SLICE_T}mm of the seat, centre of mass X {com[0]:.1f} Y {com[1]:.1f} is {margin:.1f}mm inside them (need {COM_MARGIN})"
+
+
+@check("a 5mm tripod screw reaches the nut through a clear hole (geometry)")
+def _(c, b):
+    bd, body, nut = c.body, b.placed("body"), b.placed("tripod_nut")
+    seat = body.bounding_box().min.Z
+    ring = (bd.nut_bore + bd.nut_af) / 4
+    run = _first_run(nut, (ring, bd.tripod_y, seat - 1), (0, 0, 1), 40.0)
+    if run is None:
+        return False, "no nut above the seat"
+    bottom, top = seat - 1 + run[0], seat - 1 + run[1]
+    r = bd.nut_bore / 2
+    blocked = [off for off in ((0, 0), (r, 0), (-r, 0), (0, r), (0, -r))
+               if _runs(body, (off[0], bd.tripod_y + off[1], seat - 1), (0, 0, 1), top - seat + 1)]
+    engaged = min(SCREW_LEN - (bottom - seat), top - bottom)
+    threads = engaged / THREAD_PITCH
+    return not blocked and threads >= MIN_THREADS - EPS, f"nut bottom {bottom - seat:.2f}mm over the seat, {SCREW_LEN}mm screw engages {max(engaged, 0):.2f}mm = {max(threads, 0):.1f} threads (need {MIN_THREADS}), hole blocked at {blocked}"
+
+
 def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
     bd, p, v = c.body, c.pinhole, c.viewfinder
     from parts.body import nut_z0
@@ -169,9 +249,11 @@ def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
     rays += [("body", f"M42 pocket wall {n}", (0, pocket, 0), d) for n, d in (("X", (1, 0, 0)), ("top", (0, 0, 1)), ("bottom", (0, 0, -1)))]
     rays += [("body", "M42 pocket wall at the front face", (0, bd.front_face_y - 0.1, 0), (1, 0, 0))]
     rays += [
-        ("body", "nut pocket to M42 pocket", (0, bd.tripod_y, nut_top - 0.05), (0, 1, 0)),
+        ("body", "nut pocket to boss front", (0, bd.tripod_y, nut_top - 0.05), (0, 1, 0)),
+        ("body", "nut pocket corner to boss side", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (-1, 0, 0)),
+        ("body", "nut pocket to latch slot at the nut", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (0, -1, 0)),
         ("body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
-        ("body", "nut pocket to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
+        ("body", "screw hole to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
         ("body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
         ("shutter_housing", "blade rail", (0, (s0 + s1) / 2, 0), (0, 0, 1)),
         ("shutter_housing", "rear plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, -1, 0)),
