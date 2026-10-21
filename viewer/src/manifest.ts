@@ -101,6 +101,7 @@ function mechanism(x: unknown, path: string): Mechanism {
     label: string(o.label, `${path}.label`),
     readout: readout(o.readout, `${path}.readout`),
     cyclic: o.cyclic === undefined ? false : boolean(o.cyclic, `${path}.cyclic`),
+    internal: o.internal === undefined ? false : boolean(o.internal, `${path}.internal`),
     drives: array(o.drives, `${path}.drives`).map((d, i) => drive(d, `${path}.drives[${i}]`)),
   }
 }

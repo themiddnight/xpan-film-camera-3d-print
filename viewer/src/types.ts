@@ -61,6 +61,8 @@ export interface Mechanism {
    * slider shows the part within the current turn. Otherwise the value stays in 0 to 1.
    */
   cyclic: boolean
+  /** Driven only by cycles (e.g. the pawl riding the cam); no slider, since it only makes sense in sequence. */
+  internal: boolean
   /** Applied to each part in this order. */
   drives: readonly Drive[]
 }

@@ -22,6 +22,8 @@ export interface ViewerState {
   failed: ReadonlySet<string>
   /** Parts the `mechanism` view frames: those the focused cycle moves. */
   framed: readonly string[]
+  /** The cycle shown in its cutaway, with the part views it changed, so turning it off restores them. */
+  focus: { cycle: string; saved: Readonly<Record<string, PartView>> } | null
 }
 
 /** What a part shows right now, after its own toggles, its group's toggles and the kind filter. */
@@ -100,6 +102,7 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
     boxes: {},
     failed: new Set(),
     framed: manifest.cycles.length > 0 ? cycleParts(manifest, manifest.cycles[0]) : [],
+    focus: null,
   })
   const selectBounds = boundsSelector(manifest.parts)
   const motion = new Motion(manifest.mechanisms)
@@ -130,11 +133,20 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
         return s.boxes[name]?.equals(box) ? s : { ...s, boxes: { ...s.boxes, [name]: box } }
       }),
       setFocus: (player, on) => store.update(s => {
-        const parts = { ...s.parts }
         const { ghost, hide } = player.cycle.focus
-        for (const name of ghost) parts[name] = on ? { visible: true, ghost: true } : SHOWN
-        for (const name of hide) parts[name] = on ? { visible: false, ghost: false } : SHOWN
-        return { ...s, parts, framed: cycleParts(manifest, player.cycle), view: on ? 'mechanism' : 'iso', viewRequest: s.viewRequest + 1 }
+        if (!on) {
+          if (!s.focus) return s
+          return { ...s, parts: { ...s.parts, ...s.focus.saved }, focus: null, view: 'iso', viewRequest: s.viewRequest + 1 }
+        }
+        const base = s.focus ? { ...s.parts, ...s.focus.saved } : s.parts
+        const saved = Object.fromEntries([...ghost, ...hide].map(name => [name, base[name]]))
+        const parts = { ...base }
+        for (const name of ghost) parts[name] = { visible: true, ghost: true }
+        for (const name of hide) parts[name] = { visible: false, ghost: false }
+        return {
+          ...s, parts, focus: { cycle: player.cycle.id, saved },
+          framed: cycleParts(manifest, player.cycle), view: 'mechanism', viewRequest: s.viewRequest + 1,
+        }
       }),
       reportFailed: (name, error) => {
         console.error(`Part ${name} failed to load:`, error)

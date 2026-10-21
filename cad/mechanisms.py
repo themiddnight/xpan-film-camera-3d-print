@@ -38,6 +38,8 @@ class Mechanism:
     drives: tuple[Drive, ...]
     readout: Readout | None = None
     cyclic: bool = False
+    internal: bool = False
+    """Driven only by cycles; the viewer gives it no slider."""
 
 
 @dataclass(frozen=True)
@@ -106,10 +108,15 @@ def dark_slide_pull(c: Camera) -> float:
 
 
 def advance_fraction_to_clear_pocket(c: Camera) -> float:
-    """Sprocket turn (fraction of one frame) after which the pocket has left the nose."""
+    """Sprocket turn (fraction of one frame) after which the pocket has left the nose.
+
+    The pocket's tangential edge must pass the far side of the nose at every radius the two share;
+    the innermost radius needs the largest turn.
+    """
     s, p = c.sprocket, c.pawl
-    arc = s.notch_w / 2 + p.tip_w / 2   # pocket edge must pass the far side of the nose
-    return arc / (2 * math.pi * s.notch_r)
+    r = s.notch_r - s.notch_len / 2
+    turn = math.asin(min(1.0, s.notch_w / 2 / r)) + math.asin(min(1.0, p.tip_w / 2 / r))
+    return turn / (2 * math.pi)
 
 
 def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
@@ -144,6 +151,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
         Mechanism(
             "pawl_ride", "Pawl rides on the cam",
             (Drive("pawl", "rotate", axis, pawl_ride_deg(c), pivot),),
+            internal=True,
         ),
         Mechanism(
             "turn_buttons", "Turn the cover latches",
@@ -230,6 +238,7 @@ def manifest_entries(c: Camera, registered: set[str]) -> tuple[list[dict], list[
             "id": m.id,
             "label": m.label,
             "cyclic": m.cyclic,
+            "internal": m.internal,
             "readout": None if m.readout is None else {"per_unit": m.readout.per_unit, "unit": m.readout.unit},
             "drives": [{"part": d.part, "kind": d.kind, "axis": list(d.axis), "origin": list(d.origin),
                         "amount": d.amount} for d in m.drives],

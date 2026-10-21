@@ -77,6 +77,18 @@ SEEDS = {
         replace(CAMERA, sprocket=replace(CAMERA.sprocket, notch_w=3.4)),
         {"locked pawl stops the sprocket within the backlash limit (geometry)"},
     ),
+    "printer bed smaller than the shell": (
+        replace(CAMERA, print=replace(CAMERA.print, bed=150.0)),
+        {"every printed part fits the print bed (geometry)"},
+    ),
+    "pins in clearance holes instead of a press fit": (
+        replace(CAMERA, fit=replace(CAMERA.fit, pin_press_hole=3.05)),
+        {"no parts overlap beyond the intended fits (geometry)"},
+    ),
+    "take-up spool moved into the sprocket": (
+        replace(CAMERA, layout=replace(CAMERA.layout, spool_x=77.0)),
+        {"no parts overlap beyond the intended fits (geometry)"},
+    ),
     "rewind fork with no tower": (
         replace(CAMERA, rewind=replace(CAMERA.rewind, tower_top_inside=28.5)),
         {"rewind fork lifts inside the tower"},

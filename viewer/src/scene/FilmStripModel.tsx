@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import {
   BufferGeometry, CanvasTexture, DoubleSide, Float32BufferAttribute, MeshStandardMaterial, RepeatWrapping,
@@ -81,10 +81,15 @@ export const FilmStripModel = memo(function FilmStripModel({ spec, strip }: { sp
   const { geometry, material, texture } = useMemo(() => {
     const texture = perforationTile(strip, spec.color)
     const material = new MeshStandardMaterial({
-      map: texture, alphaTest: 0.5, side: DoubleSide, ...SURFACE[spec.kind],
+      map: texture,
+      // Low enough that a ghosted strip (opacity 0.25) still draws; the holes have alpha 0 and are still cut.
+      alphaTest: 0.1, side: DoubleSide, ...SURFACE[spec.kind],
     })
     return { geometry: ribbon(strip), material, texture }
   }, [strip, spec.color, spec.kind])
+
+  // The material is disposed with the part display; its map and the geometry are not.
+  useEffect(() => () => { texture.dispose(); geometry.dispose() }, [texture, geometry])
 
   const materials = useMemo(() => [material], [material])
   const worldBox = useMemo(() => geometry.boundingBox!.clone(), [geometry])

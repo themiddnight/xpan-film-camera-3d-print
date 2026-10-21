@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react'
 import type { CyclePlayer } from '../state/cycle'
-import { useViewer } from '../state/viewer'
+import { useViewer, useViewerState } from '../state/viewer'
 
 /** Space runs the first cycle, as on the anatomy figure, unless a form control has the keyboard. */
 function useSpaceKey(player: CyclePlayer, enabled: boolean) {
@@ -21,7 +21,7 @@ function useSpaceKey(player: CyclePlayer, enabled: boolean) {
 function CycleRow({ player, keyboard }: { player: CyclePlayer; keyboard: boolean }) {
   const { motion, actions } = useViewer()
   const status = useSyncExternalStore(player.subscribe, player.getStatus)
-  const [focus, setFocus] = useState(false)
+  const focus = useViewerState(s => s.focus?.cycle === player.cycle.id)
   const readout = useRef<HTMLOutputElement>(null)
   const { counter, label } = player.cycle
   useSpaceKey(player, keyboard)
@@ -41,10 +41,7 @@ function CycleRow({ player, keyboard }: { player: CyclePlayer; keyboard: boolean
     return motion.subscribeValue(counter.mechanism, paint)
   }, [motion, counter])
 
-  const toggleFocus = () => {
-    actions.setFocus(player, !focus)
-    setFocus(!focus)
-  }
+  const toggleFocus = () => actions.setFocus(player, !focus)
 
   return (
     <div className="cycle">

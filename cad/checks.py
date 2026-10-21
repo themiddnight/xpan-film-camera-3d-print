@@ -103,18 +103,19 @@ def _(c, b):
 INTERFERENCE_TOLERANCE_MM3 = 0.01
 """Overlap below this is tessellation noise or a touching face, not a clash."""
 
-INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, str]] = {
-    frozenset(("hinge_pin", "shell")): (30.0, "pin pressed into the two 30mm end knuckles"),
-    frozenset(("pawl_pin", "shell")): (6.0, "pin pressed into the pivot cheeks"),
-    frozenset(("sprocket_pin", "shell")): (6.0, "pin pressed into the floor boss"),
-    frozenset(("latch_pin", "shell")): (2.5, "pin pressed into the latch lugs"),
-    frozenset(("rewind_o_ring", "shell")): (1.0, "O-ring squeezed in its counterbore, which is its job"),
-    frozenset(("dark_slide", "slot_plug")): (500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
-    frozenset(("film", "shell")): (0.5, "film lies on the rails; facets of the curved strip graze them"),
-    frozenset(("film", "sprocket")): (0.2, "film wraps the hub; facets of the curved strip graze it"),
-    frozenset(("film", "film_roll")): (0.5, "the strip's last wrap lies on the roll; facets graze it"),
+INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, float, str]] = {
+    frozenset(("hinge_pin", "shell")): (20.0, 30.0, "pin pressed into the two 30mm end knuckles"),
+    frozenset(("pawl_pin", "shell")): (3.0, 6.0, "pin pressed into the pivot cheeks"),
+    frozenset(("sprocket_pin", "shell")): (3.0, 6.0, "pin pressed into the floor boss"),
+    frozenset(("latch_pin", "shell")): (1.0, 2.5, "pin pressed into the latch lugs"),
+    frozenset(("rewind_o_ring", "shell")): (0.2, 1.0, "O-ring squeezed in its counterbore, which is its job"),
+    frozenset(("dark_slide", "slot_plug")): (0.0, 500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
+    frozenset(("film", "shell")): (0.0, 0.5, "film lies on the rails; facets of the curved strip graze them"),
+    frozenset(("film", "sprocket")): (0.0, 0.2, "film wraps the hub; facets of the curved strip graze it"),
+    frozenset(("film", "film_roll")): (0.0, 0.5, "the strip's last wrap lies on the roll; facets graze it"),
 }
-"""Pairs that overlap on purpose, with the most volume allowed and the reason. More than that is a clash."""
+"""Pairs that overlap on purpose: (least, most) volume in mm3 and the reason. A press fit below its least
+has stopped gripping; above its most it is a clash."""
 
 
 def _boxes_meet(a, b) -> bool:
@@ -142,11 +143,15 @@ def overlaps(b: Built) -> list[tuple[str, str, float]]:
 
 @check("no parts overlap beyond the intended fits (geometry)")
 def _(c, b):
-    clashes = [(a, o, v) for a, o, v in overlaps(b)
-               if v > INTENDED_OVERLAPS.get(frozenset((a, o)), (0.0, ""))[0]]
-    if not clashes:
+    found = {frozenset((a, o)): v for a, o, v in overlaps(b)}
+    problems = [f"{' x '.join(sorted(pair))} {v:.2f}mm3" for pair, v in found.items()
+                if v > INTENDED_OVERLAPS.get(pair, (0.0, 0.0, ""))[1]]
+    problems += [f"{' x '.join(sorted(pair))} only {found.get(pair, 0.0):.2f}mm3 (fit needs {least})"
+                 for pair, (least, _, _) in INTENDED_OVERLAPS.items()
+                 if least > 0 and found.get(pair, 0.0) < least and pair <= PARTS.keys()]
+    if not problems:
         return True, f"{len(PARTS)} parts, {len(INTENDED_OVERLAPS)} intended overlaps within their limits"
-    return False, "; ".join(f"{a} x {o} {v:.2f}mm3" for a, o, v in clashes[:8])
+    return False, "; ".join(problems[:8])
 
 
 def _polar(r: float, angle_deg: float, z: float) -> Vector:
@@ -410,13 +415,20 @@ def _(c, b):
 @check("frame cycle advances exactly one frame and ends locked")
 def _(c, b):
     cy = mechanisms.frame_cycle(c)
-    first, last = cy.keys[0].values, cy.keys[-1].values
-    ok = first == {"advance": 0.0, "release": 0.0, "pawl_ride": 0.0} and last == {"advance": 1.0, "release": 0.0, "pawl_ride": 0.0}
-    rising = all(b2.values["advance"] >= a.values["advance"] for a, b2 in zip(cy.keys, cy.keys[1:]))
-    # The button may only be let go once the pocket has left the nose.
-    let_go = next(k for k in cy.keys if k.values["release"] == 0.0 and k.values["pawl_ride"] > 0)
-    clear = let_go.values["advance"] >= mechanisms.advance_fraction_to_clear_pocket(c)
-    return ok and rising and clear, f"{cy.keys[-1].values['advance'] * c.film.advance:.1f}mm, let go at {let_go.values['advance']:.3f} of a turn"
+    rest = {"advance": 0.0, "release": 0.0, "pawl_ride": 0.0}
+    ok = cy.keys[0].values == rest and cy.keys[-1].values == {**rest, "advance": 1.0}
+    rising = all(k2.values["advance"] >= k1.values["advance"] for k1, k2 in zip(cy.keys, cy.keys[1:]))
+    # The button may start coming up only once the pocket has left the whole nose; checked against the
+    # pocket geometry directly, not the helper the keys were built from.
+    s, p = c.sprocket, c.pawl
+    r_in = s.notch_r - s.notch_len / 2
+    needed = (math.asin(s.notch_w / 2 / r_in) + math.asin(p.tip_w / 2 / r_in)) / (2 * math.pi)
+    let_go = next((k1 for k1, k2 in zip(cy.keys, cy.keys[1:]) if k2.values["release"] < k1.values["release"]), None)
+    if let_go is None:
+        return False, "the button is never let go"
+    clear = let_go.values["advance"] >= needed
+    return ok and rising and clear, (f"{cy.keys[-1].values['advance'] * c.film.advance:.1f}mm, button starts up at "
+                                     f"{let_go.values['advance']:.3f} of a turn, pocket clear at {needed:.3f}")
 
 
 def run_checks(c: Camera = CAMERA) -> list[Result]:

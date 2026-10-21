@@ -65,7 +65,7 @@ export class CyclePlayer {
     this.base = new Map()
     for (const id of this.mechanismIds()) {
       // A frame advance starts from the last whole frame, so a cycle after manual slider moves stays aligned.
-      this.base.set(id, this.motion.isCyclic(id) ? Math.round(this.motion.get(id)) : 0)
+      this.base.set(id, this.motion.isCyclic(id) ? Math.floor(this.motion.get(id) + 1e-9) : 0)
     }
     this.update({ running: true })
   }

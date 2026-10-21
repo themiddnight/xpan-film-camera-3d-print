@@ -47,7 +47,7 @@ function MechanismRow({ mechanism }: { mechanism: Mechanism }) {
 }
 
 export function MechanismPanel() {
-  const { mechanisms } = useViewer().motion
+  const mechanisms = useViewer().motion.mechanisms.filter(m => !m.internal)
   if (mechanisms.length === 0) return null
   return (
     <section>

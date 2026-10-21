@@ -23,6 +23,10 @@ GLB_UNIT_SCALE = 1000  # export_gltf writes metres; the viewer multiplies back t
 def main() -> int:
     for sub in ("stl", "step", "glb"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
+        # A renamed or removed part must not leave its old file in the print package.
+        for stale in (OUT / sub).iterdir():
+            if stale.stem not in PARTS:
+                stale.unlink()
     manifest = []
     for name, spec in PARTS.items():
         part = spec.build(CAMERA)
