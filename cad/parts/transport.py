@@ -10,7 +10,9 @@ Values chosen here where the docs give a range or nothing (all live in params.py
   presses the nose down. Its face toward the sprocket axis is an arc of 7.0mm about the pivot axis, so the
   lower corner does not swing into the pocket wall as the lever turns. The pivot boss is 5.7mm OD. A 2.4mm spigot under the button end seats the spring.
   The lever prints on its side; the nose and spigot need tiny supports.
-- Release button: 6.6mm cap, 2.5mm tall, with a coin slot for the quarter turn. The cap is as wide as the
+- Release button: a hemispherical nose (Pawl.button_nose_r) on the stem bottom bears on the lever at one point on
+  the button axis, so the straight press and the turning lever stay in contact without the button sinking in.
+  6.6mm cap, 2.5mm tall, with a coin slot for the quarter turn. The cap is as wide as the
   advance knob allows (1.1mm to it). The lug sits so that pressed it is 0.2mm under the ceiling, and a
   quarter turn puts it under the top wall (bayonet hold). Its stem is guided only by the 3mm top wall.
   Nothing retains the button when the camera is upside down.
@@ -32,7 +34,7 @@ Values chosen here where the docs give a range or nothing (all live in params.py
 """
 import math
 
-from build123d import Axis, Box, Cone, Cylinder, GeomType, Location, Part, Polygon, Pos, Rot, Torus, chamfer, extrude, fillet
+from build123d import Axis, Box, Cone, Cylinder, GeomType, Location, Part, Polygon, Pos, Rot, Sphere, Torus, chamfer, extrude, fillet
 
 from params import Camera
 from parts.spec import PartSpec
@@ -180,7 +182,10 @@ def build_release_button(c: Camera) -> Part:
     cap_z0 = button_cap_z0(c)
     cap_z1 = cap_z0 + p.button_cap_h
 
-    stem = chamfer(_cylinder(p.button_d / 2, lever_top, cap_z0 + 0.1).edges().filter_by_position(Axis.Z, lever_top - 0.01, lever_top + 0.01), 0.5)
+    face_z = lever_top + p.button_nose_r
+    stem = chamfer(_cylinder(p.button_d / 2, face_z, cap_z0 + 0.1).edges().filter_by_position(Axis.Z, face_z - 0.01, face_z + 0.01), 0.5)
+    if p.button_nose_r > 0:
+        stem += Pos(0, 0, face_z) * Sphere(p.button_nose_r)
     cap = chamfer(_cylinder(p.button_cap_d / 2, cap_z0, cap_z1).edges().filter_by_position(Axis.Z, cap_z1 - 0.01, cap_z1 + 0.01), 0.5)
     cap -= Pos(0, 0, cap_z1 - p.button_cap_groove_d / 2 + 0.05) * Box(p.button_cap_d + 1, p.button_cap_groove_w, p.button_cap_groove_d + 0.1)
     lug_x0, lug_x1 = p.button_d / 2 - 0.2, p.button_d / 2 + p.button_lug_len

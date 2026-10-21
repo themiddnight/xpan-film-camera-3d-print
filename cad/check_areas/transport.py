@@ -1,7 +1,7 @@
 """Geometry checks for the transport parts: pawl, release button, take-up stack, rewind fork, knobs and rods."""
 import math
 
-from build123d import Axis, Cylinder, Part, Pos, Rot, Vector
+from build123d import Axis, Cylinder, Location, Part, Pos, Rot, Vector
 
 from checklib import check
 import mechanisms
@@ -11,6 +11,8 @@ TRANSPORT_PARTS = list(transport.PARTS)
 INTERFERENCE_MM3 = 0.01  # mirrors checks.INTERFERENCE_TOLERANCE_MM3, which this package cannot import
 SWEEP_STEP_DEG = 0.5
 TOL = 1e-3  # bisection probes are good to about 1e-8; compare with a little slack
+PRESS_STEPS = 16
+CONTACT_MM = 0.2  # the button must stay this close to the lever, or it does not drive it
 STROKE_MARGIN = 0.5
 CEILING_MARGIN = 0.4
 
@@ -109,6 +111,24 @@ def _(c, b):
                 f"drop {ride:.1f}-0 deg: {drop[0]:.3f}mm3 at {drop[1]:.1f} deg")
 
 
+@check("release button drives the pawl without sinking into it the whole press (geometry)")
+def _(c, b):
+    p = c.pawl
+    axis, pivot = mechanisms.pawl_axis(c)
+    lift = transport.pawl_lift_deg(c)
+    pawl, button = b.placed("pawl"), b.placed("release_button")
+    worst_clash, worst_gap = (0.0, 0.0), (0.0, 0.0)
+    for i in range(PRESS_STEPS + 1):
+        v = i / PRESS_STEPS
+        pressed = button.moved(Location((0, 0, -v * p.button_travel)))
+        turned = pawl.rotate(Axis(pivot, axis), v * lift)
+        worst_clash = max(worst_clash, (_overlap(pressed, turned), v))
+        worst_gap = max(worst_gap, (pressed.distance_to(turned), v))
+    ok = worst_clash[0] < INTERFERENCE_MM3 and worst_gap[0] <= CONTACT_MM
+    return ok, (f"press 0-{p.button_travel}mm: worst overlap {worst_clash[0]:.3f}mm3 at {worst_clash[1]:.2f} of the stroke, "
+                f"worst gap {worst_gap[0]:.3f}mm at {worst_gap[1]:.2f}")
+
+
 @check("lifted pawl lever clears the ceiling (geometry)")
 def _(c, b):
     top = _lifted_pawl(c, b).bounding_box().max.Z
@@ -171,7 +191,8 @@ def _(c, b):
 
 @check("release button fits its collar bore (geometry)")
 def _(c, b):
-    stem_d = 2 * _edge(b.local("release_button"), (0, 0, 27.0), (0, 5, 27.0))
+    z = transport.button_cap_z0(c) - 2.0
+    stem_d = 2 * _edge(b.local("release_button"), (0, 0, z), (0, 5, z))
     gap = (c.pawl.button_hole_d - stem_d) / 2
     return c.fit.fdm_clearance - TOL <= gap <= 0.5, f"stem {stem_d:.2f}mm in a {c.pawl.button_hole_d}mm bore, {gap:.2f}mm each side"
 
