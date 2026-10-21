@@ -9,6 +9,7 @@ import math
 from build123d import Rot, Vector
 
 import check_areas  # noqa: F401  registers the per-area checks
+import mechanisms
 from checklib import CHECKS, EPS, Built, Result, check, radial_extent, solid_runs
 from params import CAMERA, Camera
 from parts import PARTS, sprocket
@@ -351,6 +352,54 @@ def _(c, b):
     o = c.optics
     best = 1.9 * math.sqrt(o.pinhole_y * o.wavelength)
     return abs(o.pinhole_d - best) / best < 0.1, f"optimum {best:.3f}mm, f/{o.pinhole_y / o.pinhole_d:.0f}"
+
+
+# Mechanism checks: move the built solids the way the viewer does and probe them.
+
+def _turned(part, axis, origin, deg):
+    """A placed part turned about an axis through origin, as a mechanism drive turns it."""
+    from build123d import Axis as _Axis
+    return part.rotate(_Axis(origin, axis), deg)
+
+
+def _shared_volume(a, b) -> float:
+    shared = a & b
+    return shared.volume if shared is not None else 0.0
+
+
+@check("riding pawl clears the cam face between clicks (geometry)")
+def _(c, b):
+    axis, pivot = mechanisms.pawl_axis(c)
+    pawl = _turned(b.placed("pawl"), axis, pivot, mechanisms.pawl_ride_deg(c))
+    sprocket_axis = ((0, 0, 1), (c.layout.sprocket_x, c.sprocket_y, 0))
+    worst = max(_shared_volume(pawl, _turned(b.placed("sprocket"), sprocket_axis[0], sprocket_axis[1], deg))
+                for deg in (30, 120, 210, 300))
+    return worst < INTERFERENCE_TOLERANCE_MM3, f"ride {mechanisms.pawl_ride_deg(c):.1f} deg, worst overlap {worst:.3f}mm3"
+
+
+LOCK_BACKLASH_FILM_MM = 0.5
+"""Most film travel a locked sprocket may allow; a third of the 1.5mm gap between frames."""
+
+
+@check("locked pawl stops the sprocket within the backlash limit (geometry)")
+def _(c, b):
+    sprocket_axis = ((0, 0, 1), (c.layout.sprocket_x, c.sprocket_y, 0))
+    turn = math.degrees(LOCK_BACKLASH_FILM_MM / (c.pitch_d / 2))
+    hits = [_shared_volume(b.placed("pawl"), _turned(b.placed("sprocket"), *sprocket_axis, sign * turn))
+            for sign in (1, -1)]
+    return min(hits) > INTERFERENCE_TOLERANCE_MM3, f"turned +/-{turn:.1f} deg: overlap {hits[0]:.3f} / {hits[1]:.3f}mm3"
+
+
+@check("frame cycle advances exactly one frame and ends locked")
+def _(c, b):
+    cy = mechanisms.frame_cycle(c)
+    first, last = cy.keys[0].values, cy.keys[-1].values
+    ok = first == {"advance": 0.0, "release": 0.0, "pawl_ride": 0.0} and last == {"advance": 1.0, "release": 0.0, "pawl_ride": 0.0}
+    rising = all(b2.values["advance"] >= a.values["advance"] for a, b2 in zip(cy.keys, cy.keys[1:]))
+    # The button may only be let go once the pocket has left the nose.
+    let_go = next(k for k in cy.keys if k.values["release"] == 0.0 and k.values["pawl_ride"] > 0)
+    clear = let_go.values["advance"] >= mechanisms.advance_fraction_to_clear_pocket(c)
+    return ok and rising and clear, f"{cy.keys[-1].values['advance'] * c.film.advance:.1f}mm, let go at {let_go.values['advance']:.3f} of a turn"
 
 
 def run_checks(c: Camera = CAMERA) -> list[Result]:

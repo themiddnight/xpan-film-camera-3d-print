@@ -8,7 +8,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 
 | # | Part | Qty to buy | Spec | Used for | Search terms | Price |
 |---:|---|---|---|---|---|---|
-| 1 | Stainless 304 round rod | 1m (or 2 x 500mm) | Ø3.0mm, cut to length | Sprocket pin 60mm, rewind shaft 27mm, take-up drive shaft 70mm, pawl pivot 15mm, cover hinge pin 171mm, body latch pin 48mm, shutter lock pin 20mm (about 410mm total) | "เพลาสแตนเลส 304 3 มิล", "stainless rod 3mm" | ฿35-115 (seen, varies by length) |
+| 1 | Stainless 304 round rod | 1m (or 2 x 500mm) | Ø3.0mm, cut to length | Sprocket pin 60mm, rewind shaft 21mm, take-up drive shaft 70mm, pawl pivot 15mm, cover hinge pin 171mm, body latch pin 48mm, shutter lock pin 20mm (about 404mm total) | "เพลาสแตนเลส 304 3 มิล", "stainless rod 3mm" | ฿35-115 (seen, varies by length) |
 | 2 | M42 body cap + rear lens cap pair | 2 pairs (one spare) | M42 x 1, plastic | Rear cap = body female mount; body cap = pinhole module base | "M42 body cap", "ฝาปิดท้ายเลนส์ M42" | ฿39-50 per pair (seen) |
 | 3 | Brass shim | 1 sheet | 0.05mm, about 5 x 5in | Pinhole plate | "แผ่นชิมทองเหลือง 0.05", "brass shim 0.05mm" | ฿95 (seen) |
 | 4 | Aluminium sheet | 1 | 0.5mm, 30 x 30cm, AL1100 | Dark slide (71mm wide in the 72mm slot, about 75mm tall with handle) and shutter blade | "แผ่นอลูมิเนียม 0.5 mm AL1100" | ฿70 (seen) |

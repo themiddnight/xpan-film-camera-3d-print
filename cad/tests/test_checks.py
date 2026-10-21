@@ -73,6 +73,10 @@ SEEDS = {
         replace(CAMERA, body_link=replace(CAMERA.body_link, latch_hook_h=1.2)),
         {"latch hook rises past the pin centre"},
     ),
+    "pocket much wider than the pawl nose (loose lock)": (
+        replace(CAMERA, sprocket=replace(CAMERA.sprocket, notch_w=3.4)),
+        {"locked pawl stops the sprocket within the backlash limit (geometry)"},
+    ),
     "rewind fork with no tower": (
         replace(CAMERA, rewind=replace(CAMERA.rewind, tower_top_inside=28.5)),
         {"rewind fork lifts inside the tower"},

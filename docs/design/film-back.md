@@ -615,7 +615,7 @@ The S path winds the take-up roll emulsion-out, against the curl the film has fr
 | Bottom locator | 7mm recess for the spool stub |
 | Rewind tower | Hollow boss over the cassette axis, 7.6mm inside diameter, from the top wall up to Z = +37 (inside top), 2.0mm walls, closed top with a 3.3mm bushing bore |
 | Rewind fork | 7mm OD, 2.6mm slot, 4.5mm deep (**measure** the spool key); engaged it spans Z = +22.5 to +28.2, lifted 8mm it sits inside the tower (top at +36.2, 0.8mm under the tower top) |
-| Rewind shaft | 3.0mm steel pin, 27mm (fork bottom at Z = +22.5 to knob top at about +49.5) |
+| Rewind shaft | 3.0mm steel pin, 21mm (Z = +27.2 to +48.2). It stops at the roof of the fork's 2.6mm slot, since a 3.0mm rod cannot pass the slot. Revised in phase 3 (2026-10-22) from 27mm |
 | Rewind knob | 20mm OD, 10mm tall, knurled, on top of the tower; lifts 8mm. An O-ring on the shaft sits in a 4.8mm counterbore in the tower top and holds the knob up by friction |
 | Film throat | 0.6mm slot at the chamber exit, velvet on both lands |
 
@@ -645,7 +645,7 @@ The S path winds the take-up roll emulsion-out, against the curl the film has fr
 | Spool core | 16mm OD with a 1.0 x 20mm leader slot |
 | Spool flanges | 26mm OD, 1.2mm thick, 35.6mm apart |
 | Wound roll | 24mm max at 20 frames (estimate: 1.5m x 0.13mm) |
-| Drive shaft | 3.0mm steel pin, 70mm (floor at Z = -30 to a flush knob top at about +42), turns in top and bottom bushings |
+| Drive shaft | 3.0mm steel pin, 70mm, Z = -28.8 to +41.2: it turns in a top bushing and a blind floor hole that leaves 1.2mm of floor, since the clutch spring pushes it down. 70mm cannot span the full -30 to +42. Revised in phase 3 (2026-10-22) |
 | Clutch | Drive collar fixed to the shaft, felt washer, spool free on the shaft, coaxial compression spring of 5mm OD (inside diameter over 3.2mm) for preload (**tune**) |
 | Advance knob | 26mm OD, 10mm tall, knurled, fixed to the shaft with epoxy on a filed flat |
 

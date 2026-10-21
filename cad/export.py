@@ -54,11 +54,13 @@ def main() -> int:
             "size_mm": [round(bb.size.X, 2), round(bb.size.Y, 2), round(bb.size.Z, 2)],
         })
         print(f"{name}: {part.volume:.0f} mm3, {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm")
+    mechanisms, cycles = manifest_entries(CAMERA, set(PARTS))
     (OUT / "manifest.json").write_text(json.dumps({
         "glb_unit_scale": GLB_UNIT_SCALE,
         "film_advance_mm": CAMERA.film.advance,
         "parts": manifest,
-        "mechanisms": manifest_entries(CAMERA, set(PARTS)),
+        "mechanisms": mechanisms,
+        "cycles": cycles,
     }, indent=2))
     return 0
 
