@@ -215,6 +215,13 @@ class Pawl:
     button_cap_gap: float = 0.5       # pressed, the cap underside stays this far above the shell top
     button_cap_groove_w: float = 1.0  # fingernail or coin slot across the cap, for the quarter turn
     button_cap_groove_d: float = 0.6
+    # The button bears on the lever through a hemispherical nose centred on its axis, so contact is one
+    # point at button_arm. A flat face would touch at its inner edge first, because the lever turns about
+    # the pivot while the button slides straight down. The pressed contact point is tangent to the lever
+    # top at exactly 1.5 (the lever top sits 1.0 above the pivot axis, the button end 6.0 along it); a
+    # slightly smaller radius leaves a gap under 0.01mm instead of a tangent clash. The stem face around
+    # the nose is relieved by this radius, which also clears the lever top under the stem edge pressed.
+    button_nose_r: float = 1.4
     # Lug underside at rest. Pressed 2.5mm, the lug top sits 0.2mm under the ceiling (Z=28.5), so a
     # quarter turn puts it under the top wall and the spring holds the button down (bayonet).
     # The shell's slot for it is a vertical leg through the top wall (28.5 to 31.5), open underneath.
