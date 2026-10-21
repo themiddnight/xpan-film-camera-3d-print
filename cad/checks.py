@@ -84,10 +84,51 @@ def _(c, b):
     return gap >= 1.0 - EPS, f"largest radius {radius:.2f}mm, gap {gap:.2f}mm"
 
 
-@check("sprocket fits the print bed (geometry)")
+# Assembly checks over every registered part.
+
+@check("every printed part fits the print bed (geometry)")
 def _(c, b):
-    size = (Rot(*PARTS["sprocket"].print_rotation) * b.sprocket).bounding_box().size
-    return max(size.X, size.Y) <= c.print.bed, f"{size.X:.1f} x {size.Y:.1f}mm footprint"
+    too_big = []
+    for name, spec in PARTS.items():
+        if spec.print_rotation is None:
+            continue
+        size = (Rot(*spec.print_rotation) * b.local(name)).bounding_box().size
+        if max(size.X, size.Y) > c.print.bed:
+            too_big.append(f"{name} {size.X:.1f} x {size.Y:.1f}")
+    printed = sum(spec.kind == "printed" for spec in PARTS.values())
+    return not too_big, f"{printed} printed parts within {c.print.bed:.0f}mm" if not too_big else "; ".join(too_big)
+
+
+INTERFERENCE_TOLERANCE_MM3 = 0.01
+"""Overlap below this is tessellation noise or a touching face, not a clash."""
+
+INTENDED_OVERLAPS: dict[frozenset[str], str] = {}
+"""Pairs that overlap on purpose (press fits), with the reason."""
+
+
+def overlaps(b: Built) -> list[tuple[str, str, float]]:
+    """Every pair of placed parts whose solids share volume, largest first."""
+    names = sorted(PARTS)
+    placed = {n: b.placed(n) for n in names}
+    boxes = {n: p.bounding_box() for n, p in placed.items()}
+    found = []
+    for i, a in enumerate(names):
+        for other in names[i + 1:]:
+            if not boxes[a].overlaps(boxes[other]):
+                continue
+            shared = placed[a] & placed[other]
+            volume = shared.volume if shared is not None else 0.0
+            if volume > INTERFERENCE_TOLERANCE_MM3:
+                found.append((a, other, volume))
+    return sorted(found, key=lambda t: -t[2])
+
+
+@check("no parts overlap except named press fits (geometry)")
+def _(c, b):
+    clashes = [(a, o, v) for a, o, v in overlaps(b) if frozenset((a, o)) not in INTENDED_OVERLAPS]
+    if not clashes:
+        return True, f"{len(PARTS)} parts, {len(INTENDED_OVERLAPS)} named press fits"
+    return False, "; ".join(f"{a} x {o} {v:.2f}mm3" for a, o, v in clashes[:8])
 
 
 def _polar(r: float, angle_deg: float, z: float) -> Vector:
