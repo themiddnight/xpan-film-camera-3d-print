@@ -531,14 +531,14 @@ Post-processing:
 | Chamber depth | Set by the cassette and the forward-mounted sprocket; see section 17 |
 | Release button details | Section 17, plus the quarter-turn rewind hold in section 6 |
 | Rear cover latch | Two turn-buttons on M3 screws |
-| Body latch spring | Printed PETG cantilever hook on a 3mm steel pin; strain about 1.1% |
+| Body latch spring | Printed PETG cantilever hook on a 3mm steel pin; strain about 1.7% |
 | Dark slide material | 0.5mm aluminum, painted matte black |
 
 ---
 
 ## 17. Modeling Parameters (v02 baseline)
 
-Single values for CAD. Every value becomes a named parameter in `cad/params.py`. Values marked **tune** depend on the printer and get a test coupon in the print package. Values marked **measure** come from a real cassette or bought part and must be checked with calipers before phase 3. `tools/check_layout.py` recomputes the derived values.
+Single values for CAD. Every value becomes a named parameter in `cad/params.py`. Values marked **tune** depend on the printer and get a test coupon in the print package. Values marked **measure** come from a real cassette or bought part and must be checked with calipers before phase 3. `cad/checks.py` recomputes the derived values.
 
 ### 17.1 Origin and film
 
@@ -629,14 +629,14 @@ The S path winds the take-up roll emulsion-out, against the curl the film has fr
 | Teeth | 14, on the lower perforation row centred at Z = -14.09 |
 | Tooth size | 1.4mm along travel at the root, 2.0mm across, 0.7mm above the hub, flanks tapered to 1.0mm at the tip, 0.25mm tip fillet (**tune**). A 0.9mm parallel tooth would drag on the trailing perforation edge as it leaves the film |
 | Flanges | 23mm OD, 1.0mm thick, 35.4mm apart |
-| Cam disc | 17mm OD, 3mm thick, Z = +20 to +23 (1.3mm above the top flange). One face notch in the top face, 2.2mm wide, 1.8mm deep, centred at 6.5mm radius, aligned with a tooth gap |
+| Cam disc | 17mm OD, 3mm thick, Z = +20 to +23 (1.3mm above the top flange). One closed pocket in the top face, 2.2mm wide (tangential) x 2.4mm long (radial), 1.8mm deep, centred at 6.0mm radius so 1.3mm of rim stays outside it, aligned with a tooth gap. In the assembled pose the part is turned so the pocket sits under the pawl tip |
 | Top hub | 8mm OD through an 8.4mm collar in the top wall, index dot on top, closed top |
 | Pin | 3.0mm steel, 60mm, pressed into a bottom boss, part spins on it |
 | Bore clearance | 3.30mm bore on a 3.0mm pin (**tune**) |
-| Pawl | Lever 12mm long, 2.0mm thick, pivot in the middle on a horizontal 3.0mm pin 15mm long, tip 1.8mm wide over the face notch. In plan it runs at 45 degrees toward +X/+Y: tip at (59.6, 15.1), pivot (63.8, 19.4), button end (68.1, 23.6). That keeps the button 17mm from the take-up axis, clear of the 26mm advance knob, and inside the chamber front wall |
+| Pawl | Lever 12mm long, 2.0mm thick, pivot in the middle on a horizontal 3.0mm pin 15mm long, tip 1.8mm wide over the notch pocket. In plan it runs at 45 degrees toward +X/+Y from the sprocket axis: tip at (59.2, 14.8), pivot (63.5, 19.0), button end (67.7, 23.2). That keeps the button 17mm from the take-up axis, clear of the 26mm advance knob, and inside the chamber front wall |
 | Pawl height | Lever body Z = +23.2 to +25.2 at rest, +25.7 to +27.7 lifted; 0.8mm under the 28.5 ceiling |
 | Pawl spring | 0.3mm wire, 3-4mm OD compression spring, about 8mm free; target 1-2N on the tip at working length (**tune**). A 0.4mm-wire spring this short is about 3N/mm (estimate), too stiff for a 2mm PETG lever |
-| Release button | 6mm OD at (68.1, 23.6), presses the far end of the pawl, 2.5mm travel (lifts the tip 2.5mm over a 1.8mm notch), quarter-turn L-slot hold for rewind |
+| Release button | 6mm OD at (67.7, 23.2), presses the far end of the pawl, 2.5mm travel (lifts the tip 2.5mm over a 1.8mm notch), quarter-turn L-slot hold for rewind |
 
 ### 17.7 Take-up and advance
 

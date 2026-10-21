@@ -63,6 +63,21 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 - Whatever the tool, models stay parametric: named variables at the top, no magic numbers.
 - **Blender** — visualization or organic shapes only; secondary tool.
 
+### Working with the CAD
+
+Run these from the repository root. `uv sync` installs build123d into `.venv` (Python 3.12).
+
+| Command | What it does |
+|---|---|
+| `uv run python cad/export.py` | Builds every part in `cad/parts/`, writes `out/stl` (print orientation), `out/step` and `out/glb` (camera coordinates) and `out/manifest.json` |
+| `uv run python cad/checks.py` | Layout checks from `cad/params.py` plus geometry checks on the built solids; exit 1 on any failure |
+| `uv run python cad/test_checks.py` | Seeds known design errors and proves the checks catch each one |
+| `python3 -m http.server 8642` then open `http://localhost:8642/viewer/` | three.js viewer: part toggles, ghosting, section planes, exploded view, sprocket rotation |
+
+- Every dimension lives in `cad/params.py`. `Fit` holds printer-dependent values; `Measured` holds values to confirm on bought parts. Do not put numbers in part files.
+- Register each new part in `cad/parts/__init__.py` and add geometry checks for anything a part must get right.
+- `out/` is generated and gitignored until the final print package.
+
 ---
 
 ## Design Document

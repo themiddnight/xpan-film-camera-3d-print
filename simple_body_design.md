@@ -79,7 +79,7 @@ Same origin and axes as [film_back_design.md](film_back_design.md) section 17: f
 | Rear face (contacts the film-back datum) | Y = +4.20 |
 | Rear footprint | X = +/-39, Z = -29.0 to +26.5 (1mm inside the bridge span and the shell bottom; the top stays below the film-back hook) |
 | Top tongue | 1.4mm thick (Y = +4.5 to +5.9), rises to Z = +29.7 inside the film-back hook slot, X = +/-34; 0.3mm clearance each side |
-| Bottom latch | A notch in the body's rear-bottom corner (Z = -29 to -21, Y = +4.2 to +13, X = +/-25) clears the film-back lugs and pin. A PETG cantilever 18mm long, 2.0mm thick, 8mm wide runs along the notch floor (Z = -29 to -27) from Y = +29 back to its free end at Y = +10. A 1.2mm hook on the free end rises in front of the pin, and its rear face bears on the pin's front, so the body cannot pull away from the datum (strain about 1.1%). While the body swings in, the hook ramps over the pin and the cantilever flexes 1.2mm downward, below the body bottom. Press the free end down to release |
+| Bottom latch | A notch in the body's rear-bottom corner (Z = -29 to -21, Y = +4.2 to +13, X = +/-25) clears the film-back lugs and pin. A PETG cantilever 18mm long, 2.0mm thick, 8mm wide runs along the notch floor (Z = -29 to -27) from Y = +29 back to its free end at Y = +10. A 1.8mm hook on the free end rises 0.3mm past the pin centre, and its rear face bears on the pin's front, so the body cannot pull away from the datum (strain about 1.7%, within PETG's range for an occasional snap). While the body swings in, the hook ramps over the pin and the cantilever flexes 1.8mm downward, below the body bottom. Press the free end down to release |
 | Walls | 2.5mm |
 | Chamber at the rear | 69 x 28mm inside, tapering to the M42 bore at the front |
 | Baffle ribs | Three, 1.5mm thick, at Y = +15, +27, +39, openings 1mm outside the image cone |
@@ -105,6 +105,6 @@ Neither cap's dimensions are published. Buy the pair and measure before phase 4:
 | Body cap flange OD | 53mm |
 | Body cap stack, female seat face to pinhole plane | 2.0mm |
 
-The female seat face sits at Y = 50.0 minus the measured cap stack (48.0 nominal). A printed shim ring under the glued ring absorbs a measured difference, so the 50.0 +/-0.3mm pinhole distance does not depend on cap tolerances. The 36mm bore lies within 10mm behind the pinhole, and the corner rays need only 7mm radius there (`tools/check_layout.py`).
+The female seat face sits at Y = 50.0 minus the measured cap stack (48.0 nominal). A printed shim ring under the glued ring absorbs a measured difference, so the 50.0 +/-0.3mm pinhole distance does not depend on cap tolerances. The 36mm bore lies within 10mm behind the pinhole, and the corner rays need only 7mm radius there (`cad/checks.py`).
 
 Do not buy T-mount/T2 parts by mistake. T2 is also 42mm but has a 0.75mm pitch; check for "x1" or "SLR" in the listing.
