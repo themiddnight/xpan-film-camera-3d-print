@@ -83,4 +83,37 @@ SEEDS: dict = {
         replace(C, shell=replace(C.shell, pad_foam=2.5)),
         {"pressure pad squeeze and coverage (geometry)"},
     ),
+    "dark slide keeps its 28mm carry handle": (
+        replace(C, cover=replace(C.cover, slide_top_z=60.0)),
+        {"dark slide pull tab is a pinch grip, low over the cover lip (geometry)"},
+    ),
+    "pull tab narrower than a fingertip": (
+        replace(C, cover=replace(C.cover, handle_w=12.0)),
+        {"dark slide pull tab is a pinch grip, low over the cover lip (geometry)"},
+    ),
+    "holder channel no deeper than the slide": (
+        replace(C, cover=replace(C.cover, holder_gap=0.5)),
+        {"stowed dark slide fits its holder with clearance and is held (geometry)"},
+    ),
+    "holder bumps too low to touch the slide": (
+        replace(C, cover=replace(C.cover, holder_bump_h=0.25)),
+        {"stowed dark slide fits its holder with clearance and is held (geometry)"},
+    ),
+    "stowed slide's tab stands over the cover top": (
+        replace(C, cover=replace(C.cover, stowed_bottom_z=-20.0)),
+        {"stowed dark slide and its holder clear everything, cover closed and swung open (geometry)"},
+    ),
+    "holder over the eye line where the face rests": (
+        replace(C, cover=replace(C.cover, holder_x=30.0)),
+        {"stowed dark slide and its holder clear everything, cover closed and swung open (geometry)"},
+    ),
+    "holder hung below the tripod seat": (
+        replace(C, cover=replace(C.cover, stowed_bottom_z=-40.0)),
+        {"stowed dark slide and its holder clear everything, cover closed and swung open (geometry)",
+         "tripod seat is the lowest plane, plate-clear of the hinge knuckles (geometry)"},
+    ),
+    "cover swings far enough to drive the stowed slide into the body's feet": (
+        replace(C, cover=replace(C.cover, open_deg=200.0)),
+        {"stowed dark slide and its holder clear everything, cover closed and swung open (geometry)"},
+    ),
 }

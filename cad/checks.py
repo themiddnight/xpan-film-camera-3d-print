@@ -462,6 +462,9 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
     "pawl_ride": {
         frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's sideways arc; a straight tube cannot",
     },
+    "slide_stow": {
+        frozenset(("dark_slide", "slide_holder")): "the holder's sprung bumps press 0.3mm into the slide; the shell check bounds it",
+    },
 }
 """Pairs a mechanism may overlap while moving, per mechanism, with the reason."""
 

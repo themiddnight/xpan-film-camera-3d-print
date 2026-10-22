@@ -111,6 +111,23 @@ def dark_slide_pull(c: Camera) -> float:
     return c.shell.z_max - bottom + 3.0
 
 
+SLIDE_OVER_COVER = 3.0
+"""Carried to the cover, the slide's bottom edge passes this far over the cover top."""
+
+
+def dark_slide_stow_drop(c: Camera) -> float:
+    """Straight drop from just over the cover top into the holder, onto its stop bar."""
+    return shell.lip_top(c) + SLIDE_OVER_COVER - c.cover.stowed_bottom_z
+
+
+def dark_slide_carry(c: Camera) -> tuple[Vec, float]:
+    """Unit direction and length of the jump from the pulled slide to just over its holder on the cover."""
+    dx, dy, dz = shell.stowed_slide_shift(c)
+    dz += dark_slide_stow_drop(c) - dark_slide_pull(c)
+    length = math.sqrt(dx * dx + dy * dy + dz * dz)
+    return (dx / length, dy / length, dz / length), length
+
+
 def pawl_spring_squeeze(c: Camera, lever_deg: float) -> float:
     """Length-factor change of the pawl spring when the lever turns by lever_deg (button end goes down)."""
     length = transport.lever_z(c)[0] - c.pawl.spring_shelf_z
@@ -179,7 +196,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             "cover", "Open rear cover",
             # About +X, a positive turn swings the cover's top backward (-Y), away from the shell.
             tuple(Drive(p, "rotate", (1.0, 0.0, 0.0), c.cover.open_deg, (0.0, c.cover.hinge_axis_y, c.cover.hinge_axis_z))
-                  for p in ("rear_cover", "pressure_pad")),
+                  for p in ("rear_cover", "pressure_pad", "slide_holder")),
             Readout(c.cover.open_deg, "deg open"),
             requires=(("turn_buttons", 1.0),),
         ),
@@ -187,6 +204,20 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             "dark_slide", "Pull dark slide",
             (Drive("dark_slide", "slide", UP, dark_slide_pull(c)),),
             Readout(dark_slide_pull(c), "mm pulled"),
+        ),
+        Mechanism(
+            # The hand lifts the pulled slide over the top hardware. The viewer shows that as a jump, set by
+            # the stow slider's requires, and animates only the drop into the holder.
+            "slide_carry", "Carry dark slide over the cover",
+            (Drive("dark_slide", "slide", *dark_slide_carry(c)),),
+            internal=True,
+            requires=(("dark_slide", 1.0),),
+        ),
+        Mechanism(
+            "slide_stow", "Stow dark slide on the cover",
+            (Drive("dark_slide", "slide", DOWN, dark_slide_stow_drop(c)),),
+            Readout(dark_slide_stow_drop(c), "mm into the holder"),
+            requires=(("dark_slide", 1.0), ("slide_carry", 1.0)),
         ),
         Mechanism(
             "rewind", "Lift rewind knob",
@@ -267,7 +298,8 @@ def frame_cycle(c: Camera) -> Cycle:
         count_label="perf",
         per_unit=c.film.advance,
         unit="mm",
-        focus_ghost=("shell", "rear_cover", "pressure_pad", "dark_slide", "turn_button_left", "turn_button_right"),
+        focus_ghost=("shell", "rear_cover", "pressure_pad", "dark_slide", "slide_holder", "turn_button_left",
+                     "turn_button_right"),
         focus_hide=("viewfinder_rear_frame", "viewfinder_front_frame"),
     )
 

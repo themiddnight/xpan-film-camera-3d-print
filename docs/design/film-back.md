@@ -151,8 +151,10 @@ Slot design:
 | Slot width across frame | at least 70mm | 65mm frame plus margins |
 | Slot clearance | 0.8mm for the 0.5mm aluminum sheet | 0.3mm working clearance |
 | Stop | Mechanical stop at bottom | Prevents slide from hitting film path |
-| Handle clearance | Above top surface | Large enough to grab in the dark |
+| Pull tab | 20mm wide, top at Z = +43.0, 3mm corner radius | A pinch grip, not a carry loop. Its top is 8mm over the cover lip (Z = +35.0), which is the highest part behind the tab, and 11.5mm over the shell top. A thumb-and-finger pinch needs about 8mm of tab height and one fingertip pad (about 15mm) of width |
 | Slot plug | Printed 0.5mm tab, 10mm deep, with a grip | Goes into the slot mouth whenever the slide is out (section 17.2) |
+
+The slide is one 71 x 58mm sheet: a 71 x 47mm plate (Z = -15 to +32) and the 20 x 11mm tab cut in one piece with it. The earlier 40mm handle with a 24 x 8mm finger hole stood 28mm over the plate. The tab stays below the advance knob and the rewind knob, so the slide adds no height to the camera.
 
 Light sealing:
 
@@ -160,6 +162,22 @@ Light sealing:
 - Felt at both side edges of the slide path if practical.
 - Matte black paint on metal slide.
 - Optional felt tab near slide tip to block the final gap.
+
+### 5.1 Stowage on the rear cover
+
+A pulled slide is kept on the rear cover's outer face, in a printed holder (`slide_holder`):
+
+| Item | Value | Notes |
+|---|---:|---|
+| Position | Stowed slide centre X = +56.5, bottom edge Z = -28 | Right of the eye line. The rear cover face for 15mm either side of X = 0 stays free, so the nose and brow can rest on it. The holder spans X = +16.5 to +96.5 and Z = -30 to +15, and the stowed tab ends at Z = +30, 5mm under the cover top |
+| Rails | Two side rails, each a 4mm spacer strip under a 1.2mm lip that reaches 4mm in, over a 2mm stop bar | Channel 72 x 0.8mm, like the slot: 0.5mm each side of the slide and 0.3mm behind it. The lips cover 3.5mm of each slide edge. A 0.6mm lead-in on the lip tops |
+| Hold | A sprung finger in each lip, 3.4 x 12mm, root at the bottom, with a 0.6mm bump with 45 degree flanks at its tip | The bump presses the slide 0.3mm onto the cover face (about 0.8N per finger, 0.46% strain at the root). Friction then holds the 4.5g slide upside down and when shaken. The slide edge cams the finger aside as it goes in |
+| Fixing | Glued to the cover with 5-minute epoxy, one 2.5mm peg per rail into a 3.1mm blind hole in the cover | Holes are 1.3mm deep, so 1.2mm of cover stays behind them |
+| Printing | Separate part, lip face down | The cover prints outer face down. Rails printed on that face would need support under the whole cover |
+
+To stow the slide, pull it out of the slot, lift it over the cover top, and drop it into the holder from above until it sits on the stop bar. To take it out, push the tab up with a thumb until the tab clears the cover top, then pinch it.
+
+The holder stands 2.0mm proud of the cover. On a table, the cover with the holder can open to about 72 degrees before the holder touches the table; without the holder this was about 90 degrees. The 100 degree loading angle already needs the camera held up or tilted back (simple-body.md, feet).
 
 ---
 
@@ -474,7 +492,7 @@ Post-processing:
 
 ### Shooting / Advancing
 
-0. Before the first frame: pull the dark slide and push the slot plug into the slot mouth. Reverse this before removing the body.
+0. Before the first frame: pull the dark slide, stow it in its holder on the rear cover (section 5.1), and push the slot plug into the slot mouth. Reverse this before removing the body.
 
 1. Make exposure.
 2. Press release button to lift pawl.
