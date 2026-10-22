@@ -136,7 +136,7 @@ def _baffle(c: Camera, y_front: float, interior: Part) -> tuple[Part, Part]:
     return slab - loft_rects(y_edge - run, hw + run, hh + run, y_edge, hw, hh) - opening, opening
 
 
-def build_body(c: Camera) -> Part:
+def build_pinhole_body(c: Camera) -> Part:
     b, k = c.body, c.body_link
     y0, y1 = c.gate.datum_y, b.front_face_y
     fw = pocket_r(c) + b.wall
@@ -341,7 +341,7 @@ def body_finder_mounts(c: Camera, body: Part) -> Part:
 
 
 PARTS = {
-    "body": PartSpec(build=build_body, place=at_origin, group="body", kind="printed",
+    "pinhole_body": PartSpec(build=build_pinhole_body, place=at_origin, group="body", kind="printed",
                      color="#2b2b2e", print_rotation=(90, 0, 0)),
     "m42_shim_ring": PartSpec(build=build_shim_ring, place=at_origin, group="body", kind="printed",
                               color="#5a5a60", print_rotation=(90, 0, 0)),

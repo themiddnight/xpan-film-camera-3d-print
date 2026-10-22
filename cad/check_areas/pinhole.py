@@ -3,7 +3,7 @@ import math
 
 from build123d import Part, Pos, Vector
 
-from check_areas.body import CONE_MARGIN, _apex_y, _field_cone, _first_run, _hit, _runs
+from check_areas.pinhole_body import CONE_MARGIN, _apex_y, _field_cone, _first_run, _hit, _runs
 from checklib import EPS, check
 from parts import PARTS
 from parts import pinhole as ph

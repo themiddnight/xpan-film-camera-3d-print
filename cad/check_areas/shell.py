@@ -477,7 +477,7 @@ def _(c, b):
             v = _clashes_with(shape.rotate(axis, a), fixed)
             if v > 1e-2:
                 problems.append(f"{a} deg open {name} {v:.2f}mm3")
-    seat = b.placed("body").bounding_box().min.Z
+    seat = b.placed("pinhole_body").bounding_box().min.Z
     boxes = [shape.bounding_box() for shape in mine.values()]
     low = min(bx.min.Z for bx in boxes)
     inside = all(bx.min.X >= s.x_min - EPS and bx.max.X <= s.x_max + EPS and bx.min.Z >= s.z_min - EPS

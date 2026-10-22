@@ -4,7 +4,7 @@ from build123d import Align, Axis, Box, Edge, Part, Pos, Rot, Solid, Vector
 from checklib import EPS, SHOOTING, check, posed
 from params import Camera
 from parts import PARTS
-from parts.body import LEAVES, cheek_x, fold_axis, knuckle_x, leaf, rect_wire
+from parts.pinhole_body import LEAVES, cheek_x, fold_axis, knuckle_x, leaf, rect_wire
 
 CONE_MARGIN = 0.5
 SEAT_TOL = 0.01
@@ -77,7 +77,7 @@ def _(c, b):
     r = (c.optics.m42_thread_d / 2 + c.measured.m42_rear_cap_od / 2) / 2
     start = c.body.m42_floor_y - 1.0
     spans = {n: _first_run(b.placed(n), (0, start, r), (0, 1, 0), 30.0)
-             for n in ("body", "m42_shim_ring", "m42_rear_cap_ring", "m42_body_cap")}
+             for n in ("pinhole_body", "m42_shim_ring", "m42_rear_cap_ring", "m42_body_cap")}
     if None in spans.values():
         return False, f"probe at r={r:.1f} missed {[n for n, s in spans.items() if s is None]}"
     order = list(spans.values())
@@ -92,7 +92,7 @@ def _(c, b):
 def _(c, b):
     r = (c.measured.m42_rear_cap_od / 2 + c.measured.m42_body_cap_od / 2) / 2
     start = c.body.m42_floor_y
-    face = _first_run(b.placed("body"), (0, start, r), (0, 1, 0))
+    face = _first_run(b.placed("pinhole_body"), (0, start, r), (0, 1, 0))
     cap = _first_run(b.placed("m42_body_cap"), (0, start, r), (0, 1, 0))
     gap = cap[0] - face[1]
     return gap >= 0.2 - EPS, f"body front face {gap:.2f}mm behind the cap flange"
@@ -100,7 +100,7 @@ def _(c, b):
 
 @check("baffles clear the image cone by 0.5mm (geometry)")
 def _(c, b):
-    hit = _hit(_image_cone(c, _apex_y(b), CONE_MARGIN), b.placed("body"))
+    hit = _hit(_image_cone(c, _apex_y(b), CONE_MARGIN), b.placed("pinhole_body"))
     return hit < EPS, f"cone from the frame edges to the pinhole, grown {CONE_MARGIN}mm, cuts {hit:.3f} mm3 of body"
 
 
@@ -118,7 +118,7 @@ def _(c, b):
 
 @check("body rear face on the datum, inside the bridge span (geometry)")
 def _(c, b):
-    body = b.placed("body")
+    body = b.placed("pinhole_body")
     bb = body.bounding_box()
     y = c.gate.datum_y
     on_datum = abs(bb.min.Y - y) < SEAT_TOL
@@ -133,7 +133,7 @@ def _(c, b):
 @check("body tongue fits the hook slot with clearance (geometry)")
 def _(c, b):
     k, clr = c.body_link, c.fit.fdm_clearance
-    body = b.placed("body")
+    body = b.placed("pinhole_body")
     z = (k.hook_slot_top_z + c.body.z_max) / 2 + 0.5
     y_run = _first_run(body, (0, k.hook_slot_y[0] - 1, z), (0, 1, 0), 5.0)
     if y_run is None:
@@ -146,7 +146,7 @@ def _(c, b):
 
 @check("latch hook sits behind the pin and rises past its centre (geometry)")
 def _(c, b):
-    k, body = c.body_link, b.placed("body")
+    k, body = c.body_link, b.placed("pinhole_body")
     pin_rear = k.latch_pin_y - c.measured.rod_d / 2
     z = k.latch_cantilever_top_z + 0.5
     run = _first_run(body, (0, c.gate.datum_y - 1, z), (0, 1, 0), 10.0)
@@ -198,14 +198,14 @@ def _seat_patches(body: Part, seat: float) -> list[list[tuple[float, float]]]:
 
 @check("tripod seat is the lowest plane, plate-clear of the hinge knuckles (geometry)")
 def _(c, b):
-    seat = b.placed("body").bounding_box().min.Z
-    z, name = next((z, n) for z, n in _lowest(b) if n != "body")
+    seat = b.placed("pinhole_body").bounding_box().min.Z
+    z, name = next((z, n) for z, n in _lowest(b) if n != "pinhole_body")
     return z - seat >= PLATE_CLEAR - EPS, f"seat Z {seat:.2f}, next lowest {name} at {z:.2f}: {z - seat:.2f}mm clear (need {PLATE_CLEAR})"
 
 
 @check("camera stands level on its three feet, centre of mass inside them (geometry)")
 def _(c, b):
-    body = b.placed("body")
+    body = b.placed("pinhole_body")
     seat = body.bounding_box().min.Z
     patches = _seat_patches(body, seat)
     parts = [(b.placed(n).volume, b.placed(n).center()) for n in PARTS]
@@ -218,7 +218,7 @@ def _(c, b):
 
 @check("a 5mm tripod screw reaches the nut through a clear hole (geometry)")
 def _(c, b):
-    bd, body, nut = c.body, b.placed("body"), b.placed("tripod_nut")
+    bd, body, nut = c.body, b.placed("pinhole_body"), b.placed("tripod_nut")
     seat = body.bounding_box().min.Z
     ring = (bd.nut_bore + bd.nut_af) / 4
     run = _first_run(nut, (ring, bd.tripod_y, seat - 1), (0, 0, 1), 40.0)
@@ -235,20 +235,20 @@ def _(c, b):
 
 def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
     bd, v = c.body, c.viewfinder
-    from parts.body import nut_z0
+    from parts.pinhole_body import nut_z0
     nut_top = nut_z0(c) + bd.nut_t + bd.nut_clearance
     pocket = (bd.m42_floor_y + bd.front_face_y) / 2
-    rays = [("body", f"side wall Y{y:.0f}", (0, y, 0), (1, 0, 0)) for y in (c.gate.datum_y + 1, 30.0)]
-    rays += [("body", f"{n} wall", (0, c.gate.datum_y + 3, 0), (0, 0, s)) for n, s in (("top", 1), ("bottom", -1))]
-    rays += [("body", f"M42 pocket wall {n}", (0, pocket, 0), d) for n, d in (("X", (1, 0, 0)), ("top", (0, 0, 1)), ("bottom", (0, 0, -1)))]
-    rays += [("body", "M42 pocket wall at the front face", (0, bd.front_face_y - 0.1, 0), (1, 0, 0))]
+    rays = [("pinhole_body", f"side wall Y{y:.0f}", (0, y, 0), (1, 0, 0)) for y in (c.gate.datum_y + 1, 30.0)]
+    rays += [("pinhole_body", f"{n} wall", (0, c.gate.datum_y + 3, 0), (0, 0, s)) for n, s in (("top", 1), ("bottom", -1))]
+    rays += [("pinhole_body", f"M42 pocket wall {n}", (0, pocket, 0), d) for n, d in (("X", (1, 0, 0)), ("top", (0, 0, 1)), ("bottom", (0, 0, -1)))]
+    rays += [("pinhole_body", "M42 pocket wall at the front face", (0, bd.front_face_y - 0.1, 0), (1, 0, 0))]
     rays += [
-        ("body", "nut pocket to boss front", (0, bd.tripod_y, nut_top - 0.05), (0, 1, 0)),
-        ("body", "nut pocket corner to boss side", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (-1, 0, 0)),
-        ("body", "nut pocket to latch slot at the nut", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (0, -1, 0)),
-        ("body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
-        ("body", "screw hole to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
-        ("body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
+        ("pinhole_body", "nut pocket to boss front", (0, bd.tripod_y, nut_top - 0.05), (0, 1, 0)),
+        ("pinhole_body", "nut pocket corner to boss side", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (-1, 0, 0)),
+        ("pinhole_body", "nut pocket to latch slot at the nut", (0, bd.tripod_y, nut_z0(c) + bd.nut_t / 2), (0, -1, 0)),
+        ("pinhole_body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
+        ("pinhole_body", "screw hole to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
+        ("pinhole_body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
     ]
     for which in LEAVES:
         lf = leaf(c, which)
@@ -337,7 +337,7 @@ def _(c, b):
 
 @check("finder stays ahead of the body rear face, eye point on the rear cover (geometry)")
 def _(c, b):
-    rear_face = b.placed("body").bounding_box().min.Y
+    rear_face = b.placed("pinhole_body").bounding_box().min.Y
     back = min(b.placed(n).bounding_box().min.Y for n in FINDER)
     fd = _finder(c, b)
     eye = (fd["eye_x"] + fd["eye_z"]) / 2
@@ -403,7 +403,7 @@ def _clashes(b, shapes: dict[str, Part], allowed: dict[frozenset, float]) -> lis
 
 @check("folded finder lies inside the body top outline and under the height limit (geometry)")
 def _(c, b):
-    body = b.placed("body")
+    body = b.placed("pinhole_body")
     top = c.body.z_max
     bb = body.bounding_box()
     shapes = {n: b.placed(n) for n in FINDER} | _folded(c, b)

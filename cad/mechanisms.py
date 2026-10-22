@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from params import Camera
-from parts import PARTS, body, pinhole, shell, transport
+from parts import PARTS, pinhole, pinhole_body, shell, transport
 
 Vec = tuple[float, float, float]
 
@@ -237,12 +237,12 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
         Mechanism(
             "finder_rear", "Fold rear sight",
             (Drive("viewfinder_rear_frame", "rotate", *_fold(c, "rear")),),
-            Readout(abs(body.leaf(c, "rear").fold), "deg folded"),
+            Readout(abs(pinhole_body.leaf(c, "rear").fold), "deg folded"),
         ),
         Mechanism(
             "finder_front", "Fold front finder frame",
             (Drive("viewfinder_front_frame", "rotate", *_fold(c, "front")),),
-            Readout(abs(body.leaf(c, "front").fold), "deg folded"),
+            Readout(abs(pinhole_body.leaf(c, "front").fold), "deg folded"),
             # The front frame folds back over the rear sight, so the sight lies down first.
             requires=(("finder_rear", 1.0),),
         ),
@@ -263,8 +263,8 @@ def _hook_pivot(c: Camera) -> Vec:
 
 
 def _fold(c: Camera, which: str) -> tuple[Vec, float, Vec]:
-    axis, origin = body.fold_axis(c, which)
-    return axis, body.leaf(c, which).fold, origin
+    axis, origin = pinhole_body.fold_axis(c, which)
+    return axis, pinhole_body.leaf(c, which).fold, origin
 
 
 def frame_cycle(c: Camera) -> Cycle:

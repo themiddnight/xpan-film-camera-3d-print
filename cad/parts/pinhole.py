@@ -39,7 +39,7 @@ from typing import Literal
 from build123d import Face, Part, Pos, Rot, Sphere, Wire, extrude
 
 from params import Camera
-from parts.body import box, ring_seat_y, ycyl
+from parts.pinhole_body import box, ring_seat_y, ycyl
 from parts.spec import PartSpec, at_origin
 
 ARC_STEPS = 24

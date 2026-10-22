@@ -409,7 +409,7 @@ class Cover:
 
 @dataclass(frozen=True)
 class Body:
-    """Simple 50mm body (simple-body.md 7-8). Owned by cad/parts/body.py."""
+    """Simple 50mm body (simple-body.md 7-8). Owned by cad/parts/pinhole_body.py."""
     rear_half_w: float = 39.0         # rear footprint X = +/-39, 1mm inside the bridge span
     z_min: float = -29.0
     z_max: float = 26.5
@@ -450,7 +450,7 @@ class Body:
 
 @dataclass(frozen=True)
 class Viewfinder:
-    """Front frame and optional rear sight on the body top (simple-body.md 5 and 7). Owned by cad/parts/body.py.
+    """Front frame and optional rear sight on the body top (simple-body.md 5 and 7). Owned by cad/parts/pinhole_body.py.
 
     The eye point is the rear cover's outer face, Y -4.73: you frame with the camera against your face.
     Each window has the 65:24 shape, sized width = 1.3 x (window plane - eye), the field of the 65 x 24
