@@ -1,7 +1,7 @@
 """Geometry checks for the film-back shell, rear cover, turn buttons and their bought parts."""
 import math
 
-from build123d import Axis, Part, Rot, Vector
+from build123d import Axis, Part, Pos, Rot, Vector
 
 import mechanisms
 from checklib import EPS, check
@@ -375,3 +375,120 @@ def _(c, b):
     on_rails = pad.max.Z >= g.rail_z - g.rail_w / 2 + 0.2 and pad.max.Z <= g.fence_gap / 2 - 0.3
     ok = abs(squeeze - c.fit.pad_squeeze) < 0.02 and abs(pad.max.Y + f.thickness) < 0.01 and on_rails
     return ok, f"cover face Y {cover_face:.2f}, {space:.2f}mm for a {s.pad_sheet + s.pad_foam:.2f}mm pad, squeeze {squeeze:.2f}, pad Z +/-{pad.max.Z:.1f}"
+
+
+PINCH_MIN_H, PINCH_MAX_H = 8.0, 10.0
+"""Tab height a thumb-and-finger pinch needs above whatever stands behind it, and the most worth carrying."""
+PINCH_MIN_W = 15.0
+"""About one fingertip pad."""
+FACE_REST_HALF_W, FACE_REST_Z0 = 15.0, 0.0
+"""Rear cover face kept free either side of the eye line, from this height to the top, for nose and brow."""
+SEAT_CLEAR = 0.5
+"""Mirrors the body area's tripod plate clearance under every part but the feet."""
+
+
+def _stowed_slide(c: Camera, b) -> Part:
+    """The dark slide moved the way the viewer moves it: pulled, carried over the cover, dropped into the holder."""
+    shape = b.placed("dark_slide")
+    for m in mechanisms.mechanisms(c):
+        if m.id in ("dark_slide", "slide_carry", "slide_stow"):
+            for d in m.drives:
+                shape = Pos(*(a * d.amount for a in d.axis)) * shape
+    return shape
+
+
+def _clashes_with(shape: Part, others: list[Part]) -> float:
+    box = shape.bounding_box()
+    worst = 0.0
+    for o in others:
+        if _boxes_meet(o.bounding_box(), box.min.X, box.max.X, box.min.Y, box.max.Y, box.min.Z, box.max.Z):
+            worst = max(worst, (shape & o).volume)
+    return worst
+
+
+@check("dark slide pull tab is a pinch grip, low over the cover lip (geometry)")
+def _(c, b):
+    slide = b.local("dark_slide")
+    top = slide.bounding_box().max.Z
+    height = top - sh.lip_top(c)
+    mid = Vector(0, sh.slot_mid_y(c), sh.lip_top(c) + height / 2)
+    width = _edge(slide, mid, X, 0, 40, step=0.5) + _edge(slide, mid, -X, 0, 40, step=0.5)
+    ok = PINCH_MIN_H - EPS <= height <= PINCH_MAX_H + EPS and width >= PINCH_MIN_W
+    return ok, (f"tab {width:.1f}mm wide (need {PINCH_MIN_W}), top Z {top:.1f}: {height:.1f}mm over the cover lip "
+                f"(pinch {PINCH_MIN_H}-{PINCH_MAX_H}), {top - c.shell.z_max:.1f}mm over the shell top")
+
+
+@check("stowed dark slide fits its holder with clearance and is held (geometry)")
+def _(c, b):
+    cv = c.cover
+    holder, cover, slide = b.local("slide_holder"), b.local("rear_cover"), _stowed_slide(c, b)
+    sb = slide.bounding_box()
+    y_cover = sh.cover_outer_y(c)
+    y_mid = y_cover - cv.holder_gap / 2
+    z_rail = cv.holder_top_z - 3
+    rail = Vector(cv.holder_x + sh.holder_channel_x(c) - 1, y_mid, z_rail)
+    gap = _edge(holder, rail, -Y, 0, 2) + _edge(cover, rail, Y, 0, 2)
+    play = gap - cv.slide_t
+    centre = Vector(cv.holder_x, y_mid, z_rail)
+    sides = (centre.X + _edge(holder, centre, X, 0, 45, step=1) - sb.max.X,
+             sb.min.X - (centre.X - _edge(holder, centre, -X, 0, 45, step=1)))
+    lip = Vector(cv.holder_x, y_cover - cv.holder_gap - cv.holder_lip_t / 2, z_rail)
+    engage = min(sb.max.X - (lip.X + _edge(holder, lip, X, 0, 45, step=1)),
+                 lip.X - _edge(holder, lip, -X, 0, 45, step=1) - sb.min.X)
+    stop = Vector(cv.holder_x, y_mid, 0)
+    bar_top = stop.Z - _edge(holder, stop, -Z, 0, 40, step=1)
+    on_cover = abs(sb.max.Y - y_cover) < 0.01
+    # Held: each finger's bump reaches past the slide's rear face, and the finger flexes within PETG's range.
+    f0, f1 = sh.holder_finger_x(c)
+    bump_z = cv.holder_finger_root_z + cv.holder_finger_len - cv.holder_bump_len / 2
+    squeeze = []
+    for sgn in (-1, 1):
+        p = Vector(cv.holder_x + sgn * (f0 + f1) / 2, y_cover - 0.01, bump_z)
+        crest = p.Y - _edge(holder, p, -Y, 0, 2, step=0.05)
+        squeeze.append(crest - sb.min.Y)
+    slot_open = not holder.is_inside(Vector(cv.holder_x + f1 + cv.holder_finger_slot / 2,
+                                            y_cover - cv.holder_gap - cv.holder_lip_t / 2, bump_z))
+    pressed = (slide & holder).volume
+    arm = bump_z - cv.holder_finger_root_z
+    strain = 3 * cv.holder_lip_t * max(squeeze) / (2 * arm * arm)
+    held = all(0.15 <= s <= 0.45 for s in squeeze) and slot_open and pressed > 0.1 and strain <= 0.01
+    ok = (0.2 <= play <= 0.4 and all(0.3 <= s <= 0.7 for s in sides) and engage >= 2.5
+          and abs(sb.min.Z - bar_top) < 0.01 and on_cover and held)
+    return ok, (f"channel {gap:.2f}mm ({play:.2f} play), sides {sides[0]:.2f}/{sides[1]:.2f}, lips over the edges "
+                f"{engage:.2f}mm, slide bottom {sb.min.Z:.2f} on the bar at {bar_top:.2f}, on the cover {on_cover}; "
+                f"fingers press {squeeze[0]:.2f}/{squeeze[1]:.2f}mm ({pressed:.2f}mm3), slot open {slot_open}, "
+                f"root strain {strain:.2%}")
+
+
+@check("stowed dark slide and its holder clear everything, cover closed and swung open (geometry)")
+def _(c, b):
+    s, cv = c.shell, c.cover
+    mine = {"dark_slide": _stowed_slide(c, b), "slide_holder": b.placed("slide_holder")}
+    problems = []
+    rest = [b.placed(n) for n in PARTS if n not in mine]
+    for name, shape in mine.items():
+        v = _clashes_with(shape, rest)
+        if v > 1e-2:
+            problems.append(f"closed {name} {v:.2f}mm3")
+    group = {"rear_cover", "pressure_pad", *mine}
+    fixed = [b.placed(n) for n in PARTS if n not in group | {"turn_button_left", "turn_button_right"}]
+    fixed += [_turned_button(c, b, "left", 1), _turned_button(c, b, "right", 1)]
+    axis = _cover_axis(c)
+    for a in (5, 15, 30, 45, 60, 80, cv.open_deg):
+        for name, shape in mine.items():
+            v = _clashes_with(shape.rotate(axis, a), fixed)
+            if v > 1e-2:
+                problems.append(f"{a} deg open {name} {v:.2f}mm3")
+    seat = b.placed("body").bounding_box().min.Z
+    boxes = [shape.bounding_box() for shape in mine.values()]
+    low = min(bx.min.Z for bx in boxes)
+    inside = all(bx.min.X >= s.x_min - EPS and bx.max.X <= s.x_max + EPS and bx.min.Z >= s.z_min - EPS
+                 and bx.max.Z <= sh.lip_top(c) + EPS for bx in boxes)
+    face = [bx for bx in boxes if bx.min.X < FACE_REST_HALF_W and bx.max.X > -FACE_REST_HALF_W and bx.max.Z > FACE_REST_Z0]
+    holder = mine["slide_holder"]
+    table = next((a for a in range(int(cv.open_deg) + 1) if holder.rotate(axis, a).bounding_box().min.Z < seat), None)
+    ok = not problems and low >= seat + SEAT_CLEAR - EPS and inside and not face
+    return ok, ((f"{'; '.join(problems[:4])}; " if problems else "")
+                + f"clear closed and at 5-{cv.open_deg} deg; lowest Z {low:.1f} over the seat at {seat:.2f}; "
+                  f"inside the cover outline {inside}; face rest X +/-{FACE_REST_HALF_W} above Z {FACE_REST_Z0} "
+                  f"clear {not face}; on a table the holder meets it at {table} deg open")

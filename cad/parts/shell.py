@@ -20,7 +20,7 @@ open, chosen here and kept as params:
   rim and body datum vertical and unsupported.
 - Turn buttons: centre pivots at X = +/-42.5, Y = 5.6 on raised insert bosses flush with the lip
   top. A full turn clears the rewind tower, sprocket collar, release button, advance knob and the
-  dark slide handle, which is 40mm wide for that reason. Each boss overhangs the body bay by 2mm
+  dark slide's 20mm pull tab. Each boss overhangs the body bay by 2mm
   above Z = 31.5. The hinge is 68mm under the lip, so opening slides the lip straight back: a flat
   button on the lip would not hold it. Each button carries a 3 x 2 x 1mm dog under its rear end,
   7.5mm from the pivot, in an arc groove in the 2.5mm lip (1.2mm floor); opening drives the
@@ -39,12 +39,18 @@ open, chosen here and kept as params:
   counterbore is on the underside of the tower top.
 - The slot plug is placed in its working pose in the slot mouth, so it overlaps the dark slide,
   which is in at rest. Only one is ever in the slot.
+- Dark slide pull tab: 20mm wide, rounded corners, top 8mm over the cover lip behind it. Its stowage
+  is a separate printed holder glued on the cover's outer face, because the cover prints outer face
+  down and rails on that face would need support under the whole cover. One peg per rail drops
+  into a blind hole in the cover (1.2mm of cover left behind it) to place the holder for gluing. The
+  holder prints lip face down; its fingers' bumps and the pegs face up. The stowed slide sits right
+  of the eye line, on the stop bar, against the cover face, and the bumps press it there.
 """
 import math
 from functools import lru_cache
 
-from build123d import (Axis, Box, Cylinder, Location, Part, Polygon, Pos, RectangleRounded, Rot, SlotCenterToCenter,
-                       chamfer, extrude, loft)
+from build123d import (Axis, Box, Cylinder, Location, Part, Plane, Polygon, Pos, RectangleRounded, Rot,
+                       SlotCenterToCenter, chamfer, extrude, loft)
 
 from params import Camera
 from parts.spec import PartSpec, at_origin
@@ -60,6 +66,15 @@ def zcyl(x: float, y: float, d: float, z0: float, z1: float) -> Part:
 
 def xcyl(y: float, z: float, d: float, x0: float, x1: float) -> Part:
     return Pos((x0 + x1) / 2, y, z) * Rot(0, 90, 0) * Cylinder(d / 2, x1 - x0)
+
+
+def ycyl(x: float, z: float, d: float, y0: float, y1: float) -> Part:
+    return Pos(x, (y0 + y1) / 2, z) * Rot(90, 0, 0) * Cylinder(d / 2, y1 - y0)
+
+
+def yz_prism(points: list[tuple[float, float]], x0: float, x1: float) -> Part:
+    """A (Y, Z) outline extruded along X from x0 to x1."""
+    return extrude(Plane.YZ.offset(x0) * Polygon(*points, align=None), amount=x1 - x0)
 
 
 def sector(x: float, y: float, r_in: float, r_out: float, a0: float, a1: float, z0: float, z1: float) -> Part:
@@ -388,6 +403,9 @@ def build_cover(c: Camera) -> Part:
     part -= xcyl(cv.hinge_axis_y, cv.hinge_axis_z, f.shaft_bore, k0 - 1, k1 + 1)
     for x, y in turn_button_pivots(c):
         part -= latch_groove(c, x, y)
+    for x in holder_peg_xs(c):
+        part -= ycyl(x, cv.holder_peg_z, cv.holder_peg_d + 2 * f.fdm_clearance, y_out - 1,
+                     y_out + cv.holder_peg_h + f.fdm_clearance)
     return part
 
 
@@ -432,16 +450,80 @@ def build_slot_plug(c: Camera) -> Part:
     return part
 
 
+# Dark slide stowage on the rear cover.
+
+def cover_outer_y(c: Camera) -> float:
+    return c.shell.y_rear - c.shell.cover_thickness
+
+
+def holder_channel_x(c: Camera) -> float:
+    """Half width of the holder channel, from the stowed slide centre."""
+    return c.cover.slide_w / 2 + c.cover.holder_side_clear
+
+
+def holder_lip_y(c: Camera) -> float:
+    """Inner (slide-side) face of the rail lips."""
+    return cover_outer_y(c) - c.cover.holder_gap
+
+
+def holder_peg_xs(c: Camera) -> list[float]:
+    cv = c.cover
+    off = holder_channel_x(c) + cv.holder_spacer_w / 2
+    return [cv.holder_x - off, cv.holder_x + off]
+
+
+def holder_finger_x(c: Camera) -> tuple[float, float]:
+    """Finger span, inward from the channel side: the lip's inner edge to a slot at the spacer."""
+    e, cv = holder_channel_x(c), c.cover
+    return e - cv.holder_engage, e - cv.holder_finger_slot
+
+
+def stowed_slide_shift(c: Camera) -> tuple[float, float, float]:
+    """Move from the slide in its slot to the slide stowed in the holder, front face on the cover."""
+    cv = c.cover
+    y = cover_outer_y(c) - cv.slide_t / 2 - slot_mid_y(c)
+    return cv.holder_x, y, cv.stowed_bottom_z - c.gate.slot_bottom_z
+
+
+def build_slide_holder(c: Camera) -> Part:
+    cv = c.cover
+    xs, e = cv.holder_x, holder_channel_x(c)
+    y_cover, y_lip = cover_outer_y(c), holder_lip_y(c)
+    y_out = y_lip - cv.holder_lip_t
+    z0, z1 = cv.stowed_bottom_z - cv.holder_bar_h, cv.holder_top_z
+    outer = e + cv.holder_spacer_w
+    part = box(xs - outer, xs + outer, y_out, y_cover, z0, cv.stowed_bottom_z)
+    root, slot, h = cv.holder_finger_root_z, cv.holder_finger_slot, cv.holder_bump_h
+    tip = root + cv.holder_finger_len
+    f0, f1 = holder_finger_x(c)
+    for sgn in (-1, 1):
+        def xr(a: float, b: float) -> tuple[float, float]:
+            return tuple(sorted((xs + sgn * a, xs + sgn * b)))
+        part += box(*xr(e, outer), y_lip - 0.01, y_cover, z0, z1)
+        part += box(*xr(e - cv.holder_engage, outer), y_out, y_lip, z0, z1)
+        # Sprung finger: a slot beside it up to the tip and one across the tip free it from the lip.
+        part -= box(*xr(f1, e), y_out - 1, y_lip, root, tip + slot)
+        part -= box(*xr(f0 - 1, e), y_out - 1, y_lip, tip, tip + slot)
+        b0 = tip - cv.holder_bump_len
+        part += yz_prism([(y_lip - 0.01, b0), (y_lip + h, b0 + h), (y_lip + h, tip - h), (y_lip - 0.01, tip)], *xr(f0, f1))
+        # Lead-in on the lip's top inner edge, so the slide edge finds the channel.
+        part -= yz_prism([(y_lip + 0.01, z1 - h), (y_lip + 0.01, z1 + 0.01), (y_lip - h, z1 + 0.01)],
+                         *xr(e - cv.holder_engage - 1, e + 0.01))
+    for x in holder_peg_xs(c):
+        part += ycyl(x, cv.holder_peg_z, cv.holder_peg_d, y_cover - 0.01, y_cover + cv.holder_peg_h)
+    return part
+
+
 # Bought parts.
 
 def build_dark_slide(c: Camera) -> Part:
     cv = c.cover
     y0 = slot_mid_y(c) - cv.slide_t / 2
     part = box(-cv.slide_w / 2, cv.slide_w / 2, y0, y0 + cv.slide_t, c.gate.slot_bottom_z, cv.slide_plate_top_z)
-    part += box(-cv.handle_w / 2, cv.handle_w / 2, y0, y0 + cv.slide_t, cv.slide_plate_top_z - 0.01, cv.slide_top_z)
-    hole_top = cv.slide_top_z - (cv.handle_w - cv.finger_hole_w) / 2
-    return part - box(-cv.finger_hole_w / 2, cv.finger_hole_w / 2, y0 - 1, y0 + 1,
-                      hole_top - cv.finger_hole_h, hole_top)
+    # The tab's rounded bottom corners sit inside the plate, so only its top corners show.
+    tab_z0 = cv.slide_plate_top_z - cv.handle_r
+    tab = Pos(0, (tab_z0 + cv.slide_top_z) / 2) * RectangleRounded(cv.handle_w, cv.slide_top_z - tab_z0, cv.handle_r)
+    return part + extrude(Plane.XZ.offset(-y0) * tab, amount=-cv.slide_t)  # Plane.XZ faces -Y
 
 
 def build_pressure_pad(c: Camera) -> Part:
@@ -490,6 +572,7 @@ PARTS: dict[str, PartSpec] = {
     "turn_button_right": PartSpec(build_turn_button, place_turn_button(1), "film-back", "printed", "#4a4a52",
                                   print_rotation=(180, 0, 0)),
     "slot_plug": PartSpec(build_slot_plug, at_origin, "film-back", "printed", "#4a4a52", print_rotation=(90, 0, 0)),
+    "slide_holder": PartSpec(build_slide_holder, at_origin, "film-back", "printed", "#4a4a52", print_rotation=(90, 0, 0)),
     "dark_slide": PartSpec(build_dark_slide, at_origin, "film-back", "bought", "#1c1c1f"),
     "pressure_pad": PartSpec(build_pressure_pad, at_origin, "film-back", "bought", "#101012"),
     "hinge_pin": PartSpec(build_hinge_pin, at_origin, "film-back", "bought", METAL),

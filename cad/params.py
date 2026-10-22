@@ -370,14 +370,36 @@ class Cover:
     m3_len: float = 8.0
     m3_head_d: float = 5.5
     m3_head_h: float = 3.0
-    # Dark slide (docs/bom.md: 71mm wide, about 75mm tall with handle) and slot plug (film-back.md 17.2).
+    # Dark slide (docs/bom.md: 71 x 58mm with its pull tab) and slot plug (film-back.md 17.2).
     slide_t: float = 0.5
     slide_w: float = 71.0
     slide_plate_top_z: float = 32.0   # chosen: plate stands 0.5mm proud of the slot mouth
-    slide_top_z: float = 60.0
-    handle_w: float = 40.0            # chosen: narrower than the slot so the turn buttons sweep past it
-    finger_hole_w: float = 24.0
-    finger_hole_h: float = 8.0
+    # Pull tab: a pinch grip, not a carry loop. A thumb-and-finger pinch needs about 8mm of tab above
+    # whatever stands behind it (the cover lip, Z 35.0) and a fingertip pad's 15mm of width.
+    slide_top_z: float = 43.0         # chosen: 8.0mm over the cover lip, 11.5mm over the shell top
+    handle_w: float = 20.0            # chosen: a fingertip pad and some; the turn buttons sweep well past it
+    handle_r: float = 3.0             # rounded tab corners, so the tab does not snag a bag or a finger
+    # Stowage: a printed holder glued on the rear cover's outer face holds the pulled slide (film-back.md 5).
+    # The slide drops in from the top between two side rails onto a stop bar; a sprung finger in each rail
+    # presses it on the cover. Chosen: right of the eye line, so the face rests on a clear back.
+    holder_x: float = 56.5            # stowed slide centre; the holder ends 1mm inside the cover's right end
+    stowed_bottom_z: float = -28.0    # stowed slide bottom edge, on the stop bar; the tab ends 5mm under the cover top
+    holder_gap: float = 0.8           # channel between the cover face and the rail lips: the slot's 0.8mm
+    holder_side_clear: float = 0.5    # each side of the slide: the channel is 72mm wide, like the slot
+    holder_engage: float = 4.0        # rail lip reaches this far in from the channel side
+    holder_spacer_w: float = 4.0      # glued strip beside the slide edge, under the lip
+    holder_lip_t: float = 1.2         # Print.min_wall; the sprung fingers are cut from it
+    holder_bar_h: float = 2.0         # stop bar under the slide
+    holder_top_z: float = 15.0        # rails end 4mm under the stowed plate top
+    holder_peg_d: float = 2.5         # one peg per rail into a blind hole in the cover, to place it for gluing
+    holder_peg_h: float = 1.0
+    holder_peg_z: float = -20.0
+    holder_finger_w: float = 4.0      # sprung finger along the lip's inner edge, root at the bottom
+    holder_finger_len: float = 12.0
+    holder_finger_root_z: float = -12.0
+    holder_finger_slot: float = 0.6
+    holder_bump_h: float = 0.6        # bump on the finger tip toward the cover: 0.3mm into the slide
+    holder_bump_len: float = 2.4      # along Z, with 45 deg flanks so the slide edge cams the finger aside
     plug_t: float = 0.5
     plug_depth: float = 10.0
     plug_grip_w: float = 40.0

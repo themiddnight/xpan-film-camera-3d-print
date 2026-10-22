@@ -11,7 +11,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 | 1 | Stainless 304 round rod | 1m (or 2 x 500mm) | Ø3.0mm, cut to length | Sprocket pin 60mm, rewind shaft 21mm, take-up drive shaft 70mm, pawl pivot 15mm, cover hinge pin 171mm, body latch pin 48mm, shutter lock pivot 9mm (about 394mm total) | "เพลาสแตนเลส 304 3 มิล", "stainless rod 3mm" | ฿35-115 (seen, varies by length) |
 | 2 | M42 body cap + rear lens cap pair | 2 pairs (one spare) | M42 x 1, plastic | Rear cap = body female mount; body cap = pinhole module base | "M42 body cap", "ฝาปิดท้ายเลนส์ M42" | ฿39-50 per pair (seen) |
 | 3 | Brass shim | 1 sheet | 0.05mm, about 5 x 5in | Pinhole plate | "แผ่นชิมทองเหลือง 0.05", "brass shim 0.05mm" | ฿95 (seen) |
-| 4 | Aluminium sheet | 1 | 0.5mm, 30 x 30cm, AL1100 | Dark slide (71mm wide in the 72mm slot, about 75mm tall with handle) and shutter blade (38 x 23mm with an 11mm tongue, a 4mm hole, two 1.5mm dimple holes and a 3.3mm stop slot) | "แผ่นอลูมิเนียม 0.5 mm AL1100" | ฿70 (seen) |
+| 4 | Aluminium sheet | 1 | 0.5mm, 30 x 30cm, AL1100 | Dark slide (71 x 58mm: a 71mm plate in the 72mm slot with a 20 x 11mm pull tab) and shutter blade (38 x 23mm with an 11mm tongue, a 4mm hole, two 1.5mm dimple holes and a 3.3mm stop slot) | "แผ่นอลูมิเนียม 0.5 mm AL1100" | ฿70 (seen) |
 | 5 | M3 brass heat-set inserts | 1 pack | M3, check OD on arrival (4.0 or 4.6mm) | Rear cover turn-buttons | "น็อตฝังทองเหลือง M3", "heat set insert M3" | ฿102-150 per 100 (seen) |
 | 6 | M3 screw kit | 1 | Socket head, includes M3 x 8 | Turn-button pivots | "ชุดน็อตสกรู M3 สแตนเลส" | ฿145-160 (seen) |
 | 7 | Compression spring | 1-2 | 0.3mm wire, OD 3-4mm, trim to about 8mm | Pawl spring (target 1-2N) | "สปริงอัด 0.3 มิล" | Est. ฿40-60 (a 0.4mm-wire spring was seen at ฿60, but it is too stiff here) |
@@ -25,7 +25,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 | 14 | Flat black spray paint | 1 can | Flat/matte black | Chamber interiors, dark slide, shutter blade | "สีสเปรย์ ดำด้าน FLAT BLACK" | ฿42-54 (seen, e.g. Red Fox No.4) |
 | 15 | Stainless spring wire | Not needed | Ø1.0mm, straight | Was the wire-frame viewfinder; the finder frames are now printed (simple-body.md 5). Skip it | "ลวดสปริงสแตนเลส 304 เส้นตรง 1 มิล" | ฿30-40 (seen) |
 | 16 | Empty reloadable 135 cassettes | 1 set of 5 | Standard 135 | Measuring the cassette and spool key; transport tests with scrap film | "ตลับฟิล์มเปล่า 135" | ฿163 per 5 (seen) |
-| 17 | 5-minute epoxy | 1 | Two-part | Knobs and fork to shafts, M42 rings into printed pockets | "กาวอีพ็อกซี่ 5 นาที" | Est. ฿60-100 |
+| 17 | 5-minute epoxy | 1 | Two-part | Knobs and fork to shafts, M42 rings into printed pockets, dark slide holder onto the rear cover | "กาวอีพ็อกซี่ 5 นาที" | Est. ฿60-100 |
 | 18 | Black PETG filament | 1kg | 1.75mm | All printed parts | "PETG สีดำ 1kg" | Est. ฿400-600 |
 
 **Estimated total:** about ฿1,600-2,300 for the parts above, before shipping. This is an estimate summed from the seen prices plus the estimated rows.
