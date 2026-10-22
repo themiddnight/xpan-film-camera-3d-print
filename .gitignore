@@ -8,3 +8,4 @@ viewer/dist/
 
 .worktrees/
 viewer/*.tsbuildinfo
+.claude/worktrees/

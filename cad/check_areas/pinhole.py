@@ -1,4 +1,4 @@
-"""Geometry checks for the pinhole module's shutter: blade, slider knob, lock lever and its pivot."""
+"""Geometry checks for the pinhole module's shutter: blade, push tabs, lock lever and its pivot."""
 import math
 
 from build123d import Part, Pos, Vector
@@ -11,13 +11,18 @@ from parts import pinhole as ph
 TOL = 0.01
 """Shared volume (mm3) below this is a touching face or tessellation noise."""
 SWEEP_STEPS = 6
-KNOB_PROUD_MIN = 5.0
-"""How far the knob must stand past the housing edge for a thumb to push it (mm)."""
-KNOB_GRIP_MIN = 6.0
+TAB_PROUD_MIN = 10.0
+"""How far the tab to push next must stand past its housing edge for a thumb to find and push it (mm)."""
+TAB_FLUSH_MAX = 5.0
+"""How far the other tab may stand out, so the two ends of the travel read apart by feel (mm)."""
+TAB_FACE_MIN = 6.0
+"""Least height and depth of a tab's push face (mm)."""
+PAD_ABOVE_MIN = 3.0
+"""How far the lock's thumb pad must rise above the housing top, so the lock is worked from the top (mm)."""
 STOP_OVERRUN = 0.3
 """The stops must hold the blade within this of its nominal closed and open positions (mm)."""
 LOCK_PUSH = 1.0
-"""Knob push toward open that the engaged lock must stop (mm)."""
+"""Push on the open tab that the engaged lock must stop (mm)."""
 DETENT_CLICK_MIN = 0.1
 DETENT_CLICK_MAX = 3.0
 """Nose-into-rail volume (mm3) between the notches: enough to click, small enough to be only the nose."""
@@ -28,7 +33,7 @@ BORE_PRESS = (0.05, 0.2)
 CAP_GRIP_MIN = 1.5
 PLATE_GRIP_MIN = 2.5
 
-MOVING = ("shutter_blade", "shutter_knob")
+MOVING = ph.SLIDING
 
 
 def _offsets(c) -> list[float]:
@@ -55,24 +60,43 @@ def _(c, b):
     covers = all(blade.is_inside(Vector(x, mid, z)) for x, z in ((0, 0), (r, 0), (-r, 0), (0, r), (0, -r)))
     lever = b.placed("shutter_lock")
     rest = sum(_hit(lever, b.placed(n)) for n in MOVING)
-    pushed = _hit(lever, _slid(b, "shutter_knob", LOCK_PUSH))
+    pushed = _hit(lever, _slid(b, "shutter_blade", LOCK_PUSH))
     ok = covers and rest < TOL and pushed > TOL
-    return ok, f"covers {covers}, lock at rest {rest:.3f} mm3, knob pushed {LOCK_PUSH}mm meets the tooth {pushed:.2f} mm3"
+    return ok, (f"covers {covers}, lock at rest {rest:.3f} mm3, open tab pushed {LOCK_PUSH}mm: "
+                f"the tongue meets the tooth {pushed:.2f} mm3")
 
 
-@check("unlocked lever clears the blade and knob over the whole travel (geometry)")
+@check("shutter lock engages only with the shutter closed (geometry)")
+def _(c, b):
+    t = c.pinhole.blade_travel
+    lever = b.placed("shutter_lock")
+    blocked = sum(_hit(lever, _slid(b, n, t)) for n in MOVING)
+    return blocked > TOL, f"lever turned back with the shutter open meets the blade and open tab {blocked:.2f} mm3"
+
+
+@check("lever turns clear of the housing apart from its detent, and unlocked clears the blade and tabs (geometry)")
 def _(c, b):
     p = c.pinhole
+    housing = b.placed("shutter_housing")
     worst = []
     for i in range(SWEEP_STEPS):
         deg = p.lock_unlock_deg * i / (SWEEP_STEPS - 1)
         lever = _lever(c, b, deg)
-        worst.append((sum(_hit(lever, b.placed(n)) for n in MOVING), f"turning {deg:.0f} deg"))
+        body = lever - ph.turn_lock(c, ph.detent_zone(c), deg)
+        worst.append((sum(_hit(lever, b.placed(n)) for n in MOVING) + _hit(body, housing), f"turning {deg:.0f} deg"))
     lever = _lever(c, b, p.lock_unlock_deg)
     for dx in _offsets(c):
         worst.append((sum(_hit(lever, _slid(b, n, dx)) for n in MOVING), f"blade at {dx:.1f}mm"))
     v, where = max(worst)
     return v < TOL, f"worst {v:.3f} mm3 ({where})"
+
+
+@check("shutter lock sits on top: thumb pad above the housing, nothing below it (geometry)")
+def _(c, b):
+    lever, housing = b.placed("shutter_lock").bounding_box(), b.placed("shutter_housing").bounding_box()
+    above, low = lever.max.Z - housing.max.Z, lever.min.Z - housing.min.Z
+    ok = above >= PAD_ABOVE_MIN - EPS and low >= 0
+    return ok, f"pad top {above:.1f}mm above the housing top, lever bottom {low:.1f}mm above the housing bottom"
 
 
 @check("lock lever clicks into its detent locked and unlocked (geometry)")
@@ -118,24 +142,33 @@ def _(c, b):
     return not bad, f"hits {bad}" if bad else f"clear, rays grown {CONE_MARGIN}mm"
 
 
-@check("shutter knob stands out to push and its travel hits nothing (geometry)")
+@check("shutter tabs: the one to push next stands proud, the other near flush, travel hits nothing (geometry)")
 def _(c, b):
-    knob, housing = b.placed("shutter_knob").bounding_box(), b.placed("shutter_housing").bounding_box()
-    proud, grip = knob.max.X - housing.max.X, knob.size.Z
+    t = c.pinhole.blade_travel
+    h = b.placed("shutter_housing").bounding_box()
+    o, k = b.placed("shutter_open_tab").bounding_box(), b.placed("shutter_close_tab").bounding_box()
+    # (open tab, close tab) past their own housing edges, and the near-flush tab's gap to its edge.
+    closed = (h.min.X - o.min.X, k.max.X - h.max.X)
+    opened = (h.min.X - (o.min.X + t), k.max.X + t - h.max.X)
+    gaps = (k.min.X - h.max.X, h.min.X - (o.max.X + t))
+    face = min(o.size.Y, o.size.Z, k.size.Y, k.size.Z)
     lever = _lever(c, b, c.pinhole.lock_unlock_deg)
     hits = {}
     for dx in _offsets(c):
-        for moving, skip in (("shutter_knob", {"shutter_blade"}), ("shutter_blade", {"shutter_knob", "shutter_housing"})):
+        for moving in MOVING:
             part = _slid(b, moving, dx)
             box = part.bounding_box()
             for name in PARTS:
-                if name in skip or name in MOVING:
+                if name in MOVING or (moving, name) == ("shutter_blade", "shutter_housing"):
                     continue
                 other = lever if name == "shutter_lock" else b.placed(name)
                 if _boxes_meet(box, other.bounding_box()) and (v := _hit(part, other)) > TOL:
                     hits[f"{moving}@{dx:.0f} x {name}"] = round(v, 3)
-    ok = proud >= KNOB_PROUD_MIN - EPS and grip >= KNOB_GRIP_MIN - EPS and not hits
-    return ok, f"{proud:.1f}mm past the housing, {grip:.1f}mm grip, sweep hits {hits or 'none'}"
+    ok = (min(closed[0], opened[1]) >= TAB_PROUD_MIN - EPS and max(closed[1], opened[0]) <= TAB_FLUSH_MAX + EPS
+          and min(gaps) >= STOP_OVERRUN - EPS and face >= TAB_FACE_MIN - EPS and not hits)
+    return ok, (f"closed: open tab {closed[0]:.1f}, close tab {closed[1]:.1f}mm out; open: open tab {opened[0]:.1f}, "
+                f"close tab {opened[1]:.1f}mm out; flush tab {min(gaps):.2f}mm off the housing; push face "
+                f">= {face:.1f}mm; sweep hits {hits or 'none'}")
 
 
 @check("blade stops at closed and at blade_travel (geometry)")
@@ -176,6 +209,20 @@ def _(c, b):
                 f"grip {plate_grip:.1f}mm in the plates, {cap_grip:.1f}mm in the cap")
 
 
+def _tab_rays(c, tab: ph.Tab) -> list[tuple[str, str, tuple, tuple]]:
+    x_in, x_out = ph.tab_x(c, tab)
+    out = 1.0 if x_out > x_in else -1.0
+    b0, b1 = ph.blade_y(c)
+    mid = (b0 + b1) / 2
+    inside = (x_in + out * 0.5, mid, 0)
+    name = f"shutter_{tab}_tab"
+    return [
+        (name, "behind the blade slit", inside, (0, -1, 0)),
+        (name, "over the blade slit", inside, (0, 0, 1)),
+        (name, "slit bottom to the push face", inside, (out, 0, 0)),
+    ]
+
+
 def _wall_rays(c) -> list[tuple[str, str, tuple, tuple]]:
     p = c.pinhole
     s0, s1 = ph.slot_y(c)
@@ -185,16 +232,17 @@ def _wall_rays(c) -> list[tuple[str, str, tuple, tuple]]:
     r_n, a_n = ph.nose_centre(c)
     a = math.radians(a_n)
     notch = (x + (r_n - 0.1) * math.cos(a), lever_mid, z + (r_n - 0.1) * math.sin(a))
+    tooth_mid = ph.tongue_top(c) - p.tooth_engage + p.tooth_h / 2
     return [
         ("shutter_housing", "blade rail", (0, (s0 + s1) / 2, 0), (0, 0, 1)),
         ("shutter_housing", "rear plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, -1, 0)),
         ("shutter_housing", "front plate", (p.housing_half - 2, (s0 + s1) / 2, 0), (0, 1, 0)),
-        ("shutter_housing", "pivot bore to the edge", (x, (s1 + ph.housing_front_y(c)) / 2, z), (1, 0, 0)),
+        ("shutter_housing", "pivot bore to the top edge", (x, (s1 + ph.housing_front_y(c)) / 2, z), (0, 0, 1)),
         ("shutter_housing", "detent rail under the locked notch", notch, (math.cos(a), 0, math.sin(a))),
-        ("shutter_knob", "behind the blade slit", (ph.knob_x0(c) + 1, (b0 + b1) / 2, 0), (0, -1, 0)),
-        ("shutter_knob", "over the blade slit", (ph.knob_x0(c) + 1, (b0 + b1) / 2, 0), (0, 0, 1)),
-        ("shutter_knob", "slit to tooth notch", (p.tooth_x, (b0 + b1) / 2, -p.knob_h / 2 + p.tooth_engage), (0, 1, 0)),
+        *_tab_rays(c, "open"),
+        *_tab_rays(c, "close"),
         ("shutter_lock", "hub", (x, lever_mid, z), (0, 0, 1)),
+        ("shutter_lock", "tooth", (p.tooth_x - p.tooth_w, (b0 + b1) / 2, tooth_mid), (1, 0, 0)),
         ("shutter_lock_cap", "cap", (x, ph.lock_cap_y(c)[0] + 0.3, z), (0, 0, 1)),
     ]
 

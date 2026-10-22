@@ -445,7 +445,7 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
         frozenset(("film_roll", "takeup_spool")): "the roll turns with the spool",
     },
     "shutter_lock": {
-        frozenset(("shutter_housing", "shutter_lock")): "the lever's sprung finger flexes 0.4mm over its detent rail between the two notches",
+        frozenset(("shutter_housing", "shutter_lock")): "the lever's sprung finger flexes 0.4mm over its detent rail between the two notches; the pinhole check proves the rest of the lever clear",
     },
     "release": {
         frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's 0.4mm sideways arc; a straight tube cannot",
