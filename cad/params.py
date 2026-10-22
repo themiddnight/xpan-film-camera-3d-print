@@ -30,6 +30,8 @@ class Fit:
 class Measured:
     """Nominals until the bought parts arrive (docs/bom.md, 'Measure on arrival')."""
     cassette_d: float = 25.0
+    trap_velvet_t: float = 1.5        # adhesive light-seal velvet on a thin foam backing, free thickness with the pile up
+    trap_velvet_min_t: float = 0.4    # the same crushed flat: backing plus laid pile
     cassette_lip_envelope: float = 29.5
     cassette_cap_height: float = 39.0
     spool_top_protrusion: float = 7.5
@@ -79,6 +81,8 @@ class Gate:
     fence_gap: float = 35.3
     bevel: float = 0.3                # rear-side 45 deg bevel on the gate aperture
     slot_bottom_z: float = -15.0      # dark slide bottom stop
+    trap_gap: float = 1.2             # slot mouth widened forward to hold a velvet strip on its front face (film-back.md 17.2)
+    trap_depth: float = 7.0           # mouth pocket depth from the shell top; stops above the gate and its velvet groove
     velvet_groove_w: float = 3.0
     velvet_groove_inset: float = 1.0  # chosen: groove inner edge to the front aperture
     fence_w: float = 1.2              # chosen: Print.min_wall
@@ -316,7 +320,7 @@ class BodyLink:
 
 @dataclass(frozen=True)
 class Cover:
-    """Rear cover, turn buttons, slot plug and their bought parts (film-back.md 5, 10, 17.2-17.3).
+    """Rear cover, turn buttons, slide holder and their bought parts (film-back.md 5, 10, 17.2-17.3).
 
     Owned by cad/parts/shell.py. Values marked chosen are left open by the docs.
     """
@@ -371,7 +375,7 @@ class Cover:
     m3_len: float = 8.0
     m3_head_d: float = 5.5
     m3_head_h: float = 3.0
-    # Dark slide (docs/bom.md: 71 x 58mm with its pull tab) and slot plug (film-back.md 17.2).
+    # Dark slide (docs/bom.md: 71 x 58mm with its pull tab).
     slide_t: float = 0.5
     slide_w: float = 71.0
     slide_plate_top_z: float = 32.0   # chosen: plate stands 0.5mm proud of the slot mouth
@@ -401,11 +405,6 @@ class Cover:
     holder_finger_slot: float = 0.6
     holder_bump_h: float = 0.6        # bump on the finger tip toward the cover: 0.3mm into the slide
     holder_bump_len: float = 2.4      # along Z, with 45 deg flanks so the slide edge cams the finger aside
-    plug_t: float = 0.5
-    plug_depth: float = 10.0
-    plug_grip_w: float = 40.0
-    plug_grip_h: float = 5.0
-    plug_grip_t: float = 1.6
 
 
 @dataclass(frozen=True)

@@ -116,4 +116,16 @@ SEEDS: dict = {
         replace(C, cover=replace(C.cover, open_deg=200.0)),
         {"stowed dark slide and its holder clear everything, cover closed and swung open (geometry)"},
     ),
+    "velvet too thin: its pile does not reach the rear face of the empty slot": (
+        replace(CAMERA, measured=replace(CAMERA.measured, trap_velvet_t=1.3)),
+        {"slot mouth velvet closes the empty slot and passes the slide (geometry)"},
+    ),
+    "trap pocket 0.95mm: the slide crushes the velvet flat": (
+        replace(CAMERA, gate=replace(CAMERA.gate, trap_gap=0.95)),
+        {"slot mouth velvet closes the empty slot and passes the slide (geometry)"},
+    ),
+    "trap pocket 20mm deep: it reaches the gate's velvet groove": (
+        replace(CAMERA, gate=replace(CAMERA.gate, trap_depth=20.0)),
+        {"slot mouth velvet closes the empty slot and passes the slide (geometry)"},
+    ),
 }

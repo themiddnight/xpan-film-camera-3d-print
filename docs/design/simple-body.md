@@ -71,19 +71,6 @@ Hold the camera against your face, with your eye at the rear cover. From there t
 
 Pull the dark slide before framing. The slide's handle stands in the line of sight while the slide is in, but it does not touch the frames.
 
----|---:|---|
-| Field | 0.65 across, 0.24 up (tan of the half-angles) | 32.5 / 50 and 12 / 50; the checks measure it on the built frames |
-| Rear frame (eyepiece) | 37.96 x 14.02mm window, plane at Y = +15.2 | 11mm in front of the body's rear face |
-| Front frame | 49.66 x 18.34mm window, plane at Y = +24.2 | Rule: front - rear = 2 x 0.65 x 9mm across |
-| Eye point | Y = -14.0, Z = +42.4 | 29.2mm behind the rear frame, 9.3mm behind the rear cover. The nose can rest on the camera's back, as with a rangefinder |
-| Finder axis | Z = +42.4 | The field's lower edge passes 0.5mm over the M42 body cap rim, and over the slot plug grip |
-| Frames | Printed PETG leaves, 1.6mm thick, 1.6mm border | A hand-bent 1mm wire cannot hold the rear window's corners; a printed window holds about 0.2mm |
-| Hinges | Two knuckles per leaf, outboard of the window, on 3mm rod stubs pressed into a printed hinge base glued to the body top | Nothing crosses the field below the windows |
-| Detent | Two flats on each knuckle, 0.3mm inside its 6mm diameter; a sprung tongue in the hinge base presses a pad on the lower flat | Each frame clicks into its raised and folded positions. The flat on the pad holds the raised frame square |
-| Fold | Both frames fold forward. Fold the front frame first, then lay the rear frame on top of it. Unfold the rear frame first | Folded, the finder rises 9.4mm over the body top (Z = +35.9), about as high as the slot plug grip, and stays inside the body outline |
-
-Pull the dark slide before framing. The slide's handle stands in the line of sight while the slide is in, but it does not touch the frames.
-
 ---
 
 ## 6. Added in the Phase 1 Review

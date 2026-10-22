@@ -4,7 +4,7 @@ import math
 from build123d import Axis, Part, Pos, Rot, Vector
 
 import mechanisms
-from checklib import EPS, check
+from checklib import EPS, SHOOTING, check, posed
 from params import Camera
 from parts import PARTS
 from parts import shell as sh
@@ -267,7 +267,7 @@ def _(c, b):
     cv, t, p = c.cover, c.takeup, c.pawl
     bb = b.local("turn_button_left").bounding_box()
     sweep_r = math.hypot(max(abs(bb.min.X), bb.max.X), max(abs(bb.min.Y), bb.max.Y))
-    blockers = b.placed("shell") + b.placed("dark_slide") + b.placed("slot_plug")
+    blockers = b.placed("shell") + b.placed("dark_slide")
     z0, z1 = sh.lip_top(c) + 0.05, sh.lip_top(c) + cv.button_t
     details, ok = [], True
     for x, y in sh.turn_button_pivots(c):
@@ -381,6 +381,8 @@ PINCH_MIN_H, PINCH_MAX_H = 8.0, 10.0
 """Tab height a thumb-and-finger pinch needs above whatever stands behind it, and the most worth carrying."""
 PINCH_MIN_W = 15.0
 """About one fingertip pad."""
+TRAP_SQUEEZE_MIN = 0.2
+"""Pile pressed into pile with the slot empty, so the velvet closes the mouth without the slide."""
 FACE_REST_HALF_W, FACE_REST_Z0 = 15.0, 0.0
 """Rear cover face kept free either side of the eye line, from this height to the top, for nose and brow."""
 SEAT_CLEAR = 0.5
@@ -389,12 +391,7 @@ SEAT_CLEAR = 0.5
 
 def _stowed_slide(c: Camera, b) -> Part:
     """The dark slide moved the way the viewer moves it: pulled, carried over the cover, dropped into the holder."""
-    shape = b.placed("dark_slide")
-    for m in mechanisms.mechanisms(c):
-        if m.id in ("dark_slide", "slide_carry", "slide_stow"):
-            for d in m.drives:
-                shape = Pos(*(a * d.amount for a in d.axis)) * shape
-    return shape
+    return posed(c, b, SHOOTING)["dark_slide"]
 
 
 def _clashes_with(shape: Part, others: list[Part]) -> float:
@@ -463,15 +460,16 @@ def _(c, b):
 @check("stowed dark slide and its holder clear everything, cover closed and swung open (geometry)")
 def _(c, b):
     s, cv = c.shell, c.cover
-    mine = {"dark_slide": _stowed_slide(c, b), "slide_holder": b.placed("slide_holder")}
+    shooting = posed(c, b, SHOOTING)
+    mine = {"dark_slide": shooting["dark_slide"], "slide_holder": b.placed("slide_holder")}
     problems = []
-    rest = [b.placed(n) for n in PARTS if n not in mine]
+    rest = [shooting.get(n, b.placed(n)) for n in PARTS if n not in mine]
     for name, shape in mine.items():
         v = _clashes_with(shape, rest)
         if v > 1e-2:
             problems.append(f"closed {name} {v:.2f}mm3")
     group = {"rear_cover", "pressure_pad", *mine}
-    fixed = [b.placed(n) for n in PARTS if n not in group | {"turn_button_left", "turn_button_right"}]
+    fixed = [shooting.get(n, b.placed(n)) for n in PARTS if n not in group | {"turn_button_left", "turn_button_right"}]
     fixed += [_turned_button(c, b, "left", 1), _turned_button(c, b, "right", 1)]
     axis = _cover_axis(c)
     for a in (5, 15, 30, 45, 60, 80, cv.open_deg):
@@ -492,3 +490,28 @@ def _(c, b):
                 + f"clear closed and at 5-{cv.open_deg} deg; lowest Z {low:.1f} over the seat at {seat:.2f}; "
                   f"inside the cover outline {inside}; face rest X +/-{FACE_REST_HALF_W} above Z {FACE_REST_Z0} "
                   f"clear {not face}; on a table the holder meets it at {table} deg open")
+
+
+@check("slot mouth velvet closes the empty slot and passes the slide (geometry)")
+def _(c, b):
+    g, s, m = c.gate, c.shell, c.measured
+    shell = b.local("shell")
+    probe = Vector(0, sh.slot_mid_y(c), s.z_max - g.trap_depth / 2)
+    rear = probe.Y - _edge(shell, probe, -Y, 0, 3)
+    gap = probe.Y + _edge(shell, probe, Y, 0, 3) - rear
+    bottom = probe.Z - _edge(shell, Vector(0, rear + gap - 0.05, probe.Z), -Z, 0, 20, step=0.1)
+    # Walls round the pocket: forward to the body datum face, back through the gate plate.
+    front = 0.01 + _edge(shell, Vector(0, rear + gap + 0.01, probe.Z), Y, 0, 10, step=0.05)
+    back = 0.01 + _edge(shell, Vector(0, rear - 0.01, probe.Z), -Y, 0, 10, step=0.05)
+    slide = b.placed("dark_slide").bounding_box()
+    squeeze = m.trap_velvet_t - gap                      # pile pressing on the rear face with the slot empty
+    crushed = rear + gap - slide.max.Y                    # the strip with the slide through it
+    velvet = b.placed("slot_velvet")
+    seated = (velvet & shell).volume < 1e-3 and (velvet & b.placed("dark_slide")).volume < 1e-3
+    above_gate = bottom >= g.aperture_h / 2 + g.velvet_groove_inset + g.velvet_groove_w
+    ok = (squeeze >= TRAP_SQUEEZE_MIN - EPS and crushed >= m.trap_velvet_min_t - EPS and front >= c.print.min_wall - EPS
+          and back >= c.print.min_wall - EPS and seated and above_gate)
+    return ok, (f"pocket {gap:.2f}mm wide down to Z {bottom:.1f} (clear of the gate and its groove {above_gate}); "
+                f"empty, the pile presses {squeeze:.2f}mm onto the rear face (need {TRAP_SQUEEZE_MIN}); with the slide "
+                f"the strip is {crushed:.2f}mm (crushed limit {m.trap_velvet_min_t}); walls front {front:.2f}, back "
+                f"{back:.2f}mm; strip seated {seated}")

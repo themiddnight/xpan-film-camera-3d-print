@@ -18,7 +18,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 | 7b | Stainless spring assortment | 1 set | OD 3-6mm | Clutch spring: needs about 5mm OD so it slides over the 3mm shaft | "สปริง สแตนเลส ชุด" | ฿82 (seen) |
 | 8 | Stainless hex nut | 2 (one spare) | 1/4"-20 UNC | Tripod socket, captured in the body | "น็อตตัวเมีย 1/4 เกลียวหุน หยาบ" | ฿6-20 (seen) |
 | 9 | Self-adhesive black felt | 1 sheet | 1-2mm thick (3mm is too thick) | Throat light trap, clutch washer | "สักหลาดดำ มีกาว" | ฿56-140 (seen) |
-| 10 | Black flocking / velvet adhesive sheet | 1 sheet | Thin flocked paper | Body-to-back seal groove, dark slide slot lips, chamber lining | "black flocking adhesive paper", "กำมะหยี่ดำ มีกาว" | Est. ฿100-200 (not found on Lazada; try Shopee or AliExpress) |
+| 10 | Black flocking / velvet adhesive sheet | 1 sheet | Thin flocked paper | Body-to-back seal groove, chamber lining | "black flocking adhesive paper", "กำมะหยี่ดำ มีกาว" | Est. ฿100-200 (not found on Lazada; try Shopee or AliExpress) |
 | 11 | EVA foam sheet | 1 | 2mm closed-cell | Pressure pad, cover groove seal strip | "โฟม EVA 2 มิล" | ฿44 per A1 sheet (seen) |
 | 12 | Thin black plastic sheet | 1 | About 0.2-0.3mm, smooth | Film-side face of the pressure pad | "แฟ้มพลาสติกดำ", "black PET sheet 0.25mm" | Est. ฿20-40 |
 | 13 | Small O-ring | 1 pack | 3mm ID x 1mm section | Rewind knob friction hold, in a 4.8mm counterbore | "โอริง 3x1" | Est. ฿20-50 |
@@ -27,6 +27,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 | 16 | Empty reloadable 135 cassettes | 1 set of 5 | Standard 135 | Measuring the cassette and spool key; transport tests with scrap film | "ตลับฟิล์มเปล่า 135" | ฿163 per 5 (seen) |
 | 17 | 5-minute epoxy | 1 | Two-part | Knobs and fork to shafts, M42 rings into printed pockets, shutter push tabs onto the blade tongues, dark slide holder onto the rear cover | "กาวอีพ็อกซี่ 5 นาที" | Est. ฿60-100 |
 | 18 | Black PETG filament | 1kg | 1.75mm | All printed parts | "PETG สีดำ 1kg" | Est. ฿400-600 |
+| 19 | Light-seal velvet strip on foam | 1 strip | About 1.5mm free thickness, adhesive back, cut to 72 x 7mm | Dark slide slot mouth light trap: crushed to 0.55mm by the slide, closes the mouth when the slide is out (film-back.md 17.2) | "light seal foam velvet", "โฟมกำมะหยี่ซีลแสง กล้อง" | Est. ฿60-150 (not looked up yet) |
 
 **Estimated total:** about ฿1,600-2,300 for the parts above, before shipping. This is an estimate summed from the seen prices plus the estimated rows.
 
@@ -50,6 +51,7 @@ These values sit in the docs as nominals. Measure them with calipers and update 
 | Heat-set insert (#5) | OD and length | 4.0 or 4.6mm |
 | Hex nut (#8) | Across flats and thickness | 11.1mm, 5.6mm (est.) |
 | Rod (#1) | Actual diameter | 3.00mm |
+| Light-seal velvet (#19) | Free thickness, pile up, and fully crushed thickness | 1.5mm / 0.4mm (`Measured.trap_velvet_t`, `trap_velvet_min_t`) |
 
 ## Sourcing notes
 

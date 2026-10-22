@@ -6,8 +6,9 @@ import math
 from dataclasses import dataclass
 from typing import Callable
 
-from build123d import Part, Vector
+from build123d import Axis, Part, Pos, Vector
 
+import mechanisms
 from params import Camera
 from parts import PARTS
 
@@ -80,3 +81,41 @@ def solid_runs(part: Part, r: float, z: float, step_deg: float = 0.25) -> list[f
             runs.append(length * step_deg)
             length = 0
     return runs
+
+
+# Mechanism poses, applied the way the viewer applies them.
+
+SHOOTING = {"dark_slide": 1.0, "slide_carry": 1.0, "slide_stow": 1.0}
+"""Mechanism values for taking pictures: the slide pulled and stowed on the cover."""
+
+def _stretch(shape, origin, axis, factor):
+    """Scale along one coordinate axis about origin, as a spring compresses."""
+    from OCP.BRepBuilderAPI import BRepBuilderAPI_GTransform
+    from OCP.gp import gp_GTrsf, gp_XYZ
+    i = [abs(a) for a in axis].index(1.0)
+    g = gp_GTrsf()
+    g.SetValue(i + 1, i + 1, factor)
+    shift = [0.0, 0.0, 0.0]
+    shift[i] = origin[i] * (1 - factor)
+    g.SetTranslationPart(gp_XYZ(*shift))
+    return type(shape)(BRepBuilderAPI_GTransform(shape.wrapped, g, True).Shape())
+
+
+def drive_shape(shape, d, value: float):
+    if d.kind == "rotate":
+        return shape.rotate(Axis(d.origin, d.axis), d.amount * value)
+    if d.kind == "stretch":
+        return _stretch(shape, d.origin, d.axis, 1 + d.amount * value)
+    return Pos(*(a * d.amount * value for a in d.axis)) * shape
+
+
+def posed(c: Camera, b: Built, values: dict[str, float]) -> dict:
+    """Every driven part placed with the given mechanism values, drives applied in mechanism order."""
+    shapes = {}
+    for m in mechanisms.mechanisms(c):
+        v = values.get(m.id, 0.0)
+        if v == 0.0:
+            continue
+        for d in m.drives:
+            shapes[d.part] = drive_shape(shapes.get(d.part, b.placed(d.part)), d, v)
+    return shapes

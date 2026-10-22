@@ -10,7 +10,7 @@ from build123d import Pos, Rot, Vector
 
 import check_areas  # noqa: F401  registers the per-area checks
 import mechanisms
-from checklib import CHECKS, EPS, Built, Result, check, radial_extent, solid_runs
+from checklib import CHECKS, EPS, Built, Result, check, posed, radial_extent, solid_runs
 from params import CAMERA, Camera
 from parts import PARTS, sprocket
 
@@ -113,7 +113,6 @@ INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, float, str]] = {
     frozenset(("shutter_lock_pivot", "shutter_lock_cap")): (0.5, 1.2, "cap pressed onto the pivot tip"),
     frozenset(("viewfinder_rear_hinge", "viewfinder_rear_pins")): (2.0, 4.0, "pin stubs pressed into the cheeks"),
     frozenset(("viewfinder_front_hinge", "viewfinder_front_pins")): (2.0, 4.0, "pin stubs pressed into the cheeks"),
-    frozenset(("dark_slide", "slot_plug")): (0.0, 500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
     frozenset(("film", "shell")): (0.0, 0.5, "film lies on the rails; facets of the curved strip graze them"),
     frozenset(("film", "sprocket")): (0.0, 0.2, "film wraps the hub; facets of the curved strip graze it"),
     frozenset(("film", "film_roll")): (0.0, 0.5, "the strip's last wrap lies on the roll; facets graze it"),
@@ -467,40 +466,6 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
     },
 }
 """Pairs a mechanism may overlap while moving, per mechanism, with the reason."""
-
-
-def _stretch(shape, origin, axis, factor):
-    """Scale along one coordinate axis about origin, as a spring compresses."""
-    from OCP.BRepBuilderAPI import BRepBuilderAPI_GTransform
-    from OCP.gp import gp_GTrsf, gp_XYZ
-    i = [abs(a) for a in axis].index(1.0)
-    g = gp_GTrsf()
-    g.SetValue(i + 1, i + 1, factor)
-    shift = [0.0, 0.0, 0.0]
-    shift[i] = origin[i] * (1 - factor)
-    g.SetTranslationPart(gp_XYZ(*shift))
-    return type(shape)(BRepBuilderAPI_GTransform(shape.wrapped, g, True).Shape())
-
-
-def _drive_shape(shape, d, value: float):
-    from build123d import Axis as _Axis
-    if d.kind == "rotate":
-        return shape.rotate(_Axis(d.origin, d.axis), d.amount * value)
-    if d.kind == "stretch":
-        return _stretch(shape, d.origin, d.axis, 1 + d.amount * value)
-    return Pos(*(a * d.amount * value for a in d.axis)) * shape
-
-
-def posed(c: Camera, b: Built, values: dict[str, float]) -> dict:
-    """Every driven part placed with the given mechanism values, drives applied in mechanism order."""
-    shapes = {}
-    for m in mechanisms.mechanisms(c):
-        v = values.get(m.id, 0.0)
-        if v == 0.0:
-            continue
-        for d in m.drives:
-            shapes[d.part] = _drive_shape(shapes.get(d.part, b.placed(d.part)), d, v)
-    return shapes
 
 
 def sweep_clashes(c: Camera, b: Built, m) -> list[tuple[float, str, str, float]]:

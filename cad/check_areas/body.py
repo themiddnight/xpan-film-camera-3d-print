@@ -1,7 +1,7 @@
 """Geometry checks for the body and the pinhole module, probed on the placed solids."""
 from build123d import Align, Axis, Box, Edge, Part, Pos, Rot, Solid, Vector
 
-from checklib import EPS, check
+from checklib import EPS, SHOOTING, check, posed
 from params import Camera
 from parts import PARTS
 from parts.body import LEAVES, cheek_x, fold_axis, knuckle_x, leaf, rect_wire
@@ -365,11 +365,10 @@ def _(c, b):
     beyond = clear & Pos(0, front["y"] + EPS, 0) * Box(1000, 1000, 1000, align=(Align.CENTER, Align.MIN, Align.CENTER))
     frames = {f"viewfinder_{w}_frame" for w in LEAVES}
     rear_folded = _turned_leaf(c, b, "rear", leaf(c, "rear").fold)
+    shooting = posed(c, b, SHOOTING)
     hits = {}
     for name in [*PARTS, "rear sight folded"]:
-        if name == "dark_slide":  # pulled for the exposure; the slot plug stays in the shooting pose
-            continue
-        part = rear_folded if name == "rear sight folded" else b.placed(name)
+        part = rear_folded if name == "rear sight folded" else shooting.get(name, b.placed(name))
         # A frame sights with its window edges, so only the field beyond its window must be clear of it.
         for cone in (inside, beyond) if name in frames else (clear,):
             if _meet(part.bounding_box(), cone.bounding_box()):

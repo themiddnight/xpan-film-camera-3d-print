@@ -1,4 +1,4 @@
-"""Film-back shell, rear cover, turn buttons, slot plug and the bought parts they hold.
+"""Film-back shell, rear cover, turn buttons, slide holder and the bought parts they hold.
 
 Built in camera coordinates (film-back.md section 17), except the turn buttons, which are built
 around their own pivot and placed. Every value comes from cad/params.py. Values the docs leave
@@ -37,8 +37,11 @@ open, chosen here and kept as params:
   bushing is blind with a 1.2mm floor for light, on a 1mm boss under the drive collar; the top one
   is the 3mm top wall alone, so the clutch spring bears on the ceiling. The rewind O-ring
   counterbore is on the underside of the tower top.
-- The slot plug is placed in its working pose in the slot mouth, so it overlaps the dark slide,
-  which is in at rest. Only one is ever in the slot.
+- The slot mouth is a light trap: its top trap_depth is widened forward to trap_gap and a strip of
+  foam-backed velvet is glued on the front face. The slide crushes the pile as it passes; with the
+  slide out the pile presses on the rear face and closes the mouth. Only the front side widens: the
+  rear face is the 1.2mm gate plate already. The velvet is drawn at its crushed thickness, as it sits
+  with the slide in. Nothing has to be put into the slot while shooting.
 - Dark slide pull tab: 20mm wide, rounded corners, top 8mm over the cover lip behind it. Its stowage
   is a separate printed holder glued on the cover's outer face, because the cover prints outer face
   down and rails on that face would need support under the whole cover. One peg per rail drops
@@ -194,6 +197,7 @@ def _gate(c: Camera, part: Part) -> Part:
     # Front wall aperture and the dark slide slot (open through the top face).
     part -= box(-g.aperture_w / 2, g.aperture_w / 2, g.slot_y0, g.datum_y + 1, -g.aperture_h / 2, g.aperture_h / 2)
     part -= box(-g.slot_w / 2, g.slot_w / 2, g.slot_y0, g.slot_y0 + g.slot, g.slot_bottom_z, s.z_max + 1)
+    part -= box(-g.slot_w / 2, g.slot_w / 2, g.slot_y0, g.slot_y0 + g.trap_gap, s.z_max - g.trap_depth, s.z_max + 1)
     # Velvet groove on the body datum face.
     ix, iz = g.aperture_w / 2 + g.velvet_groove_inset, g.aperture_h / 2 + g.velvet_groove_inset
     ox, oz = ix + g.velvet_groove_w, iz + g.velvet_groove_w
@@ -442,14 +446,6 @@ def slot_mid_y(c: Camera) -> float:
     return c.gate.slot_y0 + c.gate.slot / 2
 
 
-def build_slot_plug(c: Camera) -> Part:
-    cv, s = c.cover, c.shell
-    y0 = slot_mid_y(c) - cv.plug_t / 2
-    part = box(-cv.slide_w / 2, cv.slide_w / 2, y0, y0 + cv.plug_t, s.z_max - cv.plug_depth, s.z_max + 0.01)
-    part += box(-cv.plug_grip_w / 2, cv.plug_grip_w / 2, y0, y0 + cv.plug_grip_t, s.z_max, s.z_max + cv.plug_grip_h)
-    return part
-
-
 # Dark slide stowage on the rear cover.
 
 def cover_outer_y(c: Camera) -> float:
@@ -516,6 +512,18 @@ def build_slide_holder(c: Camera) -> Part:
 
 # Bought parts.
 
+def trap_velvet_t(c: Camera) -> float:
+    """The velvet strip as it sits with the slide in: from the pocket's front face to the slide."""
+    return c.gate.slot_y0 + c.gate.trap_gap - (slot_mid_y(c) + c.cover.slide_t / 2)
+
+
+def build_slot_velvet(c: Camera) -> Part:
+    """The light-trap velvet strip glued on the mouth pocket's front face, drawn crushed by the slide."""
+    g, s = c.gate, c.shell
+    y1 = g.slot_y0 + g.trap_gap
+    return box(-g.slot_w / 2, g.slot_w / 2, y1 - trap_velvet_t(c), y1, s.z_max - g.trap_depth, s.z_max)
+
+
 def build_dark_slide(c: Camera) -> Part:
     cv = c.cover
     y0 = slot_mid_y(c) - cv.slide_t / 2
@@ -571,9 +579,9 @@ PARTS: dict[str, PartSpec] = {
                                  print_rotation=(180, 0, 0)),
     "turn_button_right": PartSpec(build_turn_button, place_turn_button(1), "film-back", "printed", "#4a4a52",
                                   print_rotation=(180, 0, 0)),
-    "slot_plug": PartSpec(build_slot_plug, at_origin, "film-back", "printed", "#4a4a52", print_rotation=(90, 0, 0)),
     "slide_holder": PartSpec(build_slide_holder, at_origin, "film-back", "printed", "#4a4a52", print_rotation=(90, 0, 0)),
     "dark_slide": PartSpec(build_dark_slide, at_origin, "film-back", "bought", "#1c1c1f"),
+    "slot_velvet": PartSpec(build_slot_velvet, at_origin, "film-back", "bought", "#141416"),
     "pressure_pad": PartSpec(build_pressure_pad, at_origin, "film-back", "bought", "#101012"),
     "hinge_pin": PartSpec(build_hinge_pin, at_origin, "film-back", "bought", METAL),
     "latch_pin": PartSpec(build_latch_pin, at_origin, "film-back", "bought", METAL),

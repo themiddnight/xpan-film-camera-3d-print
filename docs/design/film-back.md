@@ -152,7 +152,7 @@ Slot design:
 | Slot clearance | 0.8mm for the 0.5mm aluminum sheet | 0.3mm working clearance |
 | Stop | Mechanical stop at bottom | Prevents slide from hitting film path |
 | Pull tab | 20mm wide, top at Z = +43.0, 3mm corner radius | A pinch grip, not a carry loop. Its top is 8mm over the cover lip (Z = +35.0), which is the highest part behind the tab, and 11.5mm over the shell top. A thumb-and-finger pinch needs about 8mm of tab height and one fingertip pad (about 15mm) of width |
-| Slot plug | Printed 0.5mm tab, 10mm deep, with a grip | Goes into the slot mouth whenever the slide is out (section 17.2) |
+| Slot mouth light trap | Foam-backed velvet strip in a 1.2 x 7mm pocket at the mouth | Closes the mouth by itself whenever the slide is out (section 17.2). Nothing goes into the slot while shooting |
 
 The slide is one 71 x 58mm sheet: a 71 x 47mm plate (Z = -15 to +32) and the 20 x 11mm tab cut in one piece with it. The earlier 40mm handle with a 24 x 8mm finger hole stood 28mm over the plate. The tab stays below the advance knob and the rewind knob, so the slide adds no height to the camera.
 
@@ -492,7 +492,7 @@ Post-processing:
 
 ### Shooting / Advancing
 
-0. Before the first frame: pull the dark slide, stow it in its holder on the rear cover (section 5.1), and push the slot plug into the slot mouth. Reverse this before removing the body.
+0. Before the first frame: pull the dark slide and stow it in its holder on the rear cover (section 5.1); the velvet in the slot mouth closes behind it. Push the slide back in before removing the body.
 
 1. Make exposure.
 2. Press release button to lift pawl.
@@ -588,7 +588,7 @@ Origin: center of the 65 x 24mm gate, on the film plane. The film plane is the e
 
 Lateral fences: inner gap 35.3mm, from Y = 0 back to Y = -0.8.
 
-**Dark slide slot light trap.** The slot mouth on the top face stays open while shooting, and it leads straight to the gate. Line both faces of the mouth with flocking so the faces meet when the slot is empty, and insert a printed slot plug (0.5mm tab, 10mm deep, with a grip) whenever the slide is out.
+**Dark slide slot light trap.** The slot mouth on the top face stays open while shooting, and it leads straight to the gate. The top 7mm of the slot (down to Z = +24.5, above the gate and its velvet groove) widens forward from 0.8 to 1.2mm, and a strip of foam-backed velvet (1.5mm free) is glued on its front face. Only the front side widens, because the rear face is the 1.2mm gate plate. With the slide in, the slide crushes the strip to 0.55mm (the crushed limit is about 0.4mm). With the slide out, the pile presses 0.3mm onto the rear face and closes the mouth, the way the plush lips of a 135 cassette seal its slot. Nothing has to be put into the slot while shooting. Break the slide's bottom edge so it does not tear the pile. This trap cannot be proven in CAD: fog-test the first print (loaded film, slide out, an hour in direct sun, then develop) and add a hinged flap over the mouth if it leaks.
 
 ### 17.3 Rear stack
 
