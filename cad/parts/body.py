@@ -22,19 +22,22 @@ Values chosen where docs/design/simple-body.md gave a range or left one open:
   16mm across (nut corners 13.2mm plus two 1.2mm walls). The nut slides in from the +X side.
 - The boss runs out at 45 deg on its rear side and the rear pads start on the datum face, so the body
   prints rear face down without support. The latch slot is cut through the boss so the cantilever can flex.
-- Viewfinder: a two-frame sports finder, both frames printed. A hand-bent 1mm spring-wire rectangle
-  cannot hold the 38 x 14mm rear window's corners (its bend radius eats them), while a printed window
-  holds about 0.2mm, under 1% of the field. The printed knuckle also carries the detent cam.
-- Eye point 9.3mm behind the rear cover (Y -14.0) rather than 12-18mm behind the rear frame: with the
-  eye over the camera's back edge the nose would have to sit inside the film back. That sets the rear
-  window at 37.96 x 14.02; the front window (49.66 x 18.34) is as wide as its hinge can be and still
-  sit on the tapering body top, which sets the 9mm baseline.
-- Both leaves fold forward. Folding toward each other cannot nest: either folded leaf is longer than the
-  9mm between the hinges, and the front frame, folded back, would land on the film-back hook. The
-  front leaf folds first and lies 1.8mm over the body top; the rear leaf folds onto it, so its hinge
-  stands one leaf plus 0.3mm higher. Unfolding runs the other way.
-- Each knuckle has two flats 2.7mm from the axis (0.3mm inside its radius): one under it raised, one
-  under it folded, the leaf's front face lying in the second. A printed tongue in the hinge base presses
+- Viewfinder: a front frame and a small rear sight, both printed leaves. You hold the camera against your
+  face, so the eye point is the rear cover's outer face (Y -4.73); the front window then frames the
+  65 x 24 field from there on its own. The rear sight is optional: raised, its edges line up with the
+  front window's only when the eye is centred; folded, it is out of the way. A printed window holds its
+  corners to about 0.2mm, which a hand-bent wire rectangle cannot.
+- A round peep cannot do the rear sight's job: 20mm from the eye, a small hole shows only a few degrees.
+  So it is a 26.17 x 9.66mm window, sized by the same rule as the front one.
+- The front frame stands as far forward as its hinge can while the knuckles stay outside the field's
+  lower corners and the hinge base fits the tapering body top (axle Y +28). The finder axis sits just
+  over the height at which the field's lower edge grazes the M42 body cap rim.
+- They fold toward each other. The rear sight folds forward first and must swing under the raised front
+  frame (its tip passes about 2mm short of it) yet lie below the field when folded; its axle sits 1.1mm over the
+  lowest a hinge base carries to satisfy both. The front frame folds back over it, its knuckles inboard
+  of the rear sight's, so neither hinge stands under the other leaf. Unfold the front frame first.
+- Each knuckle has two flats 2.9mm from the axis (0.3mm inside its radius, 1.25mm of wall over the bore):
+  one under it raised, one under it folded (the rear sight's plate face lies in it). A printed tongue in the hinge base presses
   a pad on the lower flat; turning the leaf pushes the pad 0.3mm down, so each pose clicks in, and the flat on
   the pad sets the raised frame square. The tongue flexes into a 0.6mm recess in the body top.
 - Pin stubs (3mm rod, 6mm long) press into the cheeks and turn in the knuckles' 3.3mm bores; two knuckles
@@ -201,48 +204,55 @@ def build_tripod_nut(c: Camera) -> Part:
 
 
 # Viewfinder: two printed leaves, each on two 3mm pin stubs pressed into a hinge base on the body top.
-# Both fold forward (-90 deg about +X): the front leaf first, low; the rear leaf on top of it.
+# They fold toward each other: the rear sight forward first, low; then the front frame back over it.
 
-FOLD_DEG = -90.0
-LEAVES = ("rear", "front")
+FOLD_DEG = 90.0
+LEAVES = ("rear", "front")  # fold order
 
 
 @dataclass(frozen=True)
 class Leaf:
+    which: str
     axle_y: float
     axle_z: float
     w: float
     h: float
+    fold: float  # deg about +X that lays the leaf flat: negative folds it forward, positive back
 
 
 def leaf(c: Camera, which: str) -> Leaf:
     v = c.viewfinder
-    front_z = c.body.z_max + v.base_t + c.fit.fdm_clearance + v.knuckle_d / 2
-    if which == "front":
-        return Leaf(v.front_axle_y, front_z, v.front_w, v.front_h)
-    return Leaf(v.rear_axle_y, front_z + v.leaf_t + v.stack_gap, v.rear_w, v.rear_h)
+    if which == "rear":
+        return Leaf("rear", v.rear_axle_y, v.rear_axle_z, v.rear_w, v.rear_h, -FOLD_DEG)
+    return Leaf("front", v.front_axle_y, v.front_axle_z, v.front_w, v.front_h, FOLD_DEG)
+
+
+def min_axle_z(c: Camera) -> float:
+    """Lowest axle a hinge base can carry: the knuckle over the base plate."""
+    v = c.viewfinder
+    return c.body.z_max + v.base_t + c.fit.fdm_clearance + v.knuckle_d / 2
 
 
 def fold_axis(c: Camera, which: str) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
-    """Hinge axis direction and a point on it; FOLD_DEG about it lays the leaf flat."""
+    """Hinge axis direction and a point on it; the leaf's fold about it lays the leaf flat."""
     lf = leaf(c, which)
     return (1.0, 0.0, 0.0), (0.0, lf.axle_y, lf.axle_z)
 
 
 def _flat(c: Camera) -> float:
-    """Axis to each knuckle flat; the leaf's front face lies in one, so folded it lands on the pad."""
+    """Axis to each knuckle flat; the leaf's plate face lies in one, so folded it lands on the pad."""
     v = c.viewfinder
     return v.knuckle_d / 2 - v.detent_depth
 
 
-def _knuckle_x(c: Camera, lf: Leaf) -> tuple[float, float]:
-    v = c.viewfinder
-    x_in = lf.w / 2 + v.knuckle_inset
+def knuckle_x(c: Camera, which: str) -> tuple[float, float]:
+    v, lf = c.viewfinder, leaf(c, which)
+    x_in = lf.w / 2 + (v.rear_knuckle_inset if which == "rear" else v.front_knuckle_inset)
     return x_in, x_in + v.knuckle_len
 
 
-def _cheek_x(c: Camera, lf: Leaf) -> tuple[float, float]:
-    x0 = _knuckle_x(c, lf)[1] + c.fit.fdm_clearance
+def cheek_x(c: Camera, which: str) -> tuple[float, float]:
+    x0 = knuckle_x(c, which)[1] + c.fit.fdm_clearance
     return x0, x0 + c.viewfinder.cheek_w
 
 
@@ -252,29 +262,35 @@ def xcyl(r, x0, x1, y=0.0, z=0.0) -> Part:
 
 
 def build_leaf(c: Camera, which: str) -> Part:
+    """The window plate stands just in front of the axle, its front face the sighting plane. The knuckle
+    keeps two flats: the bottom one, and the one on the side the leaf folds toward, which turns to the
+    bottom when folded."""
     v, lf = c.viewfinder, leaf(c, which)
     r, a = v.knuckle_d / 2, _flat(c)
     y, z = lf.axle_y, lf.axle_z
-    x_in, x_out = _knuckle_x(c, lf)
+    side = 1 if lf.fold < 0 else -1
+    x_in, x_out = knuckle_x(c, which)
     outer = lf.w / 2 + v.bar
     part = box(-outer, outer, y + a - v.leaf_t, y + a, z - a, v.axis_z + lf.h / 2 + v.bar)
     for s in (-1, 1):
         part += box(*sorted((s * lf.w / 2, s * x_out)), y + a - v.leaf_t, y + a, z - a, z + r)
         part += xcyl(r, *sorted((s * x_in, s * x_out)), y=y, z=z)
     span = x_out + 1
-    part -= box(-span, span, y + a, y + r + 1, z - r - 1, z + r + 1)
+    part -= box(-span, span, *sorted((y + side * a, y + side * (r + 1))), z - r - 1, z + r + 1)
     part -= box(-span, span, y - r - 1, y + r + 1, z - r - 1, z - a)
     # The corner between the two flats swings lowest as the leaf folds; keep it inside the knuckle radius.
-    part -= box(-span, span, y, y + r, z - r, z) - xcyl(r, -span, span, y=y, z=z)
+    part -= box(-span, span, *sorted((y, y + side * r)), z - r, z) - xcyl(r, -span, span, y=y, z=z)
     part -= box(-lf.w / 2, lf.w / 2, y - r - 1, y + r + 1, v.axis_z - lf.h / 2, v.axis_z + lf.h / 2)
-    return part - xcyl(c.fit.shaft_bore / 2, -span, span, y=y, z=z)
+    for s in (-1, 1):
+        part -= xcyl(c.fit.shaft_bore / 2, *sorted((s * (x_in - 1), s * span)), y=y, z=z)
+    return part
 
 
 def _tongue(c: Camera, lf: Leaf, s: int) -> tuple[float, float]:
     """X span of the detent tongue on one side, root to tip."""
     v = c.viewfinder
-    x_in = _knuckle_x(c, lf)[0]
-    tip = _cheek_x(c, lf)[0] - v.tongue_slot
+    x_in = knuckle_x(c, lf.which)[0]
+    tip = cheek_x(c, lf.which)[0] - v.tongue_slot
     return s * (x_in - v.tongue_len), s * tip
 
 
@@ -286,7 +302,7 @@ def build_hinge(c: Camera, which: str) -> Part:
     """Base plate with two cheeks holding the pin stubs and a sprung detent tongue under each knuckle."""
     v, lf, f = c.viewfinder, leaf(c, which), c.fit
     y, z0 = lf.axle_y, c.body.z_max
-    x0, x1 = _cheek_x(c, lf)
+    x0, x1 = cheek_x(c, lf.which)
     y0, y1 = y - v.base_d / 2, y + v.base_d / 2
     part = box(-x1, x1, y0, y1, z0, z0 + v.base_t)
     for s in (-1, 1):
@@ -299,7 +315,7 @@ def build_hinge(c: Camera, which: str) -> Part:
             edge = y + side * half
             part -= box(*sorted((root, tip + s * slot)), *sorted((edge, edge + side * slot)), z0 - 1, z0 + v.base_t + 1)
         part -= box(*sorted((tip, tip + s * slot)), y - half - slot, y + half + slot, z0 - 1, z0 + v.base_t + 1)
-        x_in = _knuckle_x(c, lf)[0]
+        x_in = knuckle_x(c, lf.which)[0]
         part += box(*sorted((s * x_in, tip)), y - half, y + half, z0 + v.base_t, lf.axle_z - _flat(c))
     return part - xcyl(f.pin_press_hole / 2, -x1 - 1, x1 + 1, y=y, z=lf.axle_z)
 
@@ -307,7 +323,7 @@ def build_hinge(c: Camera, which: str) -> Part:
 def build_pins(c: Camera, which: str) -> Part:
     """Two 3mm rod stubs, pressed into the cheeks, the leaf's knuckles turning on them."""
     lf = leaf(c, which)
-    x_in, x1 = _knuckle_x(c, lf)[0] + c.fit.fdm_clearance, _cheek_x(c, lf)[1]
+    x_in, x1 = knuckle_x(c, lf.which)[0] + c.fit.fdm_clearance, cheek_x(c, lf.which)[1]
     r = c.measured.rod_d / 2
     return xcyl(r, -x1, -x_in, y=lf.axle_y, z=lf.axle_z) + xcyl(r, x_in, x1, y=lf.axle_y, z=lf.axle_z)
 

@@ -23,7 +23,7 @@ It intentionally avoids a mirror, ground glass, and coupled shutter system.
 | Front mount | M42 x 1mm female, from a bought M42 rear lens cap with its centre cut out, glued into the printed front plate | Printed M42 threads are unreliable on FDM |
 | Film format | 65 x 24mm | Film back owns gate |
 | Body-to-back lock | Top hook + bottom latch | Matches film back interface |
-| Viewfinder | Two-frame sports finder, both frames fold flat | Frames the 65 x 24 field; nothing behind the camera |
+| Viewfinder | Folding front frame and optional rear sight, the eye at the rear cover | Frames the 65 x 24 field; nothing behind the camera |
 | Material | Black PETG | FDM |
 
 ---
@@ -53,12 +53,25 @@ Detailed interface geometry is defined in [film-back.md](film-back.md).
 
 ## 5. Viewfinder
 
-A two-frame sports finder on the body top (revised 2026-10-22). The first wire frame put a peep 33mm behind the camera's back, and its 104mm front frame stood far wider than the body.
+A front frame with an optional rear sight on the body top (revised 2026-10-22). The first wire frame put a peep 33mm behind the camera's back, and its 104mm front frame stood far wider than the body.
 
-You line up two rectangles: a small rear frame (the eyepiece) at the body's rear edge and a larger front frame 9mm ahead of it. Both have the film frame's 65:24 shape and sit on one line parallel to the lens axis. When the rear frame's edges cover the front frame's edges exactly, your eye is at the eye point and the front frame shows the 65 x 24 field at 50mm. If the edges do not meet, move your head until they do.
+Hold the camera against your face, with your eye at the rear cover. From there the front frame shows the 65 x 24 field at 50mm. The rear sight is a small window of the same 65:24 shape at the body's rear edge. Raise it when you want to centre your eye more exactly: its edges line up with the front frame's edges only when your eye is centred. Otherwise leave it folded. Without it, an eye 5mm off centre shifts the framing by about 7 degrees. Pressing the camera to your face fixes the eye distance to about +/-3mm, which changes the field by about +/-7%.
 
 | Parameter | Value | Notes |
 |---|---:|---|
+| Field | 0.65 across, 0.24 up (tan of the half-angles) | 32.5 / 50 and 12 / 50; the checks measure it on the built frames |
+| Eye point | Y = -4.73, Z = +40.4 | The rear cover's outer face: the camera rests against your face |
+| Front frame | 46.32 x 17.10mm window, plane at Y = +30.9 | Window width = 1.3 x (plane - eye). It stands as far forward as its hinge can while it stays outside the field and fits the tapering body top |
+| Rear sight | 26.17 x 9.66mm window, plane at Y = +15.4 | Same rule. A round peep cannot do this job: 20mm from the eye, a small hole shows only a few degrees |
+| Finder axis | Z = +40.4 | The field's lower edge passes 0.26mm over the M42 body cap rim |
+| Frames | Printed PETG leaves, 1.6mm thick, 1.6mm border | A hand-bent 1mm wire cannot hold the windows' corners; a printed window holds about 0.2mm |
+| Hinges | Two knuckles per leaf on 3mm rod stubs pressed into a printed hinge base glued to the body top. The front knuckles sit just outside the field's corners; the rear knuckles sit outboard of the folded front frame | Nothing crosses the field |
+| Detent | Two flats on each knuckle, 0.3mm inside its 6.4mm diameter: one at the bottom and one on the side the leaf folds toward. A sprung tongue in the hinge base presses a pad on the lower flat | Each leaf clicks into its raised and folded positions. The flat on the pad holds the raised leaf square |
+| Fold | The rear sight folds forward, the front frame folds back over it. Fold the rear sight first. Unfold the front frame first | The rear sight swings freely under the raised front frame and lies below the field when folded. Folded, the finder rises 9.0mm over the body top (Z = +35.5) and stays inside the body outline |
+
+Pull the dark slide before framing. The slide's handle stands in the line of sight while the slide is in, but it does not touch the frames.
+
+---|---:|---|
 | Field | 0.65 across, 0.24 up (tan of the half-angles) | 32.5 / 50 and 12 / 50; the checks measure it on the built frames |
 | Rear frame (eyepiece) | 37.96 x 14.02mm window, plane at Y = +15.2 | 11mm in front of the body's rear face |
 | Front frame | 49.66 x 18.34mm window, plane at Y = +24.2 | Rule: front - rear = 2 x 0.65 x 9mm across |
@@ -95,7 +108,7 @@ Same origin and axes as [film-back.md](film-back.md) section 17: film plane at Y
 | Pinhole plane | Y = +50.0 (+/-0.3) |
 | Tripod socket | Stainless 1/4"-20 hex nut captured in a printed hex pocket inside a 16mm boss at Y = +32, X = 0, with 1.2mm of plastic under the nut. The nut slides in from the +X side. No 1/4"-20 heat-set insert is sold on Lazada TH |
 | Feet | Seat plane Z = Cover.hinge_axis_z - knuckle_od / 2 - 0.75 = -38.05 (derived, so it follows the hinge). Three feet end in it: the tripod boss (the boss runs out at 45 degrees on its rear side to print without support) and two rear pads at X = +/-27 to +/-35, Y from the datum face to +14. Every other part stays at least 0.5mm above the plane, so a tripod plate of any size seats flat. A 5mm screw engages 3.8mm (3.0 threads) of the nut; the check asks for 2.5 threads, which a 4.5mm screw still meets. On a table the rear cover can open to about 90 degrees (its lowest point is then 0.5mm above the seat plane); at the 100 degree film-loading angle its edge dips about 11mm below the table, so load film with the camera held up or tilted back |
-| Viewfinder | Two-frame sports finder (section 5). Rear hinge axis Y = +12.5, Z = +32.9; front hinge axis Y = +21.5, Z = +31.0; both fold -90 degrees about +X. Hinge bases sit on the body top, located by two 3mm pegs each, and the body has a 0.6mm relief under each detent tongue |
+| Viewfinder | Front frame and rear sight (section 5). Rear hinge axis Y = +12.5, Z = +32.3, folds -90 degrees about +X; front hinge axis Y = +28.0, Z = +31.2, folds +90 degrees. Hinge bases sit on the body top, located by two 3mm pegs each, and the body has a 0.6mm relief under each detent tongue |
 
 M42 mount values: see section 8.
 

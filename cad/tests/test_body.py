@@ -62,31 +62,47 @@ SEEDS: dict = {
         {"body and pinhole printed parts fit the print bed (geometry)"},
     ),
     "front finder frame 2mm too wide": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_w=51.66)),
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_w=48.32)),
         {"finder frames give the 65 x 24 field from one eye point (geometry)"},
     ),
-    "rear finder frame cut 3:1 instead of 65:24": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_h=12.65)),
+    "rear sight cut 3:1 instead of 65:24": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_h=8.72)),
         {"finder frames give the 65 x 24 field from one eye point (geometry)"},
     ),
-    "rear finder hinge on the film back, behind the body rear face": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_axle_y=6.0, front_axle_y=15.0)),
-        {"finder stays ahead of the body rear face (geometry)"},
+    "frames sized for an eye 10mm behind the rear cover": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_w=39.17, rear_h=14.46, front_w=59.32, front_h=21.90)),
+        {"finder stays ahead of the body rear face, eye point on the rear cover (geometry)"},
+    ),
+    "rear sight hinge on the film back, behind the body rear face": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_axle_y=3.0)),
+        {"finder stays ahead of the body rear face, eye point on the rear cover (geometry)"},
     ),
     "finder axis 1mm lower: the M42 body cap rim shows in the bottom of the view": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, axis_z=41.4)),
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, axis_z=39.4)),
         {"finder sight lines clear in the shooting pose (geometry)"},
     ),
-    "front finder hinge 6mm forward: the folded frame overhangs the body front": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_axle_y=27.5, front_w=57.46, front_h=21.22)),
-        {"folded finder lies inside the body top outline and under the height limit (geometry)"},
+    "front knuckles 1mm inboard: they show in the field's lower corners": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_knuckle_inset=-0.3)),
+        {"finder sight lines clear in the shooting pose (geometry)"},
     ),
-    "rear hinge no higher than the front: the rear leaf folds into the front leaf": (
-        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, stack_gap=-1.6)),
+    "rear sight hinge 2mm higher: folded, it shows in the bottom of the view": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_axle_z=34.3)),
+        {"finder sight lines clear in the shooting pose (geometry)"},
+    ),
+    "front frame 2mm closer: the rear sight hits it as it folds": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_axle_y=26.0, front_w=43.72, front_h=16.14)),
         {"finder folds and unfolds without a clash (geometry)"},
+    ),
+    "front finder hinge 3mm forward: it overhangs the tapering body top": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_axle_y=31.0, front_w=50.22, front_h=18.54)),
+        {"folded finder lies inside the body top outline and under the height limit (geometry)"},
     ),
     "round knuckles: nothing holds the frames up": (
         replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, detent_depth=0.0)),
         {"finder detents hold each frame raised and folded (geometry)"},
+    ),
+    "body tilted 15 deg off the latch: the tongue jams in the hook slot": (
+        replace(CAMERA, body_link=replace(CAMERA.body_link, detach_deg=15.0)),
+        {"every mechanism moves through its range without a clash (geometry)"},
     ),
 }

@@ -456,6 +456,9 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
     "finder_rear": {
         frozenset(("viewfinder_rear_frame", "viewfinder_rear_hinge")): "the knuckle round pushes the sprung detent pads 0.3mm down between the two clicks; the body check bounds it",
     },
+    "body_detach": {
+        frozenset(("body", "latch_pin")): "you press the latch beam down so its hook passes under the pin; the rigid model shows the beam unflexed",
+    },
     "pawl_ride": {
         frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's sideways arc; a straight tube cannot",
     },

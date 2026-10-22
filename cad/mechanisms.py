@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from params import Camera
-from parts import body, pinhole, shell, transport
+from parts import PARTS, body, pinhole, shell, transport
 
 Vec = tuple[float, float, float]
 
@@ -204,23 +204,36 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             requires=(("shutter_lock", 1.0),),
         ),
         Mechanism(
-            "finder_front", "Fold front finder frame",
-            (Drive("viewfinder_front_frame", "rotate", *_fold(c, "front")),),
-            Readout(-body.FOLD_DEG, "deg folded"),
+            "finder_rear", "Fold rear sight",
+            (Drive("viewfinder_rear_frame", "rotate", *_fold(c, "rear")),),
+            Readout(abs(body.leaf(c, "rear").fold), "deg folded"),
         ),
         Mechanism(
-            "finder_rear", "Fold rear finder frame",
-            (Drive("viewfinder_rear_frame", "rotate", *_fold(c, "rear")),),
-            Readout(-body.FOLD_DEG, "deg folded"),
-            # The rear frame lies on the folded front frame; raised, the front frame stands in its way.
-            requires=(("finder_front", 1.0),),
+            "finder_front", "Fold front finder frame",
+            (Drive("viewfinder_front_frame", "rotate", *_fold(c, "front")),),
+            Readout(abs(body.leaf(c, "front").fold), "deg folded"),
+            # The front frame folds back over the rear sight, so the sight lies down first.
+            requires=(("finder_rear", 1.0),),
+        ),
+        Mechanism(
+            "body_detach", "Swing the body off the latch",
+            # Press the latch beam down and the body tilts about its tongue in the film-back hook (film-back.md 11.2).
+            tuple(Drive(name, "rotate", (1.0, 0.0, 0.0), c.body_link.detach_deg, _hook_pivot(c))
+                  for name, spec in PARTS.items() if spec.group in ("body", "pinhole")),
+            Readout(c.body_link.detach_deg, "deg tilted"),
         ),
     )
 
 
+def _hook_pivot(c: Camera) -> Vec:
+    """The body's tongue top, mid-thickness, which stays in the hook slot as the bottom swings out."""
+    k = c.body_link
+    return 0.0, (k.tongue_y[0] + k.tongue_y[1]) / 2, k.tongue_top_z
+
+
 def _fold(c: Camera, which: str) -> tuple[Vec, float, Vec]:
     axis, origin = body.fold_axis(c, which)
-    return axis, body.FOLD_DEG, origin
+    return axis, body.leaf(c, which).fold, origin
 
 
 def frame_cycle(c: Camera) -> Cycle:

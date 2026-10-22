@@ -303,6 +303,7 @@ class BodyLink:
     body_rear_wall: float = 2.5
     latch_cantilever_top_z: float = -27.0
     latch_hook_h: float = 1.8         # reaches 0.3mm above the pin centre so the pin cannot ride out
+    detach_deg: float = 5.0           # tilt the tongue's clearance in the hook slot allows (film-back.md 17.8)
     # Film-back side of the interface (film-back.md 17.8); added by the shell stream.
     hook_half_x: float = 36.0
     hook_front_y: float = 7.7
@@ -428,27 +429,30 @@ class Body:
 
 @dataclass(frozen=True)
 class Viewfinder:
-    """Two-frame sports finder on the body top (simple-body.md 5 and 7). Owned by cad/parts/body.py.
+    """Front frame and optional rear sight on the body top (simple-body.md 5 and 7). Owned by cad/parts/body.py.
 
-    Each frame is a printed leaf whose front face is its window plane. Seen from the eye point, the
-    two windows line up when (front - rear) / 2 = field x (front plane - rear plane), with the field
-    of the 65 x 24 frame at 50mm: 0.65 across, 0.24 up. The eye then sits rear_w / 1.3 behind the
-    rear plane. Planes: rear_axle_y + 2.7 = 15.2 and front_axle_y + 2.7 = 24.2; eye at Y -14.0,
-    9.3mm behind the rear cover's outer face, so the nose can rest on the back as on a rangefinder.
+    The eye point is the rear cover's outer face, Y -4.73: you frame with the camera against your face.
+    Each window has the 65:24 shape, sized width = 1.3 x (window plane - eye), the field of the 65 x 24
+    frame at 50mm being 0.65 across and 0.24 up. Each window plane is its leaf's front face, axle_y + 2.9.
+    The rear sight folds forward, under the raised front frame, and lies low enough to stay out of the field;
+    the front frame folds back over it.
     """
-    axis_z: float = 42.4              # the field's lower edge passes 0.5mm over the M42 body cap rim (Z 26.5, Y 50)
+    axis_z: float = 40.4              # 0.26mm over 40.14, where the field's lower edge grazes the M42 body cap rim (Z 26.5, Y 50)
     rear_axle_y: float = 12.5         # rear hinge's back edge 0.8mm in front of the film-back top hook
-    front_axle_y: float = 21.5        # folded forward, the front leaf ends 5mm short of the body front
-    rear_w: float = 37.96             # 1.3 x 29.2 (eye to rear plane)
-    rear_h: float = 14.02             # rear_w x 24 / 65
-    front_w: float = 49.66            # 1.3 x 38.2 (eye to front plane)
-    front_h: float = 18.34            # front_w x 24 / 65
+    rear_axle_z: float = 32.3         # 1.1mm over the lowest: the folded sight stays under the field, yet swings clear of the front frame
+    front_axle_y: float = 28.0        # the front hinge, kept outside the field, fits the tapering body top up to about Y 28
+    front_axle_z: float = 31.2        # the lowest a hinge base carries (min_axle_z); folded, the frame lies over the folded sight
+    rear_w: float = 26.17             # 1.3 x 20.13 (eye to rear plane)
+    rear_h: float = 9.66              # rear_w x 24 / 65
+    front_w: float = 46.32            # 1.3 x 35.63 (eye to front plane)
+    front_h: float = 17.10            # front_w x 24 / 65
     leaf_t: float = 1.6
     bar: float = 1.6                  # border round each window
-    knuckle_d: float = 6.0            # on a 3mm pin: Fit.shaft_bore + 2 x min_wall, rounded up
+    knuckle_d: float = 6.4            # flats 2.9 from the axis leave min_wall round the 3.3mm bore
     detent_depth: float = 0.3         # knuckle flats sit this far inside its radius; the click
     knuckle_len: float = 3.0
-    knuckle_inset: float = 0.6        # knuckle inner end outboard of the window edge
+    front_knuckle_inset: float = 0.7  # front knuckles just outside the field's corners behind the window
+    rear_knuckle_inset: float = 12.2  # rear knuckles outboard of the folded front frame, 0.5mm clear
     cheek_w: float = 3.0              # pin pressed this deep
     base_t: float = 1.2               # hinge base plate and detent tongue thickness
     base_d: float = 8.0               # hinge base along Y: tongue + two slots + two 1.4mm strips
@@ -459,7 +463,6 @@ class Viewfinder:
     peg_d: float = 3.0                # two pegs on the body top locate each glued hinge base
     peg_h: float = 1.0                # under the 1.2mm base plate, so the plate's holes run through
     peg_inset: float = 3.0            # peg centre inboard of the tongue root
-    stack_gap: float = 0.3            # folded rear leaf over the folded front leaf
     fold_height: float = 9.5          # folded, nothing rises more than this above the body top (Z 36.0)
 
 
