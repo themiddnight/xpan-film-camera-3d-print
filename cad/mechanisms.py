@@ -199,7 +199,7 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
         ),
         Mechanism(
             "shutter", "Open shutter",
-            tuple(Drive(p, "slide", (1.0, 0.0, 0.0), c.pinhole.blade_travel) for p in ("shutter_blade", "shutter_knob")),
+            tuple(Drive(p, "slide", (1.0, 0.0, 0.0), c.pinhole.blade_travel) for p in pinhole.SLIDING),
             Readout(c.pinhole.blade_travel, "mm open"),
             requires=(("shutter_lock", 1.0),),
         ),

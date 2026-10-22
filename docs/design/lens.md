@@ -29,20 +29,36 @@ The first working module should be the pinhole module because it is the simplest
 | Hole check | Measure under magnification or scan at 2400dpi | Target 0.30mm +/-0.03 |
 | Shutter | Sliding blade in a printed housing glued to the cap front | Simple manual exposure |
 | Blade material | 0.5mm aluminum, offcut of the dark slide sheet | One purchase covers both; painted matte black |
-| Handle | Printed ridged knob glued on the blade's +X tongue | Stands 10.5mm past the housing edge, 14mm tall; slides 10mm |
+| Handles | Two printed push tabs, one glued on each end of the blade | Push the -X tab in to open, the +X tab in to close; 3.5mm along X, 20.5mm tall; slide 10mm |
 | Travel stops | Stadium slot in the blade around the lock pivot pin | Stops the blade at closed and at 10mm open, and keeps it captive |
-| Safety | Captive lock lever on a pressed 3.0mm steel pin, with a click detent | Positive lock in a bag; nothing to remove |
+| Safety | Captive lock lever on top of the housing, on a pressed 3.0mm steel pin, with a click detent | Positive lock in a bag; nothing to remove |
 
 ### 2.1 Shutter operation
 
-To open, push the lock lever's thumb pad toward the lens axis until it clicks (25 degrees), then
-slide the knob outward until it stops. The blade's 4mm hole is then on the pinhole. To close, slide
-the knob back until it stops, then push the pad back until it clicks.
+Every move is a push. Nothing has to be gripped and pulled.
 
-The lever's tooth sits 2.5mm deep in a notch in the knob's bottom face. The pivot is level with the
-middle of that engagement, so a push on the knob loads the tooth straight through the pivot and
-cannot turn the lever: the lock holds by shape, not friction. The tooth can only enter the notch
-with the blade closed.
+To open, push the lock lever's thumb pad, on top of the housing, toward +X until it clicks (25
+degrees). Then push the -X tab in toward the housing until it stops. The blade's 4mm hole is then on
+the pinhole. To close, push the +X tab in until it stops, then push the pad back (-X) until it
+clicks. Seen from the front, opening is two pushes in one direction and closing is two pushes in the
+other.
+
+The state reads by feel. With the shutter closed, the -X tab stands 14mm past its housing edge and
+the +X tab 4mm. With it open, the two swap. The tab that stands out is always the one to push next.
+The near-flush tab stops 0.5mm off the housing, so the stop pin, not the tab, ends the travel.
+
+The blade is a 23mm tall middle that never leaves the housing, with a 17.5mm tall tongue out of
+each end. Each tongue is glued into a 2.3mm deep slit in its tab. The lever's 4mm tooth drops 2.5mm
+into a notch in the top edge of the -X tongue, 2mm clear of the housing edge. The pivot sits 7.5mm
+above the pinhole, level with the middle of that engagement, so a push on the -X tab loads the tooth
+straight through the pivot and cannot turn the lever: the lock holds by shape, not friction. The
+notch is outside the housing only while the shutter is closed, and with the shutter open the -X tab
+sits under the tooth, so the lever cannot be locked with the shutter open. Unlocked, the tooth swings
+up clear of the tongue and of the tab that slides under it.
+
+The same pin carries the blade's stop slot. The thumb pad stands on a flag 12.5mm above
+the pivot, below the finder's field: the finder check holds every part 0.5mm clear of its sight
+lines.
 
 The lever stays where it is put. An arc spring finger on the lever clicks into one of two notches in
 a printed rail on the housing face, 0.4mm deep, at the locked and unlocked positions. A printed cap

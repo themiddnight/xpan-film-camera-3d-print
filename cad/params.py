@@ -465,7 +465,7 @@ class Viewfinder:
 
 @dataclass(frozen=True)
 class PinholeModule:
-    """Shutter housing, blade, slider knob and captive lock lever on the M42 body cap (lens.md 2).
+    """Shutter housing, blade, two push tabs and captive lock lever on the M42 body cap (lens.md 2).
 
     Owned by cad/parts/pinhole.py. X and Z below are camera coordinates on the housing front face.
     """
@@ -481,55 +481,59 @@ class PinholeModule:
     front_plate: float = 1.5
     rear_opening_d: float = 4.0
     front_opening: tuple = (7.0, 4.0)
-    # Blade: 0.5mm aluminium, closed pose. +X opens: the blade hole moves onto the pinhole.
+    # Blade: 0.5mm aluminium, closed pose. +X opens: the blade hole moves onto the pinhole. A full-height
+    # middle carries the stop slot; lower tongues run out of both housing ends into the push tabs.
     blade_t: float = 0.5
-    blade_x0: float = -16.0           # -X end, 2mm out of the housing so it can be pushed back by hand
     blade_h: float = 23.0
+    body_x0: float = -13.0            # full-height part, closed; it never leaves the housing
+    body_x1: float = 3.5
     blade_side_gap: float = 0.5
     blade_travel: float = 10.0
     blade_hole_d: float = 4.0
-    tongue_len: float = 7.5           # narrow end glued into the knob slit
-    tongue_h: float = 11.0
     stop_clearance: float = 0.15      # stop slot around the pivot pin, each side; stops sit +/-0.15 from nominal
     # Blade detent: a bump on the channel's rear face, touching the centred blade, and one dimple hole
     # in the blade for each end of the travel.
     detent_x: float = 4.0
-    detent_z: float = 8.0
+    detent_z: float = -7.0
     detent_d: float = 1.2
     dimple_d: float = 1.5
-    # Slider knob, glued on the tongue just outside the housing's +X edge.
-    knob_gap: float = 0.5             # to the housing edge when closed
-    knob_len: float = 10.0
-    knob_h: float = 14.0
-    knob_rear_gap: float = 0.3        # rear face to the body cap front face it slides over
-    knob_proud: float = 4.0           # front face ahead of the housing front face
+    # Push tabs, glued on the tongue ends. Push the -X tab in to open and the +X tab in to close. At
+    # each end of the travel the tab that moves next stands out by the travel more than the other.
+    tab_gap: float = 0.5              # near-flush tab to the housing edge
+    tab_len: float = 3.5              # along X
+    tab_wall: float = 1.5             # above and below the tongue slit
+    tab_end_wall: float = 1.2         # push face to the slit bottom
+    tab_rear_gap: float = 0.3         # rear face to the body cap front face it slides over
+    tab_proud: float = 4.0            # front face ahead of the housing front face
     glue_gap: float = 0.05
-    ridge_pitch: float = 1.6
-    ridge_w: float = 0.6
-    ridge_h: float = 0.5
-    # Lock lever on the housing front face. Its pivot sits at the height of the middle of the tooth's
-    # engagement, so the knob's push on the tooth runs through the pivot and cannot turn the lever.
-    lock_pivot_x: float = 9.0
+    # Lock lever on the upper housing front face, its thumb pad above the housing. The pivot pin also
+    # carries the blade's stop slot. The tooth drops into a notch in the top edge of the -X tongue,
+    # which is outside the housing only while the shutter is closed. The tongue's top edge sits half
+    # the engagement above the pivot, so the push on the tooth runs through the pivot.
+    lock_pivot_x: float = 0.0
+    lock_pivot_z: float = 7.5
     lock_gap: float = 0.2             # lever rear face to the housing front face
     lock_t: float = 3.0
     lock_hub_r: float = 4.0
-    lock_unlock_deg: float = 25.0     # about +Y; the tooth swings down out of the knob notch
+    lock_unlock_deg: float = 25.0     # about +Y; the tooth swings up out of the notch, the pad toward +X
     lock_arm_w: float = 3.2
-    tooth_x: float = 18.0
-    tooth_w: float = 3.0
-    tooth_engage: float = 2.5         # into the knob's bottom face
+    tooth_x: float = -18.0            # 2mm clear of the housing edge, so it swings up past the corner
+    tooth_w: float = 4.0
+    tooth_h: float = 4.0
+    tooth_engage: float = 2.5         # into the tongue's top edge
+    tooth_behind: float = 0.45        # reaches this far behind the blade's rear face
     notch_clearance: float = 0.3
     flag_w: float = 4.0
-    flag_len: float = 14.5            # pivot to the thumb pad centre, straight down when locked
+    flag_len: float = 12.5            # pivot to the thumb pad centre, straight up when locked
     pad_w: float = 8.0
     pad_h: float = 5.0
-    pad_depth: float = 6.0            # front-to-back, from the lever's rear face
+    pad_depth: float = 6.0            # back from the lever's front face, over the housing top
     # Lever detent: an arc spring finger on the lever, concentric with the pivot, whose nose clicks into
     # two notches in a printed rail on the housing face.
-    finger_r: float = 8.0             # beam centre radius
+    finger_r: float = 6.5             # beam centre radius
     finger_t: float = 1.2
-    finger_root_deg: float = -100.0   # angles in the lever's X-Z frame, 0 = +X, -90 = straight down
-    finger_tip_deg: float = -150.0
+    finger_root_deg: float = 85.0     # angles in the lever's X-Z frame, 0 = +X, 90 = straight up
+    finger_tip_deg: float = 30.0
     nose_r: float = 0.7
     detent_depth: float = 0.4         # radial flex of the finger tip between the notches
     rail_w: float = 1.7
