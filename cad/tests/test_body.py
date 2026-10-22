@@ -61,4 +61,32 @@ SEEDS: dict = {
         replace(CAMERA, body=replace(CAMERA.body, rear_half_w=95.0)),
         {"body and pinhole printed parts fit the print bed (geometry)"},
     ),
+    "front finder frame 2mm too wide": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_w=51.66)),
+        {"finder frames give the 65 x 24 field from one eye point (geometry)"},
+    ),
+    "rear finder frame cut 3:1 instead of 65:24": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_h=12.65)),
+        {"finder frames give the 65 x 24 field from one eye point (geometry)"},
+    ),
+    "rear finder hinge on the film back, behind the body rear face": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, rear_axle_y=6.0, front_axle_y=15.0)),
+        {"finder stays ahead of the body rear face (geometry)"},
+    ),
+    "finder axis 1mm lower: the M42 body cap rim shows in the bottom of the view": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, axis_z=41.4)),
+        {"finder sight lines clear in the shooting pose (geometry)"},
+    ),
+    "front finder hinge 6mm forward: the folded frame overhangs the body front": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, front_axle_y=27.5, front_w=57.46, front_h=21.22)),
+        {"folded finder lies inside the body top outline and under the height limit (geometry)"},
+    ),
+    "rear hinge no higher than the front: the rear leaf folds into the front leaf": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, stack_gap=-1.6)),
+        {"finder folds and unfolds without a clash (geometry)"},
+    ),
+    "round knuckles: nothing holds the frames up": (
+        replace(CAMERA, viewfinder=replace(CAMERA.viewfinder, detent_depth=0.0)),
+        {"finder detents hold each frame raised and folded (geometry)"},
+    ),
 }

@@ -29,7 +29,7 @@ Goal: a camera that works correctly, is mechanically accurate, and is practical 
 - Take-up spool + advance knob (right)
 
 ### Body Modules (attach to film back)
-**Pinhole Body** — dark chamber, fixed 50mm depth, M42 front mount, wire frame viewfinder
+**Pinhole Body** — dark chamber, fixed 50mm depth, M42 front mount, folding two-frame viewfinder
 **Lens Body** — dark chamber, mirror box, ground glass WLF, leaf shutter, M42 front mount
 
 ### Lens Modules (M42, interchangeable)

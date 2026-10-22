@@ -90,7 +90,7 @@ The simple body is a dark chamber with:
 - 50.0mm pinhole-to-film distance
 - M42 female front mount
 - Body-to-film-back hook/latch interface
-- Wire-frame viewfinder
+- Two-frame folding viewfinder
 
 It does not include a mirror or ground glass. This keeps the first working camera simple.
 

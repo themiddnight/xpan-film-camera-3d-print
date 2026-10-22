@@ -111,6 +111,8 @@ INTENDED_OVERLAPS: dict[frozenset[str], tuple[float, float, str]] = {
     frozenset(("rewind_o_ring", "shell")): (0.2, 1.0, "O-ring squeezed in its counterbore, which is its job"),
     frozenset(("shutter_lock_pivot", "shutter_housing")): (0.8, 2.0, "pivot rod pressed into both housing plates"),
     frozenset(("shutter_lock_pivot", "shutter_lock_cap")): (0.5, 1.2, "cap pressed onto the pivot tip"),
+    frozenset(("viewfinder_rear_hinge", "viewfinder_rear_pins")): (2.0, 4.0, "pin stubs pressed into the cheeks"),
+    frozenset(("viewfinder_front_hinge", "viewfinder_front_pins")): (2.0, 4.0, "pin stubs pressed into the cheeks"),
     frozenset(("dark_slide", "slot_plug")): (0.0, 500.0, "alternatives: the plug goes in the slot mouth only when the slide is out"),
     frozenset(("film", "shell")): (0.0, 0.5, "film lies on the rails; facets of the curved strip graze them"),
     frozenset(("film", "sprocket")): (0.0, 0.2, "film wraps the hub; facets of the curved strip graze it"),
@@ -447,6 +449,12 @@ MOTION_ALLOWED: dict[str, dict[frozenset[str], str]] = {
     },
     "release": {
         frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's 0.4mm sideways arc; a straight tube cannot",
+    },
+    "finder_front": {
+        frozenset(("viewfinder_front_frame", "viewfinder_front_hinge")): "the knuckle round pushes the sprung detent pads 0.3mm down between the two clicks; the body check bounds it",
+    },
+    "finder_rear": {
+        frozenset(("viewfinder_rear_frame", "viewfinder_rear_hinge")): "the knuckle round pushes the sprung detent pads 0.3mm down between the two clicks; the body check bounds it",
     },
     "pawl_ride": {
         frozenset(("pawl", "pawl_spring")): "the spring's top end follows the spigot's sideways arc; a straight tube cannot",

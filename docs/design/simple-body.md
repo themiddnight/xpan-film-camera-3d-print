@@ -23,7 +23,7 @@ It intentionally avoids a mirror, ground glass, and coupled shutter system.
 | Front mount | M42 x 1mm female, from a bought M42 rear lens cap with its centre cut out, glued into the printed front plate | Printed M42 threads are unreliable on FDM |
 | Film format | 65 x 24mm | Film back owns gate |
 | Body-to-back lock | Top hook + bottom latch | Matches film back interface |
-| Viewfinder | Foldable wire frame | Simple framing |
+| Viewfinder | Two-frame sports finder, both frames fold flat | Frames the 65 x 24 field; nothing behind the camera |
 | Material | Black PETG | FDM |
 
 ---
@@ -53,15 +53,23 @@ Detailed interface geometry is defined in [film-back.md](film-back.md).
 
 ## 5. Viewfinder
 
-Initial viewfinder: foldable wire frame.
+A two-frame sports finder on the body top (revised 2026-10-22). The first wire frame put a peep 33mm behind the camera's back, and its 104mm front frame stood far wider than the body.
+
+You line up two rectangles: a small rear frame (the eyepiece) at the body's rear edge and a larger front frame 9mm ahead of it. Both have the film frame's 65:24 shape and sit on one line parallel to the lens axis. When the rear frame's edges cover the front frame's edges exactly, your eye is at the eye point and the front frame shows the 65 x 24 field at 50mm. If the edges do not meet, move your head until they do.
 
 | Parameter | Value | Notes |
 |---|---:|---|
-| Rear-to-front frame distance | 80mm | Starting value |
-| Front frame width | about 104mm | For 65mm width at 50mm distance |
-| Front frame height | about 38mm | For 24mm height at 50mm distance |
-| Rear sight | 3mm peep hole | A small hole fixes the eye position better than a 20 x 8mm frame |
-| Wire diameter | 1.0-1.2mm | Steel wire |
+| Field | 0.65 across, 0.24 up (tan of the half-angles) | 32.5 / 50 and 12 / 50; the checks measure it on the built frames |
+| Rear frame (eyepiece) | 37.96 x 14.02mm window, plane at Y = +15.2 | 11mm in front of the body's rear face |
+| Front frame | 49.66 x 18.34mm window, plane at Y = +24.2 | Rule: front - rear = 2 x 0.65 x 9mm across |
+| Eye point | Y = -14.0, Z = +42.4 | 29.2mm behind the rear frame, 9.3mm behind the rear cover. The nose can rest on the camera's back, as with a rangefinder |
+| Finder axis | Z = +42.4 | The field's lower edge passes 0.5mm over the M42 body cap rim, and over the slot plug grip |
+| Frames | Printed PETG leaves, 1.6mm thick, 1.6mm border | A hand-bent 1mm wire cannot hold the rear window's corners; a printed window holds about 0.2mm |
+| Hinges | Two knuckles per leaf, outboard of the window, on 3mm rod stubs pressed into a printed hinge base glued to the body top | Nothing crosses the field below the windows |
+| Detent | Two flats on each knuckle, 0.3mm inside its 6mm diameter; a sprung tongue in the hinge base presses a pad on the lower flat | Each frame clicks into its raised and folded positions. The flat on the pad holds the raised frame square |
+| Fold | Both frames fold forward. Fold the front frame first, then lay the rear frame on top of it. Unfold the rear frame first | Folded, the finder rises 9.4mm over the body top (Z = +35.9), about as high as the slot plug grip, and stays inside the body outline |
+
+Pull the dark slide before framing. The slide's handle stands in the line of sight while the slide is in, but it does not touch the frames.
 
 ---
 
@@ -87,7 +95,7 @@ Same origin and axes as [film-back.md](film-back.md) section 17: film plane at Y
 | Pinhole plane | Y = +50.0 (+/-0.3) |
 | Tripod socket | Stainless 1/4"-20 hex nut captured in a printed hex pocket inside a 16mm boss at Y = +32, X = 0, with 1.2mm of plastic under the nut. The nut slides in from the +X side. No 1/4"-20 heat-set insert is sold on Lazada TH |
 | Feet | Seat plane Z = Cover.hinge_axis_z - knuckle_od / 2 - 0.75 = -38.05 (derived, so it follows the hinge). Three feet end in it: the tripod boss (the boss runs out at 45 degrees on its rear side to print without support) and two rear pads at X = +/-27 to +/-35, Y from the datum face to +14. Every other part stays at least 0.5mm above the plane, so a tripod plate of any size seats flat. A 5mm screw engages 3.8mm (3.0 threads) of the nut; the check asks for 2.5 threads, which a 4.5mm screw still meets. On a table the rear cover can open to about 90 degrees (its lowest point is then 0.5mm above the seat plane); at the 100 degree film-loading angle its edge dips about 11mm below the table, so load film with the camera held up or tilted back |
-| Viewfinder | 1.0mm steel wire front frame 104 x 38.4mm, 80mm ahead of a 3mm rear peep, folds flat on two printed hinge blocks |
+| Viewfinder | Two-frame sports finder (section 5). Rear hinge axis Y = +12.5, Z = +32.9; front hinge axis Y = +21.5, Z = +31.0; both fold -90 degrees about +X. Hinge bases sit on the body top, located by two 3mm pegs each, and the body has a 0.6mm relief under each detent tongue |
 
 M42 mount values: see section 8.
 

@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 from params import Camera
-from parts import pinhole, shell, transport
+from parts import body, pinhole, shell, transport
 
 Vec = tuple[float, float, float]
 
@@ -203,7 +203,24 @@ def mechanisms(c: Camera) -> tuple[Mechanism, ...]:
             Readout(c.pinhole.blade_travel, "mm open"),
             requires=(("shutter_lock", 1.0),),
         ),
+        Mechanism(
+            "finder_front", "Fold front finder frame",
+            (Drive("viewfinder_front_frame", "rotate", *_fold(c, "front")),),
+            Readout(-body.FOLD_DEG, "deg folded"),
+        ),
+        Mechanism(
+            "finder_rear", "Fold rear finder frame",
+            (Drive("viewfinder_rear_frame", "rotate", *_fold(c, "rear")),),
+            Readout(-body.FOLD_DEG, "deg folded"),
+            # The rear frame lies on the folded front frame; raised, the front frame stands in its way.
+            requires=(("finder_front", 1.0),),
+        ),
     )
+
+
+def _fold(c: Camera, which: str) -> tuple[Vec, float, Vec]:
+    axis, origin = body.fold_axis(c, which)
+    return axis, body.FOLD_DEG, origin
 
 
 def frame_cycle(c: Camera) -> Cycle:
@@ -238,7 +255,7 @@ def frame_cycle(c: Camera) -> Cycle:
         per_unit=c.film.advance,
         unit="mm",
         focus_ghost=("shell", "rear_cover", "pressure_pad", "dark_slide", "turn_button_left", "turn_button_right"),
-        focus_hide=("viewfinder_wire",),
+        focus_hide=("viewfinder_rear_frame", "viewfinder_front_frame"),
     )
 
 

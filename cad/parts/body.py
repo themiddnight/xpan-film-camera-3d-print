@@ -1,4 +1,4 @@
-"""Simple 50mm pinhole body, its M42 mount stack, tripod nut and wire-frame viewfinder.
+"""Simple 50mm pinhole body, its M42 mount stack, tripod nut and two-frame sports finder.
 
 Built in camera coordinates (place = identity), at rest: latched on the film back, finder raised.
 
@@ -22,13 +22,27 @@ Values chosen where docs/design/simple-body.md gave a range or left one open:
   16mm across (nut corners 13.2mm plus two 1.2mm walls). The nut slides in from the +X side.
 - The boss runs out at 45 deg on its rear side and the rear pads start on the datum face, so the body
   prints rear face down without support. The latch slot is cut through the boss so the cantilever can flex.
-- Viewfinder: two fold-flat wire elements share one axle in the two hinge blocks (Y = +42,
-  Z = +33). The frame stands over the axle and folds forward. The peep U runs back 80mm, outside
-  the dark slide, and folds down onto the film-back top.
+- Viewfinder: a two-frame sports finder, both frames printed. A hand-bent 1mm spring-wire rectangle
+  cannot hold the 38 x 14mm rear window's corners (its bend radius eats them), while a printed window
+  holds about 0.2mm, under 1% of the field. The printed knuckle also carries the detent cam.
+- Eye point 9.3mm behind the rear cover (Y -14.0) rather than 12-18mm behind the rear frame: with the
+  eye over the camera's back edge the nose would have to sit inside the film back. That sets the rear
+  window at 37.96 x 14.02; the front window (49.66 x 18.34) is as wide as its hinge can be and still
+  sit on the tapering body top, which sets the 9mm baseline.
+- Both leaves fold forward. Folding toward each other cannot nest: either folded leaf is longer than the
+  9mm between the hinges, and the front frame, folded back, would land on the film-back hook. The
+  front leaf folds first and lies 1.8mm over the body top; the rear leaf folds onto it, so its hinge
+  stands one leaf plus 0.3mm higher. Unfolding runs the other way.
+- Each knuckle has two flats 2.7mm from the axis (0.3mm inside its radius): one under it raised, one
+  under it folded, the leaf's front face lying in the second. A printed tongue in the hinge base presses
+  a pad on the lower flat; turning the leaf pushes the pad 0.3mm down, so each pose clicks in, and the flat on
+  the pad sets the raised frame square. The tongue flexes into a 0.6mm recess in the body top.
+- Pin stubs (3mm rod, 6mm long) press into the cheeks and turn in the knuckles' 3.3mm bores; two knuckles
+  per leaf, outboard of the window, so nothing crosses the field below it.
 """
-from build123d import (
-    Align, Box, Cylinder, Face, Part, Plane, Pos, RegularPolygon, Rot, Solid, Sphere, Wire, extrude,
-)
+from dataclasses import dataclass
+
+from build123d import Align, Box, Cylinder, Face, Part, Pos, RegularPolygon, Rot, Solid, Wire, extrude
 
 from params import Camera
 from parts.spec import PartSpec, at_origin
@@ -69,19 +83,6 @@ def cone_half(c: Camera, y: float) -> tuple[float, float]:
     """Half-size of the image cone (65 x 24 frame at Y = 0 to the pinhole) at height y."""
     k = (c.optics.pinhole_y - y) / c.optics.pinhole_y
     return c.film.frame_w / 2 * k, c.film.frame_h / 2 * k
-
-
-def rod(points, d: float) -> Part:
-    """A bent wire through the given points: cylinders with spherical joints."""
-    part = None
-    for a, b in zip(points, points[1:]):
-        direction = tuple(q - p for p, q in zip(a, b))
-        length = sum(x * x for x in direction) ** 0.5
-        seg = Solid.make_cylinder(d / 2, length, Plane(origin=a, z_dir=direction))
-        part = seg if part is None else part + seg
-    for p in points[1:-1]:
-        part += Pos(*p) * Sphere(d / 2)
-    return part
 
 
 # M42 mount stack along Y: pocket floor, shim ring, rear cap ring, body cap seat, pinhole.
@@ -133,7 +134,7 @@ def _baffle(c: Camera, y_front: float, interior: Part) -> tuple[Part, Part]:
 
 
 def build_body(c: Camera) -> Part:
-    b, k, v, f = c.body, c.body_link, c.viewfinder, c.fit
+    b, k = c.body, c.body_link
     y0, y1 = c.gate.datum_y, b.front_face_y
     fw = pocket_r(c) + b.wall
     outline = Wire.make_polygon([(-b.rear_half_w, y0, b.z_min), (b.rear_half_w, y0, b.z_min),
@@ -177,11 +178,7 @@ def build_body(c: Camera) -> Part:
     body -= box(0, b.rear_half_w + 1, b.tripod_y - af / 2, b.tripod_y + af / 2, z0, z1)
     body -= zcyl(b.tripod_screw_hole / 2, seat - 1, z1 + b.tripod_screw_depth, y=b.tripod_y)
 
-    tw, td = v.tenon_w + f.fdm_clearance, v.tenon_d + f.fdm_clearance
-    for sign in (-1, 1):
-        body -= box(sign * v.hinge_x - tw / 2, sign * v.hinge_x + tw / 2, v.axle_y - td / 2, v.axle_y + td / 2,
-                    b.z_max - b.hinge_pocket_depth, b.z_max + 1)
-    return body
+    return body_finder_mounts(c, body)
 
 
 def build_shim_ring(c: Camera) -> Part:
@@ -203,40 +200,128 @@ def build_tripod_nut(c: Camera) -> Part:
     return nut - zcyl(b.nut_bore / 2, z0 - 1, z0 + b.nut_t + 1, y=b.tripod_y)
 
 
-# Viewfinder.
+# Viewfinder: two printed leaves, each on two 3mm pin stubs pressed into a hinge base on the body top.
+# Both fold forward (-90 deg about +X): the front leaf first, low; the rear leaf on top of it.
 
-def peep_centre(c: Camera) -> tuple[float, float, float]:
+FOLD_DEG = -90.0
+LEAVES = ("rear", "front")
+
+
+@dataclass(frozen=True)
+class Leaf:
+    axle_y: float
+    axle_z: float
+    w: float
+    h: float
+
+
+def leaf(c: Camera, which: str) -> Leaf:
     v = c.viewfinder
-    return 0.0, v.axle_y - v.peep_to_frame, v.axle_z + v.frame_h / 2
+    front_z = c.body.z_max + v.base_t + c.fit.fdm_clearance + v.knuckle_d / 2
+    if which == "front":
+        return Leaf(v.front_axle_y, front_z, v.front_w, v.front_h)
+    return Leaf(v.rear_axle_y, front_z + v.leaf_t + v.stack_gap, v.rear_w, v.rear_h)
 
 
-def build_hinge(c: Camera, sign: int) -> Part:
-    b, v = c.body, c.viewfinder
-    x = sign * v.hinge_x
-    block = box(x - v.block_w / 2, x + v.block_w / 2, v.axle_y - v.block_d / 2, v.axle_y + v.block_d / 2,
-                b.z_max, v.axle_z + v.block_above_axle)
-    tenon_h = b.hinge_pocket_depth - c.fit.fdm_clearance
-    block += box(x - v.tenon_w / 2, x + v.tenon_w / 2, v.axle_y - v.tenon_d / 2, v.axle_y + v.tenon_d / 2,
-                 b.z_max - tenon_h, b.z_max)
-    hole = Pos(x - v.block_w, v.axle_y, v.axle_z) * Rot(0, 90, 0) * Cylinder(v.wire_hole / 2, 2 * v.block_w, align=BASE)
-    return block - hole
+def fold_axis(c: Camera, which: str) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    """Hinge axis direction and a point on it; FOLD_DEG about it lays the leaf flat."""
+    lf = leaf(c, which)
+    return (1.0, 0.0, 0.0), (0.0, lf.axle_y, lf.axle_z)
 
 
-def build_viewfinder_wire(c: Camera) -> Part:
+def _flat(c: Camera) -> float:
+    """Axis to each knuckle flat; the leaf's front face lies in one, so folded it lands on the pad."""
     v = c.viewfinder
-    hw, z0, y = v.frame_w / 2, v.axle_z, v.axle_y
-    frame = rod([(-hw, y, z0), (hw, y, z0), (hw, y, z0 + v.frame_h), (-hw, y, z0 + v.frame_h), (-hw, y, z0)], v.wire_d)
+    return v.knuckle_d / 2 - v.detent_depth
 
-    ring_r = (v.peep_d + v.wire_d) / 2
-    px, py, pz = peep_centre(c)
-    bar_z = pz - ring_r + v.wire_d / 4
-    slope = (bar_z - z0) / v.peep_to_frame
-    xs = v.hinge_x + v.block_w / 2 + v.wire_d
-    zb = z0 + (y - v.arm_bend_y) * slope
-    peep_u = rod([(-xs, y, z0), (-v.arm_x, v.arm_bend_y, zb), (-v.arm_x, py, bar_z),
-                  (v.arm_x, py, bar_z), (v.arm_x, v.arm_bend_y, zb), (xs, y, z0)], v.wire_d)
-    ring = Solid.make_torus(ring_r, v.wire_d / 2, Plane(origin=(px, py, pz), z_dir=(0, 1, 0)))
-    return frame + peep_u + ring
+
+def _knuckle_x(c: Camera, lf: Leaf) -> tuple[float, float]:
+    v = c.viewfinder
+    x_in = lf.w / 2 + v.knuckle_inset
+    return x_in, x_in + v.knuckle_len
+
+
+def _cheek_x(c: Camera, lf: Leaf) -> tuple[float, float]:
+    x0 = _knuckle_x(c, lf)[1] + c.fit.fdm_clearance
+    return x0, x0 + c.viewfinder.cheek_w
+
+
+def xcyl(r, x0, x1, y=0.0, z=0.0) -> Part:
+    """Cylinder along +X from x0 to x1."""
+    return Pos(x0, y, z) * Rot(0, 90, 0) * Cylinder(r, x1 - x0, align=BASE)
+
+
+def build_leaf(c: Camera, which: str) -> Part:
+    v, lf = c.viewfinder, leaf(c, which)
+    r, a = v.knuckle_d / 2, _flat(c)
+    y, z = lf.axle_y, lf.axle_z
+    x_in, x_out = _knuckle_x(c, lf)
+    outer = lf.w / 2 + v.bar
+    part = box(-outer, outer, y + a - v.leaf_t, y + a, z - a, v.axis_z + lf.h / 2 + v.bar)
+    for s in (-1, 1):
+        part += box(*sorted((s * lf.w / 2, s * x_out)), y + a - v.leaf_t, y + a, z - a, z + r)
+        part += xcyl(r, *sorted((s * x_in, s * x_out)), y=y, z=z)
+    span = x_out + 1
+    part -= box(-span, span, y + a, y + r + 1, z - r - 1, z + r + 1)
+    part -= box(-span, span, y - r - 1, y + r + 1, z - r - 1, z - a)
+    # The corner between the two flats swings lowest as the leaf folds; keep it inside the knuckle radius.
+    part -= box(-span, span, y, y + r, z - r, z) - xcyl(r, -span, span, y=y, z=z)
+    part -= box(-lf.w / 2, lf.w / 2, y - r - 1, y + r + 1, v.axis_z - lf.h / 2, v.axis_z + lf.h / 2)
+    return part - xcyl(c.fit.shaft_bore / 2, -span, span, y=y, z=z)
+
+
+def _tongue(c: Camera, lf: Leaf, s: int) -> tuple[float, float]:
+    """X span of the detent tongue on one side, root to tip."""
+    v = c.viewfinder
+    x_in = _knuckle_x(c, lf)[0]
+    tip = _cheek_x(c, lf)[0] - v.tongue_slot
+    return s * (x_in - v.tongue_len), s * tip
+
+
+def _peg_x(c: Camera, lf: Leaf, s: int) -> float:
+    return _tongue(c, lf, s)[0] - s * c.viewfinder.peg_inset
+
+
+def build_hinge(c: Camera, which: str) -> Part:
+    """Base plate with two cheeks holding the pin stubs and a sprung detent tongue under each knuckle."""
+    v, lf, f = c.viewfinder, leaf(c, which), c.fit
+    y, z0 = lf.axle_y, c.body.z_max
+    x0, x1 = _cheek_x(c, lf)
+    y0, y1 = y - v.base_d / 2, y + v.base_d / 2
+    part = box(-x1, x1, y0, y1, z0, z0 + v.base_t)
+    for s in (-1, 1):
+        xa, xb = sorted((s * x0, s * x1))
+        part += box(xa, xb, y0, y1, z0, lf.axle_z + f.pin_press_hole / 2 + c.print.min_wall)
+        part -= zcyl((v.peg_d + f.fdm_clearance) / 2, z0 - 1, z0 + v.base_t + 1, x=_peg_x(c, lf, s), y=y)
+        root, tip = _tongue(c, lf, s)
+        half, slot = v.tongue_w / 2, v.tongue_slot
+        for side in (-1, 1):
+            edge = y + side * half
+            part -= box(*sorted((root, tip + s * slot)), *sorted((edge, edge + side * slot)), z0 - 1, z0 + v.base_t + 1)
+        part -= box(*sorted((tip, tip + s * slot)), y - half - slot, y + half + slot, z0 - 1, z0 + v.base_t + 1)
+        x_in = _knuckle_x(c, lf)[0]
+        part += box(*sorted((s * x_in, tip)), y - half, y + half, z0 + v.base_t, lf.axle_z - _flat(c))
+    return part - xcyl(f.pin_press_hole / 2, -x1 - 1, x1 + 1, y=y, z=lf.axle_z)
+
+
+def build_pins(c: Camera, which: str) -> Part:
+    """Two 3mm rod stubs, pressed into the cheeks, the leaf's knuckles turning on them."""
+    lf = leaf(c, which)
+    x_in, x1 = _knuckle_x(c, lf)[0] + c.fit.fdm_clearance, _cheek_x(c, lf)[1]
+    r = c.measured.rod_d / 2
+    return xcyl(r, -x1, -x_in, y=lf.axle_y, z=lf.axle_z) + xcyl(r, x_in, x1, y=lf.axle_y, z=lf.axle_z)
+
+
+def body_finder_mounts(c: Camera, body: Part) -> Part:
+    """Locating pegs for both hinge bases, and a relief recess under each detent tongue."""
+    v, top = c.viewfinder, c.body.z_max
+    for which in LEAVES:
+        lf = leaf(c, which)
+        for s in (-1, 1):
+            body += zcyl(v.peg_d / 2, top - 1, top + v.peg_h, x=_peg_x(c, lf, s), y=lf.axle_y)
+            body -= box(*sorted(_tongue(c, lf, s)), lf.axle_y - v.tongue_w / 2, lf.axle_y + v.tongue_w / 2,
+                        top - v.tongue_relief, top + 1)
+    return body
 
 
 PARTS = {
@@ -244,14 +329,18 @@ PARTS = {
                      color="#2b2b2e", print_rotation=(90, 0, 0)),
     "m42_shim_ring": PartSpec(build=build_shim_ring, place=at_origin, group="body", kind="printed",
                               color="#5a5a60", print_rotation=(90, 0, 0)),
-    "viewfinder_hinge_left": PartSpec(build=lambda c: build_hinge(c, -1), place=at_origin, group="body",
-                                      kind="printed", color="#44444a", print_rotation=(0, 90, 0)),
-    "viewfinder_hinge_right": PartSpec(build=lambda c: build_hinge(c, 1), place=at_origin, group="body",
-                                       kind="printed", color="#44444a", print_rotation=(0, 90, 0)),
     "m42_rear_cap_ring": PartSpec(build=build_rear_cap_ring, place=at_origin, group="body", kind="bought",
                                   color="#1a1a1a"),
     "tripod_nut": PartSpec(build=build_tripod_nut, place=at_origin, group="body", kind="bought",
                            color="#b8bcc2"),
-    "viewfinder_wire": PartSpec(build=build_viewfinder_wire, place=at_origin, group="body", kind="bought",
-                                color="#c0c4c8"),
 }
+for _which in LEAVES:
+    PARTS[f"viewfinder_{_which}_frame"] = PartSpec(
+        build=lambda c, w=_which: build_leaf(c, w), place=at_origin, group="body", kind="printed",
+        color="#3a3a40", print_rotation=(-90, 0, 0))
+    PARTS[f"viewfinder_{_which}_hinge"] = PartSpec(
+        build=lambda c, w=_which: build_hinge(c, w), place=at_origin, group="body", kind="printed",
+        color="#44444a", print_rotation=(0, 0, 0))
+    PARTS[f"viewfinder_{_which}_pins"] = PartSpec(
+        build=lambda c, w=_which: build_pins(c, w), place=at_origin, group="body", kind="bought",
+        color="#b8bcc2")

@@ -23,7 +23,7 @@ Prices are from Lazada Thailand search pages on 2026-10-21, lowest variant shown
 | 12 | Thin black plastic sheet | 1 | About 0.2-0.3mm, smooth | Film-side face of the pressure pad | "แฟ้มพลาสติกดำ", "black PET sheet 0.25mm" | Est. ฿20-40 |
 | 13 | Small O-ring | 1 pack | 3mm ID x 1mm section | Rewind knob friction hold, in a 4.8mm counterbore | "โอริง 3x1" | Est. ฿20-50 |
 | 14 | Flat black spray paint | 1 can | Flat/matte black | Chamber interiors, dark slide, shutter blade | "สีสเปรย์ ดำด้าน FLAT BLACK" | ฿42-54 (seen, e.g. Red Fox No.4) |
-| 15 | Stainless spring wire | 1m | Ø1.0mm, straight | Wire-frame viewfinder | "ลวดสปริงสแตนเลส 304 เส้นตรง 1 มิล" | ฿30-40 (seen) |
+| 15 | Stainless spring wire | Not needed | Ø1.0mm, straight | Was the wire-frame viewfinder; the finder frames are now printed (simple-body.md 5). Skip it | "ลวดสปริงสแตนเลส 304 เส้นตรง 1 มิล" | ฿30-40 (seen) |
 | 16 | Empty reloadable 135 cassettes | 1 set of 5 | Standard 135 | Measuring the cassette and spool key; transport tests with scrap film | "ตลับฟิล์มเปล่า 135" | ฿163 per 5 (seen) |
 | 17 | 5-minute epoxy | 1 | Two-part | Knobs and fork to shafts, M42 rings into printed pockets | "กาวอีพ็อกซี่ 5 นาที" | Est. ฿60-100 |
 | 18 | Black PETG filament | 1kg | 1.75mm | All printed parts | "PETG สีดำ 1kg" | Est. ฿400-600 |

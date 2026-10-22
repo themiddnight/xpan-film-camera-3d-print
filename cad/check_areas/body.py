@@ -1,10 +1,10 @@
 """Geometry checks for the body and the pinhole module, probed on the placed solids."""
-from build123d import Box, Edge, Part, Pos, Rot, Solid, Vector
+from build123d import Axis, Box, Edge, Part, Pos, Rot, Solid, Vector
 
 from checklib import EPS, check
 from params import Camera
 from parts import PARTS
-from parts.body import rect_wire
+from parts.body import FOLD_DEG, LEAVES, fold_axis, leaf, rect_wire
 
 CONE_MARGIN = 0.5
 SEAT_TOL = 0.01
@@ -17,6 +17,16 @@ THREAD_PITCH = 25.4 / 20
 MIN_THREADS = 2.5          # a 4.5mm screw still gets 2.6 threads on the shipped floor
 COM_MARGIN = 3.0           # centre of mass this far inside the support polygon
 SLICE_T = 0.05
+FIELD_TOL = 0.02           # finder field within 2% of the film frame's, across and up
+EYE_TOL = 1.0              # the across and up eye points agree this closely, mm
+AXIS_TOL = 0.05            # window centres on one line parallel to the lens axis
+SIGHT_MARGIN = 0.5         # sight lines clear every other part by this much
+SIGHT_INSET = 0.2          # ...and pass this far inside the frames' own edges
+OVERLAP_TOL = 0.01         # mm3; matches the assembly overlap rule
+DETENT_TURN = 10.0         # deg off a pose at which the detent must already be pressing
+DETENT_SWEEP_MM3 = 4.0     # two pads pushed 0.3mm by the knuckle round: 2.7mm3 per leaf at 45 deg
+FOLD_STEPS = 9
+FINDER = tuple(f"viewfinder_{w}_{k}" for w in LEAVES for k in ("frame", "hinge", "pins"))
 
 
 def _runs(part: Part, start, direction, length: float) -> list[tuple[float, float]]:
@@ -239,8 +249,17 @@ def _wall_rays(c: Camera, b) -> list[tuple[str, str, tuple, tuple]]:
         ("body", "nut pocket floor", (0, bd.tripod_y + (bd.tripod_screw_hole + bd.nut_af) / 4, nut_z0(c) + 0.1), (0, 0, -1)),
         ("body", "screw hole to latch slot", (0, bd.tripod_y, c.body_link.latch_cantilever_top_z + bd.latch_gap / 2), (0, -1, 0)),
         ("body", "screw hole to chamber", (0, bd.tripod_y, nut_top + bd.tripod_screw_depth - 0.05), (0, 0, 1)),
-        ("viewfinder_hinge_right", "hinge over the wire", (v.hinge_x, v.axle_y, v.axle_z), (0, 0, 1)),
     ]
+    for which in LEAVES:
+        lf = leaf(c, which)
+        cheek = (lf.w / 2 + v.knuckle_inset + v.knuckle_len + c.fit.fdm_clearance + v.cheek_w / 2)
+        rays += [
+            (f"viewfinder_{which}_hinge", f"{which} hinge cheek over the pin", (cheek, lf.axle_y, lf.axle_z), (0, 0, 1)),
+            (f"viewfinder_{which}_hinge", f"{which} hinge strip beside the tongue",
+             (lf.w / 2 - v.tongue_len / 2, lf.axle_y - v.base_d / 2 - 0.5, c.body.z_max + v.base_t / 2), (0, 1, 0)),
+            (f"viewfinder_{which}_frame", f"{which} knuckle round the bore",
+             (lf.w / 2 + v.knuckle_inset + v.knuckle_len / 2, lf.axle_y, lf.axle_z), (0, -1, 0)),
+        ]
     return rays
 
 
@@ -264,3 +283,163 @@ def _(c, b):
             if max(size.X, size.Y) > c.print.bed:
                 over.append(f"{name} {size.X:.0f} x {size.Y:.0f}")
     return not over, f"over: {over}" if over else "all fit"
+
+
+# Viewfinder: measured on the built leaves, posed the way the hinges turn them.
+
+def _meet(a, b) -> bool:
+    """Bounding boxes share space (BoundBox.overlaps misses one box inside the other)."""
+    return all(getattr(a.min, k) <= getattr(b.max, k) and getattr(b.min, k) <= getattr(a.max, k) for k in "XYZ")
+
+
+def _turned_leaf(c: Camera, b, which: str, deg: float) -> Part:
+    axis, origin = fold_axis(c, which)
+    part = b.placed(f"viewfinder_{which}_frame")
+    return part if deg == 0 else part.rotate(Axis(origin, axis), deg)
+
+
+def _window(c: Camera, b, which: str) -> dict:
+    """The window's edges in the leaf's front face (its sighting edges, since the leaf is thickest there)."""
+    v, lf = c.viewfinder, leaf(c, which)
+    part = b.placed(f"viewfinder_{which}_frame")
+    start = lf.axle_y - 10.0
+    bar = _first_run(part, (0, start, v.axis_z + lf.h / 2 + v.bar / 2), (0, 1, 0), 20.0)
+    face = start + bar[1]
+    probe = (0, face - 0.02, v.axis_z)
+    right, left = (_first_run(part, probe, (s, 0, 0), 60.0)[0] for s in (1, -1))
+    up, down = (_first_run(part, probe, (0, 0, s), 40.0)[0] for s in (1, -1))
+    return {"y": face, "hw": (right + left) / 2, "hh": (up + down) / 2,
+            "xc": (right - left) / 2, "zc": v.axis_z + (up - down) / 2}
+
+
+def _finder(c: Camera, b) -> dict:
+    r, f = _window(c, b, "rear"), _window(c, b, "front")
+    d = f["y"] - r["y"]
+    kx, kz = (f["hw"] - r["hw"]) / d, (f["hh"] - r["hh"]) / d
+    return {"rear": r, "front": f, "kx": kx, "kz": kz,
+            "eye_x": r["y"] - r["hw"] / kx, "eye_z": r["y"] - r["hh"] / kz}
+
+
+@check("finder frames give the 65 x 24 field from one eye point (geometry)")
+def _(c, b):
+    fd = _finder(c, b)
+    want = (c.film.frame_w / 2 / c.optics.pinhole_y, c.film.frame_h / 2 / c.optics.pinhole_y)
+    err = (fd["kx"] / want[0] - 1, fd["kz"] / want[1] - 1)
+    r, f = fd["rear"], fd["front"]
+    axis = max(abs(r["zc"] - f["zc"]), abs(r["xc"]), abs(f["xc"]))
+    ok = max(map(abs, err)) <= FIELD_TOL and abs(fd["eye_x"] - fd["eye_z"]) <= EYE_TOL and axis <= AXIS_TOL
+    return ok, (f"rear {2 * r['hw']:.2f} x {2 * r['hh']:.2f} at Y {r['y']:.2f}, front {2 * f['hw']:.2f} x "
+                f"{2 * f['hh']:.2f} at Y {f['y']:.2f}: field {err[0]:+.1%} across, {err[1]:+.1%} up; eye at Y "
+                f"{fd['eye_x']:.2f} / {fd['eye_z']:.2f}, centres off the axis line {axis:.3f}mm")
+
+
+@check("finder stays ahead of the body rear face (geometry)")
+def _(c, b):
+    rear_face = b.placed("body").bounding_box().min.Y
+    back = min(b.placed(n).bounding_box().min.Y for n in FINDER)
+    fd = _finder(c, b)
+    eye = (fd["eye_x"] + fd["eye_z"]) / 2
+    cover = b.placed("rear_cover").bounding_box().min.Y
+    return back >= rear_face - EPS, (f"finder from Y {back:.2f}, body rear face {rear_face:.2f}; eye relief "
+                                     f"{fd['rear']['y'] - eye:.1f}mm, eye {cover - eye:.1f}mm behind the rear cover")
+
+
+def _sight_cone(eye: float, w: dict, grow: float, to_y: float) -> Solid:
+    """Every line of sight from the eye through the front window, out to to_y, grown by grow."""
+    k = (to_y - eye) / (w["y"] - eye)
+    return Pos(0, 0, w["zc"]) * Solid.make_loft([rect_wire(eye, APEX_HALF + grow, APEX_HALF + grow),
+                                                 rect_wire(to_y, w["hw"] * k + grow, w["hh"] * k + grow)])
+
+
+@check("finder sight lines clear in the shooting pose (geometry)")
+def _(c, b):
+    fd = _finder(c, b)
+    eye = (fd["eye_x"] + fd["eye_z"]) / 2
+    front = fd["front"]
+    beyond = max(b.placed(n).bounding_box().max.Y for n in PARTS) + 1.0
+    clear = _sight_cone(eye, front, SIGHT_MARGIN, beyond)
+    inside = _sight_cone(eye, front, -SIGHT_INSET, front["y"])
+    frames = {f"viewfinder_{w}_frame" for w in LEAVES}
+    hits = {}
+    for name in PARTS:
+        if name == "dark_slide":  # pulled for the exposure; the slot plug stays in the shooting pose
+            continue
+        cone = inside if name in frames else clear
+        part = b.placed(name)
+        if _meet(part.bounding_box(), cone.bounding_box()):
+            vol = _hit(cone, part)
+            if vol > EPS:
+                hits[name] = round(vol, 3)
+    return not hits, f"blocked by {hits}" if hits else (
+        f"eye through the front window and on past the lens clear of every part by {SIGHT_MARGIN}mm, "
+        f"of the frames' edges by {SIGHT_INSET}mm")
+
+
+def _folded(c: Camera, b, front: float = FOLD_DEG, rear: float = FOLD_DEG) -> dict[str, Part]:
+    return {"viewfinder_front_frame": _turned_leaf(c, b, "front", front),
+            "viewfinder_rear_frame": _turned_leaf(c, b, "rear", rear)}
+
+
+def _clashes(b, shapes: dict[str, Part], allowed: dict[frozenset, float]) -> list[str]:
+    out = []
+    for name, shape in shapes.items():
+        box = shape.bounding_box()
+        for other in PARTS:
+            if other == name or (other in shapes and other < name):
+                continue
+            other_shape = shapes.get(other, b.placed(other))
+            if not _meet(box, other_shape.bounding_box()):
+                continue
+            vol = _hit(shape, other_shape)
+            if vol > allowed.get(frozenset((name, other)), OVERLAP_TOL):
+                out.append(f"{name} x {other} {vol:.2f}mm3")
+    return out
+
+
+@check("folded finder lies inside the body top outline and under the height limit (geometry)")
+def _(c, b):
+    body = b.placed("body")
+    top = c.body.z_max
+    bb = body.bounding_box()
+    shapes = {n: b.placed(n) for n in FINDER} | _folded(c, b)
+    worst, where = float("inf"), ""
+    for name, shape in shapes.items():
+        for p in shape.vertices():
+            if not bb.min.Y <= p.Y <= bb.max.Y:
+                worst, where = -1.0, f"{name} at Y {p.Y:.2f}"
+                break
+            run = _first_run(body, (0, p.Y, top - 2.0), (1 if p.X >= 0 else -1, 0, 0), 100.0)
+            margin = run[1] - abs(p.X)
+            if margin < worst:
+                worst, where = margin, f"{name} at X {p.X:.2f} Y {p.Y:.2f}"
+    height = max(s.bounding_box().max.Z for s in shapes.values()) - top
+    ok = worst >= -EPS and height <= c.viewfinder.fold_height + EPS
+    return ok, (f"closest to the outline {worst:.2f}mm ({where}); folded top {height:.2f}mm over the body top "
+                f"(limit {c.viewfinder.fold_height})")
+
+
+@check("finder folds and unfolds without a clash (geometry)")
+def _(c, b):
+    detent = {frozenset((f"viewfinder_{w}_frame", f"viewfinder_{w}_hinge")): DETENT_SWEEP_MM3 for w in LEAVES}
+    problems = []
+    for i in range(1, FOLD_STEPS + 1):
+        deg = FOLD_DEG * i / FOLD_STEPS
+        for label, shapes in (("front", _folded(c, b, front=deg, rear=0.0)), ("rear", _folded(c, b, rear=deg))):
+            problems += [f"{label} at {deg:.0f} deg: {p}" for p in _clashes(b, shapes, detent)]
+    folded = _clashes(b, _folded(c, b), {})
+    problems += [f"folded: {p}" for p in folded]
+    return not problems, "; ".join(problems[:6]) if problems else (
+        f"front then rear folded in {FOLD_STEPS} steps; only the detent pads give, folded pose clear")
+
+
+@check("finder detents hold each frame raised and folded (geometry)")
+def _(c, b):
+    out, ok = [], True
+    for which in LEAVES:
+        hinge = b.placed(f"viewfinder_{which}_hinge")
+        for pose in (0.0, FOLD_DEG):
+            at = _hit(_turned_leaf(c, b, which, pose), hinge)
+            off = min(_hit(_turned_leaf(c, b, which, pose + s * DETENT_TURN), hinge) for s in (1, -1))
+            ok &= at <= OVERLAP_TOL and off > OVERLAP_TOL
+            out.append(f"{which} {pose:.0f}: {at:.3f} / {off:.2f}mm3")
+    return ok, f"pad overlap in pose / {DETENT_TURN:.0f} deg off it: " + ", ".join(out)

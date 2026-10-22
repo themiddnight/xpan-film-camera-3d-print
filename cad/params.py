@@ -424,28 +424,43 @@ class Body:
     nut_t: float = 5.6
     nut_bore: float = 6.35
     nut_clearance: float = 0.3
-    hinge_pocket_depth: float = 1.5
 
 
 @dataclass(frozen=True)
 class Viewfinder:
-    """Wire-frame finder and its hinge blocks (simple-body.md 5 and 7). Owned by cad/parts/body.py."""
-    wire_d: float = 1.0
-    frame_w: float = 104.0
-    frame_h: float = 38.4
-    peep_to_frame: float = 80.0
-    peep_d: float = 3.0
-    axle_y: float = 42.0
-    axle_z: float = 33.0              # folded arms clear the 31.5 film-back top
-    hinge_x: float = 22.0
-    block_w: float = 6.0
-    block_d: float = 8.0
-    block_above_axle: float = 2.5
-    tenon_w: float = 4.0
-    tenon_d: float = 6.0
-    wire_hole: float = 1.3
-    arm_x: float = 37.5               # rear arms pass outside the 71mm dark slide
-    arm_bend_y: float = 8.0
+    """Two-frame sports finder on the body top (simple-body.md 5 and 7). Owned by cad/parts/body.py.
+
+    Each frame is a printed leaf whose front face is its window plane. Seen from the eye point, the
+    two windows line up when (front - rear) / 2 = field x (front plane - rear plane), with the field
+    of the 65 x 24 frame at 50mm: 0.65 across, 0.24 up. The eye then sits rear_w / 1.3 behind the
+    rear plane. Planes: rear_axle_y + 2.7 = 15.2 and front_axle_y + 2.7 = 24.2; eye at Y -14.0,
+    9.3mm behind the rear cover's outer face, so the nose can rest on the back as on a rangefinder.
+    """
+    axis_z: float = 42.4              # the field's lower edge passes 0.5mm over the M42 body cap rim (Z 26.5, Y 50)
+    rear_axle_y: float = 12.5         # rear hinge's back edge 0.8mm in front of the film-back top hook
+    front_axle_y: float = 21.5        # folded forward, the front leaf ends 5mm short of the body front
+    rear_w: float = 37.96             # 1.3 x 29.2 (eye to rear plane)
+    rear_h: float = 14.02             # rear_w x 24 / 65
+    front_w: float = 49.66            # 1.3 x 38.2 (eye to front plane)
+    front_h: float = 18.34            # front_w x 24 / 65
+    leaf_t: float = 1.6
+    bar: float = 1.6                  # border round each window
+    knuckle_d: float = 6.0            # on a 3mm pin: Fit.shaft_bore + 2 x min_wall, rounded up
+    detent_depth: float = 0.3         # knuckle flats sit this far inside its radius; the click
+    knuckle_len: float = 3.0
+    knuckle_inset: float = 0.6        # knuckle inner end outboard of the window edge
+    cheek_w: float = 3.0              # pin pressed this deep
+    base_t: float = 1.2               # hinge base plate and detent tongue thickness
+    base_d: float = 8.0               # hinge base along Y: tongue + two slots + two 1.4mm strips
+    tongue_w: float = 4.0
+    tongue_len: float = 10.0          # root to the knuckle's inner end: 0.4% strain at the click
+    tongue_slot: float = 0.6
+    tongue_relief: float = 0.6        # recess in the body top under each tongue, room to flex
+    peg_d: float = 3.0                # two pegs on the body top locate each glued hinge base
+    peg_h: float = 1.0                # under the 1.2mm base plate, so the plate's holes run through
+    peg_inset: float = 3.0            # peg centre inboard of the tongue root
+    stack_gap: float = 0.3            # folded rear leaf over the folded front leaf
+    fold_height: float = 9.5          # folded, nothing rises more than this above the body top (Z 36.0)
 
 
 @dataclass(frozen=True)
