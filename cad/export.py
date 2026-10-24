@@ -9,10 +9,12 @@ from pathlib import Path
 
 from build123d import Compound, Pos, Rot, export_gltf, export_step, export_stl
 
+from features import feature_entries
 from mechanisms import manifest_entries
 from parts.film import strip_manifest
 from params import CAMERA
 from parts import PARTS
+from spec_sheet import spec_entries
 
 OUT = Path(__file__).resolve().parent.parent / "out"
 GLB_LINEAR_DEFLECTION = 0.02
@@ -67,6 +69,8 @@ def main() -> int:
         "mechanisms": mechanisms,
         "cycles": cycles,
         "film_strip": strip_manifest(CAMERA),
+        "features": feature_entries(CAMERA),
+        "spec_sheet": spec_entries(CAMERA),
     }, indent=2))
     return 0
 

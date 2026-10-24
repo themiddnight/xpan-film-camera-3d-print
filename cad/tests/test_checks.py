@@ -6,6 +6,7 @@ and the shipped parameters must pass everything.
 """
 import importlib
 import sys
+from contextlib import nullcontext
 from dataclasses import replace
 from pathlib import Path
 
@@ -96,7 +97,8 @@ SEEDS = {
 }
 
 
-# Each area adds its own seeds in tests/test_<area>.py as a SEEDS dict of the same shape.
+# Each area adds its own seeds in tests/test_<area>.py as a SEEDS dict of the same shape. A seed may
+# carry a third element, a function returning a context manager, for an error that is not a Camera value.
 for _path in sorted(HERE.glob("test_*.py")):
     if _path.stem != "test_checks":
         _area = importlib.import_module(_path.stem).SEEDS
@@ -114,8 +116,9 @@ def main() -> int:
     baseline = failed_names(CAMERA)
     if baseline:
         problems.append(f"shipped parameters fail: {sorted(baseline)}")
-    for label, (camera, expected) in SEEDS.items():
-        got = failed_names(camera)
+    for label, (camera, expected, *patch) in SEEDS.items():
+        with patch[0]() if patch else nullcontext():
+            got = failed_names(camera)
         missing = expected - got
         status = "caught" if not missing else f"MISSED {sorted(missing)}"
         print(f"{label}: {status}; failed checks: {sorted(got)}")

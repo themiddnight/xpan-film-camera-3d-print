@@ -601,6 +601,7 @@ class Optics:
     wavelength: float = 0.00055
     m42_bore: float = 36.0
     m42_thread_d: float = 42.0
+    m42_pitch: float = 1.0            # M42 x 1: the standard fine pitch
     m42_depth_behind_pinhole: float = 10.0
 
 
