@@ -5,7 +5,10 @@ Each seed is a past or plausible design error; the named checks must fail on it,
 and the shipped parameters must pass everything.
 """
 import importlib
+import os
 import sys
+import time
+from concurrent.futures import ProcessPoolExecutor
 from contextlib import nullcontext
 from dataclasses import replace
 from pathlib import Path
@@ -14,6 +17,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))  # cad/ holds params, parts and checks
 sys.path.insert(0, str(HERE))
 
+from checklib import CHECKS
 from checks import run_checks
 from params import CAMERA
 
@@ -107,24 +111,37 @@ for _path in sorted(HERE.glob("test_*.py")):
         SEEDS.update(_area)
 
 
-def failed_names(camera) -> set[str]:
-    return {r.name for r in run_checks(camera) if not r.ok}
+def shipped_failures(name: str) -> set[str]:
+    return {r.name for r in run_checks(CAMERA, {name}) if not r.ok}
+
+
+def seed_misses(label: str) -> set[str]:
+    """The checks a seed should trip but does not. Only those checks run: a seed is caught or
+    missed on them alone, and skipping the rest is what keeps the suite minutes, not hours."""
+    camera, expected, *patch = SEEDS[label]
+    with patch[0]() if patch else nullcontext():
+        failed = {r.name for r in run_checks(camera, expected) if not r.ok}
+    return expected - failed
 
 
 def main() -> int:
-    problems = []
-    baseline = failed_names(CAMERA)
-    if baseline:
-        problems.append(f"shipped parameters fail: {sorted(baseline)}")
-    for label, (camera, expected, *patch) in SEEDS.items():
-        with patch[0]() if patch else nullcontext():
-            got = failed_names(camera)
-        missing = expected - got
-        status = "caught" if not missing else f"MISSED {sorted(missing)}"
-        print(f"{label}: {status}; failed checks: {sorted(got)}")
-        if missing:
-            problems.append(label)
+    start = time.perf_counter()
+    # Each shipped check and each seed is its own task; the slowest checks take over a minute,
+    # so one process per core keeps the wall time near the slowest single task.
+    with ProcessPoolExecutor(max_workers=os.cpu_count()) as pool:
+        shipped = {name: pool.submit(shipped_failures, name) for name, _ in CHECKS}
+        seeds = {label: pool.submit(seed_misses, label) for label in SEEDS}
+        problems = []
+        baseline = set().union(*(f.result() for f in shipped.values()))
+        if baseline:
+            problems.append(f"shipped parameters fail: {sorted(baseline)}")
+        for label, future in seeds.items():
+            missing = future.result()
+            print(f"{label}: {'caught' if not missing else f'MISSED {sorted(missing)}'}")
+            if missing:
+                problems.append(label)
     print()
+    print(f"{len(CHECKS)} shipped checks and {len(SEEDS)} seeds in {time.perf_counter() - start:.0f}s")
     print("ALL SEEDS CAUGHT" if not problems else f"PROBLEMS: {problems}")
     return 1 if problems else 0
 
