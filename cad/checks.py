@@ -547,9 +547,14 @@ def _run_one(name, fn, c: Camera, built: Built) -> Result:
         return Result(name, False, f"could not evaluate: {type(e).__name__}: {e}")
 
 
-def run_checks(c: Camera = CAMERA) -> list[Result]:
+def run_checks(c: Camera = CAMERA, names: set[str] | None = None) -> list[Result]:
+    """Runs every check, or only the named ones; a name that is not a registered check is an error."""
+    if names is not None:
+        unknown = names - {name for name, _ in CHECKS}
+        if unknown:
+            raise KeyError(f"no such check: {sorted(unknown)}")
     built = Built(c)
-    return [_run_one(name, fn, c, built) for name, fn in CHECKS]
+    return [_run_one(name, fn, c, built) for name, fn in CHECKS if names is None or name in names]
 
 
 def main() -> int:

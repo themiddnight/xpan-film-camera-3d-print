@@ -71,7 +71,7 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 |---|---|
 | `uv run python cad/export.py` | Builds every part in `cad/parts/`, writes `out/stl` (print orientation), `out/step` and `out/glb` (camera coordinates) and `out/manifest.json` |
 | `uv run python cad/checks.py` | Layout checks from `cad/params.py` plus geometry checks on the built solids; exit 1 on any failure |
-| `uv run python cad/tests/test_checks.py` | Seeds known design errors and proves the checks catch each one |
+| `uv run python cad/tests/test_checks.py` | Seeds known design errors and proves the checks catch each one. Each seed runs only the checks it must trip, spread over every core (about 7 minutes on 8 cores) |
 | `pnpm --dir viewer install` (once), then `pnpm --dir viewer dev` and open `http://localhost:8642/` | Vite + React + react-three-fiber viewer reading `out/`: the whole camera with part toggles by group and kind, ghosting, section planes and exploded view; **Operate** plays one frame advance (button or Space, Loop, Show mechanism cutaway and camera) with the film moving on its path; a play/scrub slider for each mechanism |
 | `pnpm --dir viewer build` | Typechecks and builds a static viewer into `viewer/dist/` (includes the current `out/` files) |
 | `node docs/figures/film-transport/build.mjs` | Writes the film-transport figure pages (add `--light` for the light page, `--audit` to check the geometry); needs the anatomy skill (`ANATOMY_HOME`, default `~/.claude/skills/anatomy`) |
