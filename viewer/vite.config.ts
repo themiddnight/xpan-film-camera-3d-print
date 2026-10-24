@@ -14,10 +14,11 @@ export default defineConfig(({ mode }) => {
     publicDir: isPublic ? false : '../out',
     base: './',
     server: { port: 8642, strictPort: true },
-    // three.js alone is most of the 1.02MB workshop chunk, and the workshop is a local review tool,
-    // so splitting buys nothing. The limit sits just above today's size so real growth still warns.
+    // three.js, fiber and drei are most of the one 3D chunk both pages need (1.24MB in the public build,
+    // 344kB gzipped), and the page cannot draw anything without all of it, so splitting buys nothing.
+    // The limit sits just above today's size so real growth still warns.
     build: {
-      chunkSizeWarningLimit: 1050,
+      chunkSizeWarningLimit: 1250,
       outDir: isPublic ? 'dist-public' : 'dist',
       rollupOptions: { input: isPublic ? ['index.html'] : ['index.html', 'workshop.html'] },
     },

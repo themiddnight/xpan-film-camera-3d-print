@@ -60,7 +60,8 @@ export interface Viewer {
     setExplode: (amount: number) => void
     showView: (view: ViewName) => void
     reportBox: (name: string, box: Box3 | null) => void
-    reportFailed: (name: string, error: Error) => void
+    /** Marks a part that will not appear; whoever caught the failure has already logged it. */
+    reportFailed: (name: string) => void
     /** Ghosts and hides the cycle's focus parts, or shows them again. */
     setFocus: (cycle: CyclePlayer, on: boolean) => void
   }
@@ -148,10 +149,7 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
           framed: cycleParts(manifest, player.cycle), view: 'mechanism', viewRequest: s.viewRequest + 1,
         }
       }),
-      reportFailed: (name, error) => {
-        console.error(`Part ${name} failed to load:`, error)
-        store.update(s => (s.failed.has(name) ? s : { ...s, failed: new Set(s.failed).add(name) }))
-      },
+      reportFailed: name => store.update(s => (s.failed.has(name) ? s : { ...s, failed: new Set(s.failed).add(name) })),
     },
   }
 }

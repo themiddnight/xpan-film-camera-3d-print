@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { Matrix4, Vector3 } from 'three'
 import { useViewer, useViewerState, type ViewerState } from '../state/viewer'
 import { writeSectionPlane } from './frames'
@@ -17,9 +17,22 @@ interface Applied {
  * The one place part transforms are written. Each frame it advances playing mechanisms, and when a
  * mechanism value, the explode amount, a part box or the set of nodes changed, it recomputes every
  * part's matrix: explode offset after the part's drives. Idle frames do no work.
+ *
+ * Under `frameloop="demand"` it also asks for the frames motion needs: one when a cycle starts, a
+ * mechanism starts playing or the viewer state changes, and the next one while anything still moves.
  */
 export function MotionDriver() {
   const viewer = useViewer()
+  const invalidate = useThree(s => s.invalidate)
+  useEffect(() => {
+    const unsubscribe = [
+      viewer.store.subscribe(invalidate),
+      viewer.motion.subscribePlaying(invalidate),
+      ...viewer.cycles.map(c => c.subscribe(invalidate)),
+    ]
+    invalidate()
+    return () => unsubscribe.forEach(u => u())
+  }, [viewer, invalidate])
   const scratch = useMemo(() => ({ matrix: new Matrix4(), offset: new Vector3() }), [])
   const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, spread: new Map() }), [])
 
@@ -27,6 +40,9 @@ export function MotionDriver() {
     const { motion, nodes, store, manifest, cycles } = viewer
     for (const cycle of cycles) cycle.tick(seconds)
     motion.tick(seconds)
+    const moving = cycles.some(c => c.getStatus().running || c.getStatus().looping) ||
+      motion.mechanisms.some(m => motion.isPlaying(m.id))
+    if (moving) invalidate()
     const { explode, boxes } = store.getState()
     if (
       applied.revision === motion.revision && applied.explode === explode &&

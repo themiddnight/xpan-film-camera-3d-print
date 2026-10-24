@@ -1,9 +1,9 @@
-import { memo, useMemo } from 'react'
-import { useGLTF } from '@react-three/drei'
-import { BackSide, Box3, Color, FrontSide, Mesh, MeshBasicMaterial, MeshStandardMaterial } from 'three'
+import { memo, use, useEffect, useMemo } from 'react'
+import { BackSide, Box3, Color, FrontSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, type Object3D } from 'three'
 import { useViewer } from '../state/viewer'
 import type { PartManifest } from '../types'
 import { gltfToWorld } from './frames'
+import { loadPart } from './partLoader'
 import { INSIDE_SHADE, SURFACE, usePartDisplay } from './partDisplay'
 
 interface Props {
@@ -17,8 +17,18 @@ interface Props {
  * Memoised, and it subscribes only to its own display mode, so a slider drag renders no part.
  */
 export const PartModel = memo(function PartModel({ spec, url }: Props) {
+  const loaded = use(loadPart(spec.name, url))
+  return loaded instanceof Error ? <FailedPart name={spec.name} /> : <LoadedPart spec={spec} scene={loaded} />
+})
+
+function FailedPart({ name }: { name: string }) {
+  const { reportFailed } = useViewer().actions
+  useEffect(() => reportFailed(name), [name, reportFailed])
+  return null
+}
+
+function LoadedPart({ spec, scene }: { spec: PartManifest; scene: Object3D }) {
   const viewer = useViewer()
-  const { scene } = useGLTF(url)
 
   const { model, materials } = useMemo(() => {
     const model = scene.clone(true)
@@ -50,4 +60,4 @@ export const PartModel = memo(function PartModel({ spec, url }: Props) {
       </group>
     </group>
   )
-})
+}
