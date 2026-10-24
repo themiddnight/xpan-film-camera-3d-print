@@ -1,4 +1,5 @@
-import { GROUPS, type Manifest } from '../types'
+import { GROUPS, SPEC_SECTIONS, type Manifest } from '../types'
+import { splitBlocks, strayRefs, type Doc } from './maker'
 import { specRefs } from './spec'
 import type { Chapter, Figure, Staging } from './story'
 
@@ -53,6 +54,35 @@ export function validateStory(manifest: Manifest, chapters: readonly Chapter[], 
     seen.add(owner)
     errors.push(...stagingErrors(manifest, owner, staging))
     for (const ref of specRefs(copy)) if (!specs.has(ref)) errors.push(`${owner}: unknown spec "${ref}"`)
+  }
+  return errors
+}
+
+/**
+ * Checks every component placeholder and spec value in the maker documents: figures and drawings must
+ * exist, spec tables must name a real section, values must name a spec entry, and nothing else in
+ * braces may be left over. Messages read `document <id>: unknown figure "<name>"`.
+ */
+export function validateDocs(manifest: Manifest, docs: readonly Doc[], figures: readonly Figure[], drawings: readonly { id: string }[]): string[] {
+  const errors: string[] = []
+  const specs = new Set(manifest.spec_sheet.map(s => s.id))
+  const figureIds = new Set(figures.map(f => f.id))
+  const drawingIds = new Set(drawings.map(d => d.id))
+  for (const { id, markdown } of docs) {
+    const unknown = (what: string, name: string) => errors.push(`document ${id}: unknown ${what} "${name}"`)
+    for (const block of splitBlocks(markdown)) {
+      switch (block.kind) {
+        case 'figure': if (!figureIds.has(block.id)) unknown('figure', block.id); break
+        case 'drawing': if (!drawingIds.has(block.id)) unknown('drawing', block.id); break
+        case 'spec': if (!SPEC_SECTIONS.some(s => s === block.section)) unknown('spec table', block.section); break
+        case 'unknown': unknown('placeholder', block.ref); break
+        case 'bom': break
+        case 'markdown':
+          for (const ref of specRefs(block.text)) if (!specs.has(ref)) unknown('spec', ref)
+          for (const ref of strayRefs(block.text)) unknown('placeholder', ref)
+          break
+      }
+    }
   }
   return errors
 }

@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { realManifest } from '../test/realManifest'
 import { CHAPTERS } from './chapters'
+import { DOCS } from './content'
+import { DRAWINGS, FIGURES } from './figures'
 import type { Chapter, Figure } from './story'
-import { validateStory } from './validate'
+import { validateDocs, validateStory } from './validate'
 
 const manifest = realManifest()
 const part = manifest.parts[0].name
@@ -28,8 +30,14 @@ describe('validateStory', () => {
     expect(validateStory(manifest, [fixture], [])).toEqual([])
   })
 
-  it('accepts the real chapters against the real manifest', () => {
-    expect(validateStory(manifest, CHAPTERS, [])).toEqual([])
+  it('accepts the real chapters and figures against the real manifest', () => {
+    expect(validateStory(manifest, CHAPTERS, FIGURES)).toEqual([])
+  })
+
+  it('names a figure that hides a part CAD no longer has', () => {
+    const [first, ...rest] = FIGURES
+    const stale = { ...first, scene: { ...first.scene, hide: [...(first.scene?.hide ?? []), 'no_such_part'] } }
+    expect(validateStory(manifest, [], [stale, ...rest])).toEqual([`figure ${first.id}: unknown part "no_such_part"`])
   })
 
   it('names a spec value the copy asks for that the spec sheet lacks', () => {
@@ -78,5 +86,47 @@ describe('validateStory', () => {
 
   it('rejects two chapters with one id', () => {
     expect(validateStory(manifest, [fixture, fixture], [])).toEqual(['chapter fixture: duplicate id "fixture"'])
+  })
+})
+
+describe('validateDocs', () => {
+  const docs = (markdown: string) => [{ id: 'doc', markdown }]
+  const check = (markdown: string) => validateDocs(manifest, docs(markdown), FIGURES, DRAWINGS)
+
+  it('accepts the real documents against the real manifest, figures and drawings', () => {
+    expect(validateDocs(manifest, DOCS, FIGURES, DRAWINGS)).toEqual([])
+  })
+
+  it('accepts every kind of placeholder when it names something real', () => {
+    const figure = FIGURES[0].id
+    const value = manifest.spec_sheet[0].id
+    expect(check(`## Doc\n\n{{figure:${figure}}}\n\n{{drawing:${DRAWINGS[0].id}}}\n\n{{spec:specs}}\n\n{{spec:interface}}\n\n{{bom}}\n\nA {{value:${value}}} and {{number:${value}}}.`)).toEqual([])
+  })
+
+  it('names an unknown figure', () => {
+    expect(check('{{figure:no_such_figure}}')).toEqual(['document doc: unknown figure "no_such_figure"'])
+  })
+
+  it('names an unknown drawing', () => {
+    expect(check('{{drawing:no_such_drawing}}')).toEqual(['document doc: unknown drawing "no_such_drawing"'])
+  })
+
+  it('names an unknown spec table', () => {
+    expect(check('{{spec:no_such_section}}')).toEqual(['document doc: unknown spec table "no_such_section"'])
+  })
+
+  it('names an unknown spec value in prose', () => {
+    expect(check('Frames of {{value:no_such_spec}} and {{number:no_such_number}}.')).toEqual([
+      'document doc: unknown spec "no_such_spec"',
+      'document doc: unknown spec "no_such_number"',
+    ])
+  })
+
+  it('names a placeholder nothing handles, in prose or on its own line', () => {
+    expect(check('A {{figure:inline}} in a sentence.\n\n{{table:specs}}\n\n{{figure}}')).toEqual([
+      'document doc: unknown placeholder "{{figure:inline}}"',
+      'document doc: unknown placeholder "{{table:specs}}"',
+      'document doc: unknown placeholder "{{figure}}"',
+    ])
   })
 })

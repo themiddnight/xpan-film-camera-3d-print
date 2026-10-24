@@ -6,16 +6,27 @@ import { fetchManifest } from '../manifest'
 import type { Manifest } from '../types'
 import { CHAPTERS } from './chapters'
 import { Showcase } from './Showcase'
-import type { Figure } from './story'
-import { validateStory } from './validate'
-
-// Figures arrive with the maker half.
-const FIGURES: readonly Figure[] = []
+import { DOCS } from './content'
+import { DRAWINGS, FIGURES } from './figures'
+import { FigureViews, useFigureEntries } from './FigureViews'
+import { MakerDoc } from './MakerDoc'
+import { validateDocs, validateStory } from './validate'
 
 type Load =
   | { status: 'loading' }
   | { status: 'error'; messages: readonly string[] }
   | { status: 'ready'; manifest: Manifest }
+
+/** The showcase over the maker half, with every figure drawn into the showcase's one canvas. */
+function Page({ manifest }: { manifest: Manifest }) {
+  const entries = useFigureEntries(manifest, FIGURES)
+  return (
+    <>
+      <Showcase manifest={manifest} chapters={CHAPTERS} figureViews={<FigureViews entries={entries} />} />
+      <MakerDoc manifest={manifest} entries={entries} />
+    </>
+  )
+}
 
 function Presentation() {
   const [load, setLoad] = useState<Load>({ status: 'loading' })
@@ -24,7 +35,7 @@ function Presentation() {
     let current = true
     fetchManifest().then(
       manifest => {
-        const errors = validateStory(manifest, CHAPTERS, FIGURES)
+        const errors = [...validateStory(manifest, CHAPTERS, FIGURES), ...validateDocs(manifest, DOCS, FIGURES, DRAWINGS)]
         if (current) setLoad(errors.length > 0 ? { status: 'error', messages: errors } : { status: 'ready', manifest })
       },
       (e: unknown) => { if (current) setLoad({ status: 'error', messages: [e instanceof Error ? e.message : String(e)] }) },
@@ -40,7 +51,7 @@ function Presentation() {
         <ul>{load.messages.map(m => <li key={m}>{m}</li>)}</ul>
       </div>
     )
-    case 'ready': return <Showcase manifest={load.manifest} chapters={CHAPTERS} />
+    case 'ready': return <Page manifest={load.manifest} />
   }
 }
 

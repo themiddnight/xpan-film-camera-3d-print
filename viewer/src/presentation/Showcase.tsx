@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { KeyPlayer } from '../state/cycle'
 import { useSelector } from '../state/store'
-import { createViewer, useViewer, useViewerState, type Viewer } from '../state/viewer'
+import { createViewer, type Viewer } from '../state/viewer'
 import { MANIFEST_URL } from '../manifest'
-import { GROUP_LABELS, GROUPS, type CycleCounter, type Group, type Manifest } from '../types'
+import { GROUP_LABELS, GROUPS, type Group, type Manifest } from '../types'
+import { Director, motionsFor } from './Director'
 import { FilmStripNav, stripVars } from './FilmStripNav'
 import { FormatOverlay } from './FormatOverlay'
 import { matches, PHONE, REDUCED_MOTION, useMedia } from './media'
@@ -15,66 +15,11 @@ import { StagedView } from './StagedView'
 import type { Chapter, Staging } from './story'
 import { CHAPTER_ATTRIBUTE, useActiveChapter } from './useActiveChapter'
 
-/** Autoplay waits for the camera to arrive, as ShotRig eases over this long. */
-const SETTLE_MS = 800
-
 declare global {
   interface Window {
     /** Read by browser checks: the stage's viewer and the active chapter. */
     presentation?: { viewer: Viewer; chapter: string; players: ReadonlyMap<string, KeyPlayer> }
   }
-}
-
-interface Motion {
-  player: KeyPlayer
-  counter: CycleCounter | null
-}
-
-/** One player per chapter with motion, all writing into the stage viewer's mechanisms. */
-function chapterMotions(viewer: Viewer, chapters: readonly Chapter[]): Map<string, Motion> {
-  const motions = new Map<string, Motion>()
-  for (const c of chapters) {
-    if (!c.motion) continue
-    if ('cycle' in c.motion) {
-      const id = c.motion.cycle
-      const cycle = viewer.manifest.cycles.find(k => k.id === id)
-      if (cycle) motions.set(c.id, { player: new KeyPlayer(cycle.keys, viewer.motion), counter: cycle.counter })
-    } else {
-      motions.set(c.id, { player: new KeyPlayer(c.motion.keys, viewer.motion), counter: null })
-    }
-  }
-  return motions
-}
-
-/**
- * Runs inside the stage view, after the chapter's staging is applied in the same commit. On a chapter
- * change it stops every chapter's motion, so nothing an earlier chapter started keeps writing over the
- * new pose; once the parts are in and the camera has arrived it plays the new chapter's motion once.
- */
-function Director({ motions, active, autoplay }: { motions: ReadonlyMap<string, Motion>; active: string; autoplay: boolean }) {
-  const viewer = useViewer()
-  const invalidate = useThree(s => s.invalidate)
-  const ready = useViewerState(s => viewer.selectBounds(s) !== null)
-  const player = motions.get(active)?.player ?? null
-
-  useEffect(() => {
-    for (const m of motions.values()) m.player.stop()
-    if (!player) return
-    return player.subscribe(invalidate)
-  }, [motions, player, invalidate])
-
-  useEffect(() => {
-    if (!player || !ready || !autoplay) return
-    const timer = setTimeout(() => player.run(), SETTLE_MS)
-    return () => clearTimeout(timer)
-  }, [player, ready, autoplay])
-
-  useFrame((_, seconds) => {
-    if (!player) return
-    player.tick(seconds)
-    if (player.getStatus().running) invalidate()
-  })
-  return null
 }
 
 function LoadProgress({ viewer }: { viewer: Viewer }) {
@@ -110,11 +55,12 @@ function highlighted(manifest: Manifest, chapter: Chapter, group: Group | null):
 
 /**
  * The showcase: one stage behind the page, restaged as each chapter's text crosses the middle of the
- * screen, with the film-strip navigator along the bottom.
+ * screen, with the film-strip navigator along the bottom. `figureViews`, the page's other staged
+ * views, are drawn into the same canvas, since a page has only one.
  */
-export function Showcase({ manifest, chapters }: { manifest: Manifest; chapters: readonly Chapter[] }) {
+export function Showcase({ manifest, chapters, figureViews }: { manifest: Manifest; chapters: readonly Chapter[]; figureViews?: ReactNode }) {
   const viewer = useMemo(() => createViewer(manifest, MANIFEST_URL), [manifest])
-  const motions = useMemo(() => chapterMotions(viewer, chapters), [viewer, chapters])
+  const motions = useMemo(() => motionsFor(viewer, chapters), [viewer, chapters])
   const ids = useMemo(() => chapters.map(c => c.id), [chapters])
   const active = useActiveChapter(ids)
   const phone = useMedia(PHONE)
@@ -143,6 +89,7 @@ export function Showcase({ manifest, chapters }: { manifest: Manifest; chapters:
           <Director motions={motions} active={active} autoplay={!reduced} />
           {active === 'format' && <FormatOverlay />}
         </StagedView>
+        {figureViews}
       </StageCanvas>
       <div ref={stage} className="stage" data-explore={interactive}>
         <div ref={focus} className="stage-focus" />
