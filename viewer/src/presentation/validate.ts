@@ -1,4 +1,5 @@
 import { GROUPS, type Manifest } from '../types'
+import { specRefs } from './spec'
 import type { Chapter, Figure, Staging } from './story'
 
 function stagingErrors(manifest: Manifest, owner: string, staging: Staging): string[] {
@@ -35,21 +36,23 @@ function stagingErrors(manifest: Manifest, owner: string, staging: Staging): str
 }
 
 /**
- * Checks every part, group, mechanism, cycle and feature a chapter or figure names against the
+ * Checks every part, group, mechanism, cycle, feature and spec a chapter or figure names against the
  * manifest, so a CAD rename shows up as a message naming the owner, never as a blank stage.
  * An empty list means the story is valid.
  */
 export function validateStory(manifest: Manifest, chapters: readonly Chapter[], figures: readonly Figure[]): string[] {
   const errors: string[] = []
   const owners = [
-    ...chapters.map(c => ({ owner: `chapter ${c.id}`, id: c.id, staging: c as Staging })),
-    ...figures.map(f => ({ owner: `figure ${f.id}`, id: f.id, staging: f as Staging })),
+    ...chapters.map(c => ({ owner: `chapter ${c.id}`, id: c.id, staging: c as Staging, copy: `${c.title} ${c.text}` })),
+    ...figures.map(f => ({ owner: `figure ${f.id}`, id: f.id, staging: f as Staging, copy: f.caption })),
   ]
   const seen = new Set<string>()
-  for (const { owner, id, staging } of owners) {
+  const specs = new Set(manifest.spec_sheet.map(s => s.id))
+  for (const { owner, id, staging, copy } of owners) {
     if (seen.has(owner)) errors.push(`${owner}: duplicate id "${id}"`)
     seen.add(owner)
     errors.push(...stagingErrors(manifest, owner, staging))
+    for (const ref of specRefs(copy)) if (!specs.has(ref)) errors.push(`${owner}: unknown spec "${ref}"`)
   }
   return errors
 }

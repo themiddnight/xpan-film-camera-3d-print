@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@fontsource-variable/archivo':
+        specifier: 5.3.0
+        version: 5.3.0
       '@react-three/drei':
         specifier: 10.7.9
         version: 10.7.9(@react-three/fiber@9.8.2(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1))(@types/react@19.3.0)(@types/three@0.186.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(three@0.186.1)
@@ -54,6 +57,9 @@ packages:
 
   '@dimforge/rapier3d-compat@0.12.0':
     resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
+
+  '@fontsource-variable/archivo@5.3.0':
+    resolution: {integrity: sha512-HogK8FJelrD1o7TlZlkIVtHgc20bO5PZRWE7mUeUTdMN055alznQV6/00J00IBeu8FQAH4s3zW9UJNvKExXf+g==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -883,6 +889,8 @@ snapshots:
   '@babel/runtime@7.29.10': {}
 
   '@dimforge/rapier3d-compat@0.12.0': {}
+
+  '@fontsource-variable/archivo@5.3.0': {}
 
   '@jridgewell/resolve-uri@3.1.2': {}
 

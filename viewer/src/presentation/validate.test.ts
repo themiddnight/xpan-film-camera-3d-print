@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { realManifest } from '../test/realManifest'
+import { CHAPTERS } from './chapters'
 import type { Chapter, Figure } from './story'
 import { validateStory } from './validate'
 
@@ -25,6 +26,14 @@ const errorsFor = (changes: Partial<Chapter>) => validateStory(manifest, [{ ...f
 describe('validateStory', () => {
   it('accepts a chapter whose references all exist in the real manifest', () => {
     expect(validateStory(manifest, [fixture], [])).toEqual([])
+  })
+
+  it('accepts the real chapters against the real manifest', () => {
+    expect(validateStory(manifest, CHAPTERS, [])).toEqual([])
+  })
+
+  it('names a spec value the copy asks for that the spec sheet lacks', () => {
+    expect(errorsFor({ text: 'Frames of {{value:no_such_spec}}.' })).toEqual(['chapter fixture: unknown spec "no_such_spec"'])
   })
 
   it('names the chapter and the feature that no longer exists', () => {

@@ -1,0 +1,429 @@
+:root {
+  --seamless: #D5D8D8;
+  --petg: #000000;
+  --brass: #A4823F;
+  --drawing-white: #FFFFFF;
+  --dimension-blue: #2C5A86;
+  --film-base: #3A3A38;
+  /* A dense, exposed frame on the negative, and the pale edge printing beside it. */
+  --film-dense: #1E1E1D;
+  --film-print: #C9CBC4;
+
+  --font: 'Archivo Variable', system-ui, sans-serif;
+  --gutter: 48px;
+  --column: min(420px, 34vw);
+  --frame-h: 52px;
+  --edge-h: 16px;
+  --ease: cubic-bezier(0.6, 0, 0.2, 1);
+}
+
+@media (max-width: 640px) {
+  :root {
+    --gutter: 16px;
+    --frame-h: 34px;
+    --edge-h: 14px;
+  }
+}
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--seamless);
+  color: var(--petg);
+  font-family: var(--font);
+  font-size: 17px;
+  line-height: 1.5;
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 {
+  font-stretch: 125%;
+  font-weight: 720;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p { margin: 0; }
+
+:focus-visible {
+  outline: 2px solid var(--dimension-blue);
+  outline-offset: 2px;
+}
+
+button { font: inherit; color: inherit; }
+
+.page-status { padding: var(--gutter); max-width: 70ch; }
+
+/* Showcase layout: a sticky stage with the chapters scrolling over it. */
+
+/* The strip proportions come from the spec sheet as --strip-pitch, --strip-film and --strip-frame-w on the section. */
+.showcase {
+  position: relative;
+  --strip-h: calc(var(--edge-h) + var(--frame-h) * var(--strip-film));
+  --tile-w: calc(var(--frame-h) * var(--strip-pitch));
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+}
+
+/* Where the shot is framed; the picture still fills the stage behind the card and the strip. */
+.stage-focus {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: var(--strip-h);
+  left: calc(var(--gutter) + var(--column));
+  pointer-events: none;
+}
+
+.stage[data-explore="false"] {
+  /* OrbitControls writes its own touch-action on the element; this wins while orbit is off. */
+  touch-action: pan-y !important;
+}
+
+.chapters {
+  position: relative;
+  z-index: 1;
+  margin-top: -100svh;
+  pointer-events: none;
+}
+
+.chapter {
+  min-height: 100svh;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: var(--gutter) 0 calc(var(--strip-h) + var(--gutter)) var(--gutter);
+}
+
+.card {
+  box-sizing: border-box;
+  width: var(--column);
+  padding: 28px 30px 30px;
+  background: var(--drawing-white);
+  border-radius: 2px;
+  pointer-events: auto;
+}
+
+.card h2 {
+  font-size: 30px;
+  margin-bottom: 14px;
+}
+
+.card p { max-width: 62ch; }
+
+.chapter-hero .card {
+  background: none;
+  padding: 0;
+}
+
+.chapter-hero h1 {
+  font-size: clamp(44px, 6.2vw, 92px);
+  font-weight: 780;
+  line-height: 0.94;
+  margin-bottom: 26px;
+}
+
+.chapter-hero p {
+  font-size: 19px;
+  max-width: 30ch;
+}
+
+/* Loading */
+
+.load { margin-top: 28px; max-width: 280px; }
+
+.load-track {
+  display: block;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.load-bar {
+  display: block;
+  height: 2px;
+  background: var(--petg);
+  transform-origin: left center;
+  transition: transform 0.3s var(--ease);
+}
+
+.load-text {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Controls in the card */
+
+.playback {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+.playback-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.playback-button {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--petg);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.playback-button svg { width: 14px; height: 14px; fill: currentColor; }
+
+.playback-button:hover { background: var(--petg); color: var(--drawing-white); }
+
+.playback-scrub {
+  flex: 1;
+  min-width: 0;
+  margin-left: 6px;
+  accent-color: var(--petg);
+}
+
+.playback-phase { margin-top: 10px; font-size: 15px; }
+
+.playback-readout {
+  margin-top: 2px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--brass);
+  font-weight: 600;
+}
+
+.modules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.module, .explore {
+  padding: 7px 14px;
+  border: 1.5px solid var(--petg);
+  border-radius: 999px;
+  background: var(--drawing-white);
+  font-size: 15px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.module[aria-pressed="true"], .explore[aria-pressed="true"] {
+  background: var(--petg);
+  color: var(--drawing-white);
+}
+
+.explore {
+  position: absolute;
+  top: 12px;
+  right: var(--gutter);
+  z-index: 2;
+}
+
+/* Pins and labels in the stage */
+
+.pin { position: relative; white-space: nowrap; font-family: var(--font); }
+
+.pin-dot {
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--brass);
+  box-shadow: 0 0 0 2px var(--drawing-white);
+}
+
+.pin-tap { pointer-events: auto; cursor: pointer; }
+.pin-tap::before { content: ''; position: absolute; inset: -14px; }
+
+.pin-label, .overlay-label {
+  position: absolute;
+  left: 12px;
+  top: -11px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: var(--drawing-white);
+  color: var(--petg);
+  font: 500 13px/18px var(--font);
+  white-space: nowrap;
+}
+
+.pin[data-side="left"] .pin-label { left: auto; right: 12px; }
+
+.overlay-label { left: 0; }
+.overlay-label-above { top: auto; bottom: 6px; }
+.overlay-label-below { top: 6px; }
+
+/* The film-strip navigator */
+
+.strip {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  height: var(--strip-h);
+  overflow: hidden;
+}
+
+.strip-run {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* Tiles have fractional widths; the film base fills any hairline between them. */
+  background: var(--film-base);
+  transform: translateX(calc(50vw - (var(--strip-i) + var(--strip-leader) + 0.5) * var(--tile-w)));
+  transition: transform 0.8s var(--ease);
+}
+
+.strip-leader {
+  width: var(--tile-w);
+  height: var(--strip-h);
+  background: var(--film-base);
+}
+
+.strip-leader .strip-edge { display: block; }
+
+.strip-tile {
+  position: relative;
+  display: block;
+  width: var(--tile-w);
+  height: var(--strip-h);
+  padding: 0;
+  border: 0;
+  background: var(--film-base);
+  text-align: left;
+  cursor: pointer;
+}
+
+.strip-tile:focus-visible {
+  outline: 2px solid var(--drawing-white);
+  outline-offset: -4px;
+}
+
+.strip-edge {
+  display: flex;
+  justify-content: space-between;
+  height: var(--edge-h);
+  padding: 0 9%;
+  color: var(--film-print);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: var(--edge-h);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.strip-film {
+  display: block;
+  width: 100%;
+  height: calc(var(--frame-h) * var(--strip-film));
+}
+
+.strip-perf { fill: var(--seamless); }
+.strip-frame { fill: var(--film-dense); transition: fill 0.4s var(--ease); }
+.strip-tile[aria-current] .strip-frame { fill: #ECEAE3; }
+.strip-tile:hover:not([aria-current]) .strip-frame { fill: #2A2A29; }
+
+.strip-title {
+  position: absolute;
+  left: calc(var(--frame-h) * (var(--strip-pitch) - var(--strip-frame-w)) / 2);
+  top: calc(var(--edge-h) + var(--frame-h) * (var(--strip-film) - 1) / 2);
+  width: calc(var(--frame-h) * var(--strip-frame-w));
+  height: var(--frame-h);
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 9px 6px;
+  color: rgba(213, 216, 216, 0.72);
+  font-size: 11px;
+  font-weight: 600;
+  font-stretch: 110%;
+  line-height: 1.15;
+  transition: color 0.4s var(--ease);
+}
+
+.strip-tile[aria-current] .strip-title { color: var(--petg); }
+
+.strip-gate {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--edge-h) + var(--frame-h) * (var(--strip-film) - 1) / 2 - 4px);
+  width: calc(var(--frame-h) * var(--strip-frame-w) + 8px);
+  height: calc(var(--frame-h) + 8px);
+  transform: translateX(-50%);
+  pointer-events: none;
+  --arm: 12px;
+  --bar: 2px;
+  background:
+    linear-gradient(var(--brass), var(--brass)) left top / var(--arm) var(--bar) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) left top / var(--bar) var(--arm) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right top / var(--arm) var(--bar) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right top / var(--bar) var(--arm) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) left bottom / var(--arm) var(--bar) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) left bottom / var(--bar) var(--arm) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right bottom / var(--arm) var(--bar) no-repeat,
+    linear-gradient(var(--brass), var(--brass)) right bottom / var(--bar) var(--arm) no-repeat;
+}
+
+/* Phones: the camera above, the text at the bottom over a soft fade. */
+
+@media (max-width: 640px) {
+  /* Below the Explore button, and down toward the text so the camera and its words read together. */
+  .stage-focus {
+    top: 7svh;
+    left: 0;
+    bottom: 43svh;
+  }
+
+  .chapter {
+    align-items: flex-end;
+    padding: 0 0 calc(var(--strip-h) + 10px);
+  }
+
+  .card {
+    width: 100%;
+    padding: 34px var(--gutter) 6px;
+    border-radius: 0;
+    background: linear-gradient(to bottom, rgba(213, 216, 216, 0), var(--seamless) 30px);
+  }
+
+  .card h2 { font-size: 24px; margin-bottom: 8px; }
+  .card p { font-size: 16px; }
+
+  .chapter-hero .card { padding: 34px var(--gutter) 6px; }
+  .chapter-hero h1 { font-size: 44px; margin-bottom: 14px; }
+  .chapter-hero p { font-size: 17px; }
+
+  .playback { margin-top: 12px; padding-top: 10px; }
+  .playback-phase { margin-top: 6px; }
+
+  .strip-title { font-size: 9px; padding: 0 6px 4px; }
+  .strip-edge { font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .strip-run, .strip-frame, .strip-title, .load-bar { transition: none; }
+}
