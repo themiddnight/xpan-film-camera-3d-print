@@ -21,12 +21,13 @@ REQUIRED_FEATURES = (
 )
 """The ids the page's chapters and figures name; the viewer's story validator rejects a manifest without them."""
 DERIVED_FORMULAS = {
-    "aspect_ratio": lambda v: v["frame_width"] / v["frame_height"],
-    "f_number": lambda v: v["pinhole_distance"] / v["pinhole_diameter"],
-    "m42_seat_to_film": lambda v: v["pinhole_distance"] - v["m42_seat_to_pinhole"],
-    "image_circle": lambda v: math.hypot(v["frame_width"], v["frame_height"]),
+    "aspect_ratio": lambda v, c: v["frame_width"] / v["frame_height"],
+    "f_number": lambda v, c: v["pinhole_distance"] / v["pinhole_diameter"],
+    "m42_seat_to_film": lambda v, c: v["pinhole_distance"] - v["m42_seat_to_pinhole"],
+    "image_circle": lambda v, c: math.hypot(v["frame_width"], v["frame_height"]),
+    "frames_per_roll": lambda v, c: math.floor(c.film.roll_exposures * c.film.standard_frame_pitch / v["advance_per_frame"]),
 }
-"""Each derived entry, recomputed from the entries it publishes alongside."""
+"""Each derived entry, recomputed from the entries it publishes alongside (and the film params it needs)."""
 
 
 def _repeats(ids: list[str]) -> list[str]:
@@ -95,7 +96,7 @@ def _(c, b):
             problems.append(f"{e.id}: no formula named {name!r}")
             continue
         try:
-            expected = formula(published)
+            expected = formula(published, c)
         except KeyError as err:
             problems.append(f"{e.id}: formula needs unpublished {err}")
             continue

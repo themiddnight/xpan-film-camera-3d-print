@@ -65,10 +65,16 @@ SPEC_SHEET: tuple[SpecEntry, ...] = (
     _p("frame_height", "Frame height", "mm", "specs", "locked", "film.frame_h"),
     _d("aspect_ratio", "Aspect ratio (width to height)", "", "specs", "locked", "aspect_ratio",
        lambda c: c.film.frame_w / c.film.frame_h),
+    _p("standard_frame_width", "Standard 135 frame width, for comparison", "mm", "specs", "locked",
+       "film.standard_frame_w"),
     _p("perf_pitch", "Perforation pitch", "mm", "specs", "locked", "film.perf_pitch"),
     _p("perfs_per_frame", "Perforations per frame", "perfs", "specs", "locked", "film.perfs_per_frame"),
     _p("advance_per_frame", "Film advance per frame", "mm", "specs", "locked", "film.advance"),
     _p("sprocket_teeth", "Sprocket teeth", "teeth", "specs", "locked", "sprocket.teeth"),
+    # A count of whole frames, not a measurement: the head and tail leader of a real roll are not
+    # known until a test print loads one, so the status stays draft.
+    _d("frames_per_roll", "Frames per 36-exposure roll, before loading waste", "frames", "specs", "draft",
+       "frames_per_roll", lambda c: math.floor(c.film.frames_per_roll)),
     _p("sprocket_pitch_d", "Sprocket pitch diameter", "mm", "specs", "locked", "pitch_d"),
     _p("pinhole_diameter", "Pinhole diameter", "mm", "specs", "locked", "optics.pinhole_d"),
     _p("pinhole_distance", "Pinhole to film distance", "mm", "specs", "locked", "optics.pinhole_y"),

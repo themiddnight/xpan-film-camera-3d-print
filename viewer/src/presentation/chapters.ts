@@ -34,7 +34,7 @@ export const CHAPTERS: readonly Chapter[] = [
   {
     id: 'format',
     title: 'The format',
-    text: 'Panoramic frames on ordinary 135 film. Each frame is {{value:frame_width}} by {{value:frame_height}}, {{number:aspect_ratio}} times as wide as it is tall. The thin outline is a standard frame on the same film.',
+    text: 'Panoramic frames on ordinary 135 film. Each frame is {{value:frame_width}} by {{value:frame_height}}, {{number:aspect_ratio}} times as wide as it is tall, and a roll holds about {{number:frames_per_roll}}. The thin outline is a standard frame on the same film.',
     shot: { direction: [0.08, -1, 0.12], frame: ['shell'] },
     scene: { hide: [...COVER, 'dark_slide'] },
     pins: [],

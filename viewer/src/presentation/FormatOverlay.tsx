@@ -4,11 +4,6 @@ import { DoubleSide } from 'three'
 import { useViewer } from '../state/viewer'
 import { spec } from './spec'
 
-/**
- * The standard 135 frame is 36 mm wide. It is a film standard this camera does not use, so CAD does
- * not publish it; move it to the spec sheet if CAD ever does.
- */
-const STANDARD_FRAME_WIDTH_MM = 36
 /** Sits this far behind the film as the rear shot sees it, so the film never hides the frame. */
 const FILM_CLEARANCE_MM = 0.6
 /** Rings of fading light around the frame read as a glow without a post-processing pass. */
@@ -23,13 +18,13 @@ export function FormatOverlay() {
   const gate = manifest.features.find(f => f.id === 'film_gate')
   const size = useMemo(() => {
     const value = (id: string) => manifest.spec_sheet.find(s => s.id === id)?.value ?? 0
-    return { w: value('frame_width'), h: value('frame_height') }
+    return { w: value('frame_width'), h: value('frame_height'), standard: value('standard_frame_width') }
   }, [manifest])
-  if (!gate || size.w === 0 || size.h === 0) return null
+  if (!gate || size.w === 0 || size.h === 0 || size.standard === 0) return null
   const [x, gateY] = gate.point
   const y = gateY - FILM_CLEARANCE_MM
   const { w, h } = size
-  const sw = STANDARD_FRAME_WIDTH_MM
+  const sw = size.standard
   const outline: [number, number, number][] = [
     [x - sw / 2, y - 0.01, -h / 2], [x + sw / 2, y - 0.01, -h / 2], [x + sw / 2, y - 0.01, h / 2],
     [x - sw / 2, y - 0.01, h / 2], [x - sw / 2, y - 0.01, -h / 2],

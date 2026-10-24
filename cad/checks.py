@@ -564,7 +564,7 @@ def main() -> int:
     failed = [r.name for r in results if not r.ok]
     print(f"INFO  corner ray angle: {corner_angle(CAMERA):.1f} deg, "
           f"cos^4 falloff {math.log2(math.cos(math.radians(corner_angle(CAMERA))) ** -4):.2f} stops")
-    print(f"INFO  frames per 36-exp roll: {36 * 38.0 / CAMERA.film.advance:.1f} before loading waste")
+    print(f"INFO  frames per {CAMERA.film.roll_exposures}-exp roll: {CAMERA.film.frames_per_roll:.1f} before loading waste")
     print()
     print("ALL PASS" if not failed else f"{len(failed)} FAILED: {', '.join(failed)}")
     return 1 if failed else 0

@@ -55,10 +55,18 @@ class Film:
     frame_w: float = 65.0
     frame_h: float = 24.0
     perfs_per_frame: int = 14
+    standard_frame_w: float = 36.0    # a standard 135 frame, the format this camera is compared with
+    standard_frame_pitch: float = 38.0  # film a standard frame uses, gap included
+    roll_exposures: int = 36          # exposures on the roll the camera is sized for
 
     @property
     def advance(self) -> float:
         return self.perfs_per_frame * self.perf_pitch
+
+    @property
+    def frames_per_roll(self) -> float:
+        """Frames a standard roll holds at this advance, before loading waste (head and tail leader)."""
+        return self.roll_exposures * self.standard_frame_pitch / self.advance
 
     @property
     def perf_row_z(self) -> float:

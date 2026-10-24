@@ -3,6 +3,7 @@
 The pins and the sheet are fixed lists, so a seed here is a camera plus a patch of the list
 (a third element: a function returning a context manager that applies it).
 """
+import math
 from dataclasses import replace
 from unittest.mock import patch
 
@@ -69,6 +70,10 @@ SEEDS: dict = {
     "f-number no longer distance / diameter": (
         CAMERA, {DERIVED},
         _sheet(lambda es: _swap(es, "f_number", compute=lambda c: c.optics.pinhole_y / c.optics.pinhole_d / 2)),
+    ),
+    "frames per roll rounded up to the next whole frame": (
+        CAMERA, {DERIVED},
+        _sheet(lambda es: _swap(es, "frames_per_roll", compute=lambda c: math.ceil(c.film.frames_per_roll))),
     ),
     "image circle published as the frame width": (
         CAMERA, {DERIVED},
