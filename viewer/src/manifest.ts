@@ -1,9 +1,10 @@
 import {
-  GROUPS, KINDS, type Cycle, type CycleKey, type Drive, type FilmStrip, type Manifest, type Mechanism, type PartManifest, type Readout,
-  type Vec3,
+  GROUPS, KINDS, SPEC_SECTIONS, SPEC_STATUSES, type Cycle, type CycleKey, type Drive, type Feature, type FilmStrip, type Manifest,
+  type Mechanism, type PartManifest, type Readout, type SpecEntry, type Vec3,
 } from './types'
 
-export const MANIFEST_URL = new URL('manifest.json', document.baseURI).href
+// Tests run without a document, so the base falls back to a placeholder origin there.
+export const MANIFEST_URL = new URL('manifest.json', globalThis.document?.baseURI ?? 'http://localhost/').href
 
 const EXPORT_HINT = 'Run: uv run python cad/export.py'
 
@@ -172,6 +173,29 @@ function filmStrip(x: unknown, path: string): FilmStrip | null {
   }
 }
 
+function feature(x: unknown, path: string): Feature {
+  const o = record(x, path)
+  return {
+    id: string(o.id, `${path}.id`),
+    label: string(o.label, `${path}.label`),
+    part: string(o.part, `${path}.part`),
+    point: vec3(o.point, `${path}.point`),
+  }
+}
+
+function specEntry(x: unknown, path: string): SpecEntry {
+  const o = record(x, path)
+  return {
+    id: string(o.id, `${path}.id`),
+    label: string(o.label, `${path}.label`),
+    value: number(o.value, `${path}.value`),
+    unit: typeof o.unit === 'string' ? o.unit : fail(`${path}.unit`, 'a string (empty for a ratio)', o.unit),
+    section: oneOf(o.section, SPEC_SECTIONS, `${path}.section`),
+    status: oneOf(o.status, SPEC_STATUSES, `${path}.status`),
+    source: string(o.source, `${path}.source`),
+  }
+}
+
 /** Validates parsed JSON once and returns the domain type; everything downstream trusts it. */
 export function parseManifest(json: unknown): Manifest {
   const o = record(json, 'manifest')
@@ -179,6 +203,8 @@ export function parseManifest(json: unknown): Manifest {
   const mechanisms = array(o.mechanisms, 'manifest.mechanisms').map((m, i) => mechanism(m, `manifest.mechanisms[${i}]`))
   const strip = filmStrip(o.film_strip, 'manifest.film_strip')
   const cycles = o.cycles === undefined ? [] : array(o.cycles, 'manifest.cycles').map((c, i) => cycle(c, `manifest.cycles[${i}]`))
+  const features = array(o.features, 'manifest.features').map((f, i) => feature(f, `manifest.features[${i}]`))
+  const specSheet = array(o.spec_sheet, 'manifest.spec_sheet').map((e, i) => specEntry(e, `manifest.spec_sheet[${i}]`))
   if (parts.length === 0) throw new ManifestError('manifest.parts: the list is empty')
 
   const names = new Set<string>()
@@ -202,6 +228,18 @@ export function parseManifest(json: unknown): Manifest {
     })
   })
 
+  const featureIds = new Set<string>()
+  features.forEach((f, i) => {
+    if (featureIds.has(f.id)) throw new ManifestError(`manifest.features[${i}].id: duplicate id ${JSON.stringify(f.id)}`)
+    featureIds.add(f.id)
+    if (!names.has(f.part)) throw new ManifestError(`manifest.features[${i}].part: no part named ${JSON.stringify(f.part)}`)
+  })
+  const specIds = new Set<string>()
+  specSheet.forEach((e, i) => {
+    if (specIds.has(e.id)) throw new ManifestError(`manifest.spec_sheet[${i}].id: duplicate id ${JSON.stringify(e.id)}`)
+    specIds.add(e.id)
+  })
+
   cycles.forEach((c, i) => {
     const known = (id: string) => ids.has(id)
     c.keys.forEach((k, j) => Object.keys(k.values).forEach(id => {
@@ -223,6 +261,8 @@ export function parseManifest(json: unknown): Manifest {
     mechanisms,
     cycles,
     film_strip: strip,
+    features,
+    spec_sheet: specSheet,
   }
 }
 

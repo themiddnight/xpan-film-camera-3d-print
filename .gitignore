@@ -5,6 +5,7 @@ out/
 .serena/
 viewer/node_modules/
 viewer/dist/
+viewer/dist-public/
 
 .worktrees/
 viewer/*.tsbuildinfo

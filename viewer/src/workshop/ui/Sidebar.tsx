@@ -1,5 +1,5 @@
-import { useViewer, useViewerState } from '../state/viewer'
-import type { ViewName } from '../types'
+import { useViewer, useViewerState } from '../../state/viewer'
+import type { ViewName } from '../../types'
 import { CyclePanel } from './CyclePanel'
 import { MechanismPanel } from './MechanismPanel'
 import { PartsPanel } from './PartsPanel'

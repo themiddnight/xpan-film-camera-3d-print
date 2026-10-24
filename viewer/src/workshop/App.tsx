@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { fetchManifest, MANIFEST_URL } from './manifest'
-import type { Manifest } from './types'
-import { ErrorBoundary } from './ErrorBoundary'
-import { Viewport } from './scene/Viewport'
-import { createViewer, ViewerContext, useViewer, useViewerState } from './state/viewer'
+import { fetchManifest, MANIFEST_URL } from '../manifest'
+import type { Manifest } from '../types'
+import { ErrorBoundary } from '../ErrorBoundary'
+import { Viewport } from '../scene/Viewport'
+import { createViewer, ViewerContext, useViewer, useViewerState } from '../state/viewer'
 import { Sidebar } from './ui/Sidebar'
 
 declare global {

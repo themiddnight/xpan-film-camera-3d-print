@@ -1,6 +1,6 @@
-import { sectionPosition } from '../scene/frames'
-import { useViewer, useViewerState } from '../state/viewer'
-import type { Section } from '../types'
+import { sectionPosition } from '../../scene/frames'
+import { useViewer, useViewerState } from '../../state/viewer'
+import type { Section } from '../../types'
 
 const SLIDER_STEPS = 1000
 const AXES: readonly Section['axis'][] = ['off', 'x', 'y', 'z']

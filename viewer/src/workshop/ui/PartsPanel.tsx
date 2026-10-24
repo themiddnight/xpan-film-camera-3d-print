@@ -1,8 +1,8 @@
 import { memo, useMemo, useState } from 'react'
-import { useViewer, useViewerState } from '../state/viewer'
+import { useViewer, useViewerState } from '../../state/viewer'
 import {
   GROUPS, GROUP_LABELS, KINDS, type Group, type Kind, type KindFilter, type PartManifest,
-} from '../types'
+} from '../../types'
 
 const FILTERS: readonly KindFilter[] = ['all', ...KINDS]
 const FILTER_LABELS: Record<KindFilter, string> = { all: 'All', printed: 'Printed', bought: 'Bought' }

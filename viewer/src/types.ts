@@ -129,6 +129,33 @@ export interface FilmStrip {
   first_perf_s: number
 }
 
+/** A named point on a part at its rest pose, in camera mm coordinates. The presentation pins labels to it. */
+export interface Feature {
+  id: string
+  label: string
+  /** Name of the part the point sits on; the pin follows that part's node. */
+  part: string
+  point: Vec3
+}
+
+export const SPEC_SECTIONS = ['specs', 'interface'] as const
+export type SpecSection = (typeof SPEC_SECTIONS)[number]
+
+export const SPEC_STATUSES = ['locked', 'draft'] as const
+export type SpecStatus = (typeof SPEC_STATUSES)[number]
+
+/** One published number. `source` names the params path or `derived:<formula>` it came from. */
+export interface SpecEntry {
+  id: string
+  label: string
+  value: number
+  /** Empty for a ratio. */
+  unit: string
+  section: SpecSection
+  status: SpecStatus
+  source: string
+}
+
 export interface Manifest {
   /** GLB files are in metres; multiply by this to get millimetres. */
   glb_unit_scale: number
@@ -137,6 +164,8 @@ export interface Manifest {
   mechanisms: readonly Mechanism[]
   cycles: readonly Cycle[]
   film_strip: FilmStrip | null
+  features: readonly Feature[]
+  spec_sheet: readonly SpecEntry[]
 }
 
 /** World coordinates are camera-design coordinates in mm: X film travel, Y front, Z up. */

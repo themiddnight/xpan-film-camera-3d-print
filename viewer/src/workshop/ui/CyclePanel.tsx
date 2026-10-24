@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useSyncExternalStore } from 'react'
-import type { CyclePlayer } from '../state/cycle'
-import { useViewer, useViewerState } from '../state/viewer'
+import type { CyclePlayer } from '../../state/cycle'
+import { useViewer, useViewerState } from '../../state/viewer'
 
 /** Space runs the first cycle, as on the anatomy figure, unless a form control has the keyboard. */
 function useSpaceKey(player: CyclePlayer, enabled: boolean) {

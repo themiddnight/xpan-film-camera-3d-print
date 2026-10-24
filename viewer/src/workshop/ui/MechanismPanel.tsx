@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useSyncExternalStore } from 'react'
-import { useViewer } from '../state/viewer'
-import type { Mechanism } from '../types'
+import { useViewer } from '../../state/viewer'
+import type { Mechanism } from '../../types'
 
 const SLIDER_STEP = 0.001
 
