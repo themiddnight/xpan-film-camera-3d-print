@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>X-Pan pinhole camera — social card</title>
+  <!--
+    The 1200 x 630 share card. scripts/stills.mjs captures it into out/stills/og.png, which
+    index.html names as og:image. Dev only: the public build takes index.html alone, so this page
+    never reaches the site.
+  -->
+  <style>
+    :root {
+      --seamless: #D5D8D8;
+      --petg: #000000;
+      --brass-ink: #735820;
+      /*
+       * The card's paper is the same paper the stills are drawn on: 24px cells at the 903/1600 scale
+       * of the camera render, anchored where the still's own grid sits, so the two line up.
+       */
+      --cell: 13.547px;
+      --grid-x: 879.55px;
+      --grid-y: 315px;
+    }
+
+    html, body {
+      margin: 0;
+      width: 1200px;
+      height: 630px;
+      overflow: hidden;
+      font-family: 'Archivo Variable', system-ui, sans-serif;
+      color: var(--petg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .card {
+      position: relative;
+      width: 1200px;
+      height: 630px;
+      background-color: var(--seamless);
+      background-image:
+        linear-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+        linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+      background-size: calc(var(--cell) * 5) calc(var(--cell) * 5), calc(var(--cell) * 5) calc(var(--cell) * 5), var(--cell) var(--cell), var(--cell) var(--cell);
+      background-position: var(--grid-x) var(--grid-y);
+    }
+
+    /*
+     * The camera render sits in the right half, balanced against the text. The still carries its own
+     * graph paper at a different cell size, so its edges are masked into the card's paper: only empty
+     * paper fades, the camera stays crisp.
+     */
+    .shot {
+      position: absolute;
+      left: 428px;
+      top: 61px;
+      width: 903px;
+      height: 508px;
+      /* A short fade on each edge hides the join between the two papers. */
+      -webkit-mask-image:
+        linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(90deg, transparent 0%, #000 5%, #000 95%, transparent 100%),
+        linear-gradient(180deg, transparent 0%, #000 4%, #000 96%, transparent 100%);
+      mask-composite: intersect;
+    }
+
+    .shot img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .text {
+      position: absolute;
+      left: 72px;
+      top: 78px;
+      width: 560px;
+    }
+
+    .eyebrow {
+      margin: 0 0 26px;
+      font-size: 15px;
+      font-weight: 620;
+      font-stretch: 112%;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brass-ink);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 76px;
+      font-weight: 720;
+      font-stretch: 125%;
+      letter-spacing: -0.015em;
+      line-height: 0.98;
+      text-wrap: balance;
+    }
+
+    .lead {
+      margin: 26px 0 0;
+      font-size: 23px;
+      line-height: 1.35;
+      max-width: 27em;
+    }
+
+    .specs {
+      position: absolute;
+      left: 72px;
+      bottom: 68px;
+      display: flex;
+      gap: 44px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.22);
+      width: 560px;
+    }
+
+    .spec-label {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 620;
+      font-stretch: 112%;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: rgba(0, 0, 0, 0.55);
+    }
+
+    .spec-value {
+      margin: 5px 0 0;
+      font-size: 21px;
+      font-weight: 680;
+      font-stretch: 112%;
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="shot"><img src="/stills/hero.png" alt="The camera in three modules"></div>
+    <div class="text">
+      <p class="eyebrow">3D-printed · 135 film · PETG</p>
+      <h1>X-Pan pinhole camera</h1>
+      <p class="lead">Panoramic frames on the film sold in any shop, shot through a brass pinhole. Every number here comes from the CAD files.</p>
+    </div>
+    <div class="specs">
+      <div><p class="spec-label">Frame</p><p class="spec-value" data-spec="frame">–</p></div>
+      <div><p class="spec-label">Aperture</p><p class="spec-value" data-spec="aperture">–</p></div>
+      <div><p class="spec-label">Per roll</p><p class="spec-value" data-spec="roll">–</p></div>
+    </div>
+  </div>
+  <script type="module" src="/src/presentation/og.ts"></script>
+</body>
+</html>

@@ -1,5 +1,25 @@
 import { defineConfig } from 'vitest/config'
+import { loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+
+// The canonical, Open Graph and Twitter tags need an absolute URL for the share image. `%SITE_URL%`
+// in index.html is replaced here, from SITE_URL (in the environment or a local .env) or the default.
+const DEFAULT_SITE_URL = 'https://xpan-film-camera-3d-print.vercel.app'
+
+function siteUrl(env: Record<string, string>): Plugin {
+  const url = (env.SITE_URL || DEFAULT_SITE_URL).replace(/\/+$/, '')
+  return {
+    name: 'site-url',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        const out = html.replaceAll('%SITE_URL%', url)
+        if (/%[A-Z_]+%/.test(out)) throw new Error(`index.html has a placeholder with no value: ${/%[A-Z_]+%/.exec(out)![0]}`)
+        return out
+      },
+    },
+  }
+}
 
 // The CAD export writes out/manifest.json and out/glb/*. Serving out/ as the public
 // directory makes the dev server and the static build read the same files.
@@ -9,8 +29,9 @@ import react from '@vitejs/plugin-react'
 // files never reach the public site.
 export default defineConfig(({ mode }) => {
   const isPublic = mode === 'public'
+  const env = loadEnv(mode, '.', '')
   return {
-    plugins: [react()],
+    plugins: [react(), siteUrl(env)],
     publicDir: isPublic ? false : '../out',
     base: './',
     server: { port: 5173, strictPort: true },
