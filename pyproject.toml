@@ -3,6 +3,7 @@ name = "xpan-camera-cad"
 version = "0.2.0"
 description = "Parametric CAD for a DIY 65x24mm panoramic pinhole camera"
 requires-python = ">=3.12,<3.13"
+license = "CERN-OHL-S-2.0"
 dependencies = ["build123d"]
 
 [tool.uv]

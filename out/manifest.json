@@ -1,0 +1,3640 @@
+{
+  "glb_unit_scale": 1000,
+  "film_advance_mm": 66.5,
+  "parts": [
+    {
+      "name": "shell",
+      "glb": "glb/shell.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2b2b2e",
+      "volume_mm3": 68870.9,
+      "size_mm": [
+        175.0,
+        34.48,
+        76.3
+      ]
+    },
+    {
+      "name": "rear_cover",
+      "glb": "glb/rear_cover.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#34343a",
+      "volume_mm3": 35731.9,
+      "size_mm": [
+        175.0,
+        7.51,
+        72.3
+      ]
+    },
+    {
+      "name": "turn_button_left",
+      "glb": "glb/turn_button_left.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#4a4a52",
+      "volume_mm3": 413.1,
+      "size_mm": [
+        20.0,
+        8.0,
+        4.0
+      ]
+    },
+    {
+      "name": "turn_button_right",
+      "glb": "glb/turn_button_right.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#4a4a52",
+      "volume_mm3": 413.1,
+      "size_mm": [
+        20.0,
+        8.0,
+        4.0
+      ]
+    },
+    {
+      "name": "slide_holder",
+      "glb": "glb/slide_holder.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#4a4a52",
+      "volume_mm3": 1413.5,
+      "size_mm": [
+        80.0,
+        3.0,
+        45.0
+      ]
+    },
+    {
+      "name": "dark_slide",
+      "glb": "glb/dark_slide.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#1c1c1f",
+      "volume_mm3": 1776.6,
+      "size_mm": [
+        71.0,
+        0.5,
+        58.0
+      ]
+    },
+    {
+      "name": "slot_velvet",
+      "glb": "glb/slot_velvet.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#141416",
+      "volume_mm3": 277.2,
+      "size_mm": [
+        72.0,
+        0.55,
+        7.0
+      ]
+    },
+    {
+      "name": "pressure_pad",
+      "glb": "glb/pressure_pad.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#101012",
+      "volume_mm3": 5197.5,
+      "size_mm": [
+        75.0,
+        2.1,
+        33.0
+      ]
+    },
+    {
+      "name": "hinge_pin",
+      "glb": "glb/hinge_pin.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 1208.7,
+      "size_mm": [
+        171.0,
+        3.0,
+        3.0
+      ]
+    },
+    {
+      "name": "latch_pin",
+      "glb": "glb/latch_pin.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 339.3,
+      "size_mm": [
+        48.0,
+        3.0,
+        3.0
+      ]
+    },
+    {
+      "name": "m3_insert_left",
+      "glb": "glb/m3_insert_left.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#c8a24a",
+      "volume_mm3": 27.5,
+      "size_mm": [
+        4.0,
+        4.0,
+        5.0
+      ]
+    },
+    {
+      "name": "m3_insert_right",
+      "glb": "glb/m3_insert_right.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#c8a24a",
+      "volume_mm3": 27.5,
+      "size_mm": [
+        4.0,
+        4.0,
+        5.0
+      ]
+    },
+    {
+      "name": "m3_screw_left",
+      "glb": "glb/m3_screw_left.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 127.8,
+      "size_mm": [
+        5.5,
+        5.5,
+        11.0
+      ]
+    },
+    {
+      "name": "m3_screw_right",
+      "glb": "glb/m3_screw_right.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 127.8,
+      "size_mm": [
+        5.5,
+        5.5,
+        11.0
+      ]
+    },
+    {
+      "name": "sprocket",
+      "glb": "glb/sprocket.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#c9a227",
+      "volume_mm3": 12359.1,
+      "size_mm": [
+        23.0,
+        23.0,
+        51.2
+      ]
+    },
+    {
+      "name": "pawl",
+      "glb": "glb/pawl.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#c0462d",
+      "volume_mm3": 114.4,
+      "size_mm": [
+        14.4,
+        3.0,
+        5.8
+      ]
+    },
+    {
+      "name": "release_button",
+      "glb": "glb/release_button.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#c0462d",
+      "volume_mm3": 308.6,
+      "size_mm": [
+        7.3,
+        6.6,
+        11.8
+      ]
+    },
+    {
+      "name": "takeup_spool",
+      "glb": "glb/takeup_spool.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2f2f33",
+      "volume_mm3": 7794.6,
+      "size_mm": [
+        26.0,
+        26.0,
+        38.0
+      ]
+    },
+    {
+      "name": "drive_collar",
+      "glb": "glb/drive_collar.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2f2f33",
+      "volume_mm3": 422.5,
+      "size_mm": [
+        14.0,
+        14.0,
+        5.0
+      ]
+    },
+    {
+      "name": "advance_knob",
+      "glb": "glb/advance_knob.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2f2f33",
+      "volume_mm3": 5025.3,
+      "size_mm": [
+        26.0,
+        26.0,
+        10.0
+      ]
+    },
+    {
+      "name": "rewind_fork",
+      "glb": "glb/rewind_fork.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2f2f33",
+      "volume_mm3": 129.7,
+      "size_mm": [
+        7.0,
+        7.0,
+        5.7
+      ]
+    },
+    {
+      "name": "rewind_knob",
+      "glb": "glb/rewind_knob.glb",
+      "group": "film-back",
+      "kind": "printed",
+      "color": "#2f2f33",
+      "volume_mm3": 2937.4,
+      "size_mm": [
+        20.0,
+        20.0,
+        10.0
+      ]
+    },
+    {
+      "name": "sprocket_pin",
+      "glb": "glb/sprocket_pin.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc4",
+      "volume_mm3": 424.1,
+      "size_mm": [
+        3.0,
+        3.0,
+        60.0
+      ]
+    },
+    {
+      "name": "takeup_shaft",
+      "glb": "glb/takeup_shaft.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc4",
+      "volume_mm3": 485.7,
+      "size_mm": [
+        3.0,
+        3.0,
+        70.0
+      ]
+    },
+    {
+      "name": "rewind_shaft",
+      "glb": "glb/rewind_shaft.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc4",
+      "volume_mm3": 142.0,
+      "size_mm": [
+        3.0,
+        3.0,
+        21.0
+      ]
+    },
+    {
+      "name": "pawl_pin",
+      "glb": "glb/pawl_pin.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#b8bcc4",
+      "volume_mm3": 106.0,
+      "size_mm": [
+        3.0,
+        15.0,
+        3.0
+      ]
+    },
+    {
+      "name": "pawl_spring",
+      "glb": "glb/pawl_spring.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#d8b45a",
+      "volume_mm3": 18.1,
+      "size_mm": [
+        3.5,
+        3.5,
+        6.0
+      ]
+    },
+    {
+      "name": "clutch_spring",
+      "glb": "glb/clutch_spring.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#d8b45a",
+      "volume_mm3": 72.3,
+      "size_mm": [
+        5.0,
+        5.0,
+        12.5
+      ]
+    },
+    {
+      "name": "felt_washer",
+      "glb": "glb/felt_washer.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#5b4636",
+      "volume_mm3": 216.5,
+      "size_mm": [
+        14.0,
+        14.0,
+        1.5
+      ]
+    },
+    {
+      "name": "rewind_o_ring",
+      "glb": "glb/rewind_o_ring.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#151515",
+      "volume_mm3": 9.9,
+      "size_mm": [
+        5.0,
+        5.0,
+        1.0
+      ]
+    },
+    {
+      "name": "pinhole_body",
+      "glb": "glb/pinhole_body.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#2b2b2e",
+      "volume_mm3": 106326.9,
+      "size_mm": [
+        78.0,
+        43.3,
+        67.75
+      ]
+    },
+    {
+      "name": "m42_shim_ring",
+      "glb": "glb/m42_shim_ring.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#5a5a60",
+      "volume_mm3": 527.8,
+      "size_mm": [
+        46.0,
+        1.0,
+        46.0
+      ]
+    },
+    {
+      "name": "m42_rear_cap_ring",
+      "glb": "glb/m42_rear_cap_ring.glb",
+      "group": "body",
+      "kind": "bought",
+      "color": "#1a1a1a",
+      "volume_mm3": 2763.0,
+      "size_mm": [
+        46.0,
+        8.0,
+        46.0
+      ]
+    },
+    {
+      "name": "tripod_nut",
+      "glb": "glb/tripod_nut.glb",
+      "group": "body",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 420.2,
+      "size_mm": [
+        12.82,
+        11.1,
+        5.6
+      ]
+    },
+    {
+      "name": "viewfinder_rear_frame",
+      "glb": "glb/viewfinder_rear_frame.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#3a3a40",
+      "volume_mm3": 717.8,
+      "size_mm": [
+        56.57,
+        6.1,
+        17.43
+      ]
+    },
+    {
+      "name": "viewfinder_rear_hinge",
+      "glb": "glb/viewfinder_rear_hinge.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#44444a",
+      "volume_mm3": 886.9,
+      "size_mm": [
+        63.17,
+        8.0,
+        8.45
+      ]
+    },
+    {
+      "name": "viewfinder_rear_pins",
+      "glb": "glb/viewfinder_rear_pins.glb",
+      "group": "body",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 84.8,
+      "size_mm": [
+        63.17,
+        3.0,
+        3.0
+      ]
+    },
+    {
+      "name": "viewfinder_front_frame",
+      "glb": "glb/viewfinder_front_frame.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#3a3a40",
+      "volume_mm3": 626.1,
+      "size_mm": [
+        53.72,
+        6.1,
+        22.25
+      ]
+    },
+    {
+      "name": "viewfinder_front_hinge",
+      "glb": "glb/viewfinder_front_hinge.glb",
+      "group": "body",
+      "kind": "printed",
+      "color": "#44444a",
+      "volume_mm3": 783.0,
+      "size_mm": [
+        60.32,
+        8.0,
+        7.35
+      ]
+    },
+    {
+      "name": "viewfinder_front_pins",
+      "glb": "glb/viewfinder_front_pins.glb",
+      "group": "body",
+      "kind": "bought",
+      "color": "#b8bcc2",
+      "volume_mm3": 84.8,
+      "size_mm": [
+        60.32,
+        3.0,
+        3.0
+      ]
+    },
+    {
+      "name": "shutter_housing",
+      "glb": "glb/shutter_housing.glb",
+      "group": "pinhole",
+      "kind": "printed",
+      "color": "#303036",
+      "volume_mm3": 2379.0,
+      "size_mm": [
+        28.0,
+        7.0,
+        28.0
+      ]
+    },
+    {
+      "name": "shutter_open_tab",
+      "glb": "glb/shutter_open_tab.glb",
+      "group": "pinhole",
+      "kind": "printed",
+      "color": "#b04a3a",
+      "volume_mm3": 513.8,
+      "size_mm": [
+        3.5,
+        7.5,
+        20.5
+      ]
+    },
+    {
+      "name": "shutter_close_tab",
+      "glb": "glb/shutter_close_tab.glb",
+      "group": "pinhole",
+      "kind": "printed",
+      "color": "#b04a3a",
+      "volume_mm3": 513.8,
+      "size_mm": [
+        3.5,
+        7.5,
+        20.5
+      ]
+    },
+    {
+      "name": "shutter_lock",
+      "glb": "glb/shutter_lock.glb",
+      "group": "pinhole",
+      "kind": "printed",
+      "color": "#c08a30",
+      "volume_mm3": 672.0,
+      "size_mm": [
+        26.47,
+        6.0,
+        19.0
+      ]
+    },
+    {
+      "name": "shutter_lock_cap",
+      "glb": "glb/shutter_lock_cap.glb",
+      "group": "pinhole",
+      "kind": "printed",
+      "color": "#44444a",
+      "volume_mm3": 82.3,
+      "size_mm": [
+        7.0,
+        2.5,
+        7.0
+      ]
+    },
+    {
+      "name": "m42_body_cap",
+      "glb": "glb/m42_body_cap.glb",
+      "group": "pinhole",
+      "kind": "bought",
+      "color": "#151515",
+      "volume_mm3": 5310.1,
+      "size_mm": [
+        53.0,
+        7.0,
+        53.0
+      ]
+    },
+    {
+      "name": "pinhole_shim",
+      "glb": "glb/pinhole_shim.glb",
+      "group": "pinhole",
+      "kind": "bought",
+      "color": "#c8a050",
+      "volume_mm3": 5.7,
+      "size_mm": [
+        12.0,
+        0.05,
+        12.0
+      ]
+    },
+    {
+      "name": "shutter_blade",
+      "glb": "glb/shutter_blade.glb",
+      "group": "pinhole",
+      "kind": "bought",
+      "color": "#9ea3a8",
+      "volume_mm3": 390.7,
+      "size_mm": [
+        43.5,
+        0.5,
+        23.0
+      ]
+    },
+    {
+      "name": "shutter_lock_pivot",
+      "glb": "glb/shutter_lock_pivot.glb",
+      "group": "pinhole",
+      "kind": "bought",
+      "color": "#d0d4d8",
+      "volume_mm3": 63.6,
+      "size_mm": [
+        3.0,
+        9.0,
+        3.0
+      ]
+    },
+    {
+      "name": "cassette",
+      "glb": "glb/cassette.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#5b7a99",
+      "volume_mm3": 20009.7,
+      "size_mm": [
+        27.25,
+        25.83,
+        49.0
+      ]
+    },
+    {
+      "name": "film",
+      "glb": "glb/film.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#8a5a2b",
+      "volume_mm3": 765.8,
+      "size_mm": [
+        137.75,
+        22.13,
+        35.0
+      ]
+    },
+    {
+      "name": "film_roll",
+      "glb": "glb/film_roll.glb",
+      "group": "film-back",
+      "kind": "bought",
+      "color": "#6e4722",
+      "volume_mm3": 3674.4,
+      "size_mm": [
+        19.74,
+        19.74,
+        35.0
+      ]
+    }
+  ],
+  "mechanisms": [
+    {
+      "id": "advance",
+      "label": "Advance knob",
+      "cyclic": true,
+      "internal": false,
+      "requires": [
+        {
+          "mechanism": "pawl_ride",
+          "value": 1.0
+        }
+      ],
+      "readout": {
+        "per_unit": 66.5,
+        "unit": "mm of film"
+      },
+      "drives": [
+        {
+          "part": "sprocket",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            55.0,
+            10.52,
+            0.0
+          ],
+          "amount": 360.0
+        },
+        {
+          "part": "takeup_spool",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            81.0,
+            12.0,
+            0.0
+          ],
+          "amount": -381.01693376199745
+        },
+        {
+          "part": "drive_collar",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            81.0,
+            12.0,
+            0.0
+          ],
+          "amount": -381.01693376199745
+        },
+        {
+          "part": "advance_knob",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            81.0,
+            12.0,
+            0.0
+          ],
+          "amount": -381.01693376199745
+        },
+        {
+          "part": "takeup_shaft",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            81.0,
+            12.0,
+            0.0
+          ],
+          "amount": -381.01693376199745
+        }
+      ]
+    },
+    {
+      "id": "release",
+      "label": "Release button",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": {
+        "per_unit": 2.5,
+        "unit": "mm pressed"
+      },
+      "drives": [
+        {
+          "part": "release_button",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 2.5
+        },
+        {
+          "part": "pawl",
+          "kind": "rotate",
+          "axis": [
+            -0.7071067811865475,
+            0.7071067811865476,
+            0.0
+          ],
+          "origin": [
+            63.48528137423857,
+            19.00528137423857,
+            24.2
+          ],
+          "amount": 24.624318352164078
+        },
+        {
+          "part": "pawl_spring",
+          "kind": "stretch",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            67.72792206135786,
+            23.247922061357855,
+            17.2
+          ],
+          "amount": -0.4166666666666667
+        }
+      ]
+    },
+    {
+      "id": "pawl_ride",
+      "label": "Pawl rides on the cam",
+      "cyclic": false,
+      "internal": true,
+      "requires": [],
+      "readout": null,
+      "drives": [
+        {
+          "part": "pawl",
+          "kind": "rotate",
+          "axis": [
+            -0.7071067811865475,
+            0.7071067811865476,
+            0.0
+          ],
+          "origin": [
+            63.48528137423857,
+            19.00528137423857,
+            24.2
+          ],
+          "amount": 18.294473674698686
+        },
+        {
+          "part": "pawl_spring",
+          "kind": "stretch",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            67.72792206135786,
+            23.247922061357855,
+            17.2
+          ],
+          "amount": -0.31390087997771265
+        }
+      ]
+    },
+    {
+      "id": "turn_buttons",
+      "label": "Turn the cover latches",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": null,
+      "drives": [
+        {
+          "part": "turn_button_left",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            -42.5,
+            5.6,
+            0.0
+          ],
+          "amount": 90.0
+        },
+        {
+          "part": "turn_button_right",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            42.5,
+            5.6,
+            0.0
+          ],
+          "amount": 90.0
+        }
+      ]
+    },
+    {
+      "id": "cover",
+      "label": "Open rear cover",
+      "cyclic": false,
+      "internal": false,
+      "requires": [
+        {
+          "mechanism": "turn_buttons",
+          "value": 1.0
+        }
+      ],
+      "readout": {
+        "per_unit": 100.0,
+        "unit": "deg open"
+      },
+      "drives": [
+        {
+          "part": "rear_cover",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            -0.98,
+            -33.8
+          ],
+          "amount": 100.0
+        },
+        {
+          "part": "pressure_pad",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            -0.98,
+            -33.8
+          ],
+          "amount": 100.0
+        },
+        {
+          "part": "slide_holder",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            -0.98,
+            -33.8
+          ],
+          "amount": 100.0
+        }
+      ]
+    },
+    {
+      "id": "dark_slide",
+      "label": "Pull dark slide",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": {
+        "per_unit": 49.5,
+        "unit": "mm pulled"
+      },
+      "drives": [
+        {
+          "part": "dark_slide",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 49.5
+        }
+      ]
+    },
+    {
+      "id": "slide_carry",
+      "label": "Carry dark slide over the cover",
+      "cyclic": false,
+      "internal": true,
+      "requires": [
+        {
+          "mechanism": "dark_slide",
+          "value": 1.0
+        }
+      ],
+      "readout": null,
+      "drives": [
+        {
+          "part": "dark_slide",
+          "kind": "slide",
+          "axis": [
+            0.9910041511060828,
+            -0.11892049813272992,
+            0.06138963767913787
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 57.01287924671056
+        }
+      ]
+    },
+    {
+      "id": "slide_stow",
+      "label": "Stow dark slide on the cover",
+      "cyclic": false,
+      "internal": false,
+      "requires": [
+        {
+          "mechanism": "dark_slide",
+          "value": 1.0
+        },
+        {
+          "mechanism": "slide_carry",
+          "value": 1.0
+        }
+      ],
+      "readout": {
+        "per_unit": 66.0,
+        "unit": "mm into the holder"
+      },
+      "drives": [
+        {
+          "part": "dark_slide",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            -1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 66.0
+        }
+      ]
+    },
+    {
+      "id": "rewind",
+      "label": "Lift rewind knob",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": {
+        "per_unit": 8.0,
+        "unit": "mm lifted"
+      },
+      "drives": [
+        {
+          "part": "rewind_knob",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 8.0
+        },
+        {
+          "part": "rewind_fork",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 8.0
+        },
+        {
+          "part": "rewind_shaft",
+          "kind": "slide",
+          "axis": [
+            0.0,
+            0.0,
+            1.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 8.0
+        }
+      ]
+    },
+    {
+      "id": "shutter_lock",
+      "label": "Unlock shutter",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": null,
+      "drives": [
+        {
+          "part": "shutter_lock",
+          "kind": "rotate",
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            54.0,
+            7.5
+          ],
+          "amount": 25.0
+        }
+      ]
+    },
+    {
+      "id": "shutter",
+      "label": "Open shutter",
+      "cyclic": false,
+      "internal": false,
+      "requires": [
+        {
+          "mechanism": "shutter_lock",
+          "value": 1.0
+        }
+      ],
+      "readout": {
+        "per_unit": 10.0,
+        "unit": "mm open"
+      },
+      "drives": [
+        {
+          "part": "shutter_blade",
+          "kind": "slide",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 10.0
+        },
+        {
+          "part": "shutter_open_tab",
+          "kind": "slide",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 10.0
+        },
+        {
+          "part": "shutter_close_tab",
+          "kind": "slide",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "amount": 10.0
+        }
+      ]
+    },
+    {
+      "id": "finder_rear",
+      "label": "Fold rear sight",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": {
+        "per_unit": 90.0,
+        "unit": "deg folded"
+      },
+      "drives": [
+        {
+          "part": "viewfinder_rear_frame",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            12.5,
+            32.3
+          ],
+          "amount": -90.0
+        }
+      ]
+    },
+    {
+      "id": "finder_front",
+      "label": "Fold front finder frame",
+      "cyclic": false,
+      "internal": false,
+      "requires": [
+        {
+          "mechanism": "finder_rear",
+          "value": 1.0
+        }
+      ],
+      "readout": {
+        "per_unit": 90.0,
+        "unit": "deg folded"
+      },
+      "drives": [
+        {
+          "part": "viewfinder_front_frame",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            28.0,
+            31.2
+          ],
+          "amount": 90.0
+        }
+      ]
+    },
+    {
+      "id": "body_detach",
+      "label": "Swing the body off the latch",
+      "cyclic": false,
+      "internal": false,
+      "requires": [],
+      "readout": {
+        "per_unit": 5.0,
+        "unit": "deg tilted"
+      },
+      "drives": [
+        {
+          "part": "pinhole_body",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "m42_shim_ring",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "m42_rear_cap_ring",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "tripod_nut",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_rear_frame",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_rear_hinge",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_rear_pins",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_front_frame",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_front_hinge",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "viewfinder_front_pins",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_housing",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_open_tab",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_close_tab",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_lock",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_lock_cap",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "m42_body_cap",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "pinhole_shim",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_blade",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        },
+        {
+          "part": "shutter_lock_pivot",
+          "kind": "rotate",
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "origin": [
+            0.0,
+            5.2,
+            29.7
+          ],
+          "amount": 5.0
+        }
+      ]
+    }
+  ],
+  "cycles": [
+    {
+      "id": "frame",
+      "label": "Advance one frame",
+      "keys": [
+        {
+          "t": 0.0,
+          "values": {
+            "advance": 0.0,
+            "release": 0.0,
+            "pawl_ride": 0.0
+          },
+          "phase": "press the release button"
+        },
+        {
+          "t": 0.6,
+          "values": {
+            "advance": 0.0,
+            "release": 1.0,
+            "pawl_ride": 0.0
+          },
+          "phase": "turn the advance knob"
+        },
+        {
+          "t": 1.3,
+          "values": {
+            "advance": 0.13363854322520718,
+            "release": 1.0,
+            "pawl_ride": 0.0
+          },
+          "phase": "let go: the pawl rides on the cam"
+        },
+        {
+          "t": 1.8,
+          "values": {
+            "advance": 0.20045781483781078,
+            "release": 0.0,
+            "pawl_ride": 1.0
+          },
+          "phase": "riding: the film turns the sprocket"
+        },
+        {
+          "t": 5.4,
+          "values": {
+            "advance": 0.9946948352302701,
+            "release": 0.0,
+            "pawl_ride": 1.0
+          },
+          "phase": "pocket returns: click"
+        },
+        {
+          "t": 5.55,
+          "values": {
+            "advance": 1.0,
+            "release": 0.0,
+            "pawl_ride": 0.0
+          },
+          "phase": "locked: one frame advanced"
+        },
+        {
+          "t": 6.3,
+          "values": {
+            "advance": 1.0,
+            "release": 0.0,
+            "pawl_ride": 0.0
+          },
+          "phase": "locked: one frame advanced"
+        }
+      ],
+      "counter": {
+        "mechanism": "advance",
+        "count_per_unit": 14,
+        "count_label": "perf",
+        "per_unit": 66.5,
+        "unit": "mm"
+      },
+      "focus": {
+        "ghost": [
+          "shell",
+          "rear_cover",
+          "pressure_pad",
+          "dark_slide",
+          "slide_holder",
+          "turn_button_left",
+          "turn_button_right"
+        ],
+        "hide": [
+          "viewfinder_rear_frame",
+          "viewfinder_front_frame"
+        ]
+      }
+    }
+  ],
+  "film_strip": {
+    "part": "film",
+    "mechanism": "advance",
+    "advance_per_unit": 66.5,
+    "s0": -101.75,
+    "ds": 0.5000323765145551,
+    "points": [
+      [
+        -46.75,
+        -0.0638
+      ],
+      [
+        -46.25,
+        -0.0638
+      ],
+      [
+        -45.7499,
+        -0.0638
+      ],
+      [
+        -45.2499,
+        -0.0638
+      ],
+      [
+        -44.7499,
+        -0.0638
+      ],
+      [
+        -44.2498,
+        -0.0638
+      ],
+      [
+        -43.7498,
+        -0.0638
+      ],
+      [
+        -43.2498,
+        -0.0638
+      ],
+      [
+        -42.7497,
+        -0.0638
+      ],
+      [
+        -42.2497,
+        -0.0638
+      ],
+      [
+        -41.7497,
+        -0.0638
+      ],
+      [
+        -41.2496,
+        -0.0638
+      ],
+      [
+        -40.7496,
+        -0.0638
+      ],
+      [
+        -40.2496,
+        -0.0638
+      ],
+      [
+        -39.7495,
+        -0.0638
+      ],
+      [
+        -39.2495,
+        -0.0638
+      ],
+      [
+        -38.7495,
+        -0.0638
+      ],
+      [
+        -38.2494,
+        -0.0638
+      ],
+      [
+        -37.7494,
+        -0.0638
+      ],
+      [
+        -37.2494,
+        -0.0638
+      ],
+      [
+        -36.7494,
+        -0.0638
+      ],
+      [
+        -36.2493,
+        -0.0638
+      ],
+      [
+        -35.7493,
+        -0.0638
+      ],
+      [
+        -35.2493,
+        -0.0638
+      ],
+      [
+        -34.7492,
+        -0.0638
+      ],
+      [
+        -34.2492,
+        -0.0638
+      ],
+      [
+        -33.7492,
+        -0.0638
+      ],
+      [
+        -33.2491,
+        -0.0638
+      ],
+      [
+        -32.7491,
+        -0.0638
+      ],
+      [
+        -32.2491,
+        -0.0638
+      ],
+      [
+        -31.749,
+        -0.0638
+      ],
+      [
+        -31.249,
+        -0.0638
+      ],
+      [
+        -30.749,
+        -0.0638
+      ],
+      [
+        -30.2489,
+        -0.0638
+      ],
+      [
+        -29.7489,
+        -0.0638
+      ],
+      [
+        -29.2489,
+        -0.0638
+      ],
+      [
+        -28.7488,
+        -0.0638
+      ],
+      [
+        -28.2488,
+        -0.0638
+      ],
+      [
+        -27.7488,
+        -0.0638
+      ],
+      [
+        -27.2487,
+        -0.0638
+      ],
+      [
+        -26.7487,
+        -0.0638
+      ],
+      [
+        -26.2487,
+        -0.0638
+      ],
+      [
+        -25.7486,
+        -0.0638
+      ],
+      [
+        -25.2486,
+        -0.0638
+      ],
+      [
+        -24.7486,
+        -0.0638
+      ],
+      [
+        -24.2485,
+        -0.0638
+      ],
+      [
+        -23.7485,
+        -0.0638
+      ],
+      [
+        -23.2485,
+        -0.0638
+      ],
+      [
+        -22.7484,
+        -0.0638
+      ],
+      [
+        -22.2484,
+        -0.0638
+      ],
+      [
+        -21.7484,
+        -0.0638
+      ],
+      [
+        -21.2483,
+        -0.0638
+      ],
+      [
+        -20.7483,
+        -0.0638
+      ],
+      [
+        -20.2483,
+        -0.0638
+      ],
+      [
+        -19.7483,
+        -0.0638
+      ],
+      [
+        -19.2482,
+        -0.0638
+      ],
+      [
+        -18.7482,
+        -0.0638
+      ],
+      [
+        -18.2482,
+        -0.0638
+      ],
+      [
+        -17.7481,
+        -0.0638
+      ],
+      [
+        -17.2481,
+        -0.0638
+      ],
+      [
+        -16.7481,
+        -0.0638
+      ],
+      [
+        -16.248,
+        -0.0638
+      ],
+      [
+        -15.748,
+        -0.0638
+      ],
+      [
+        -15.248,
+        -0.0638
+      ],
+      [
+        -14.7479,
+        -0.0638
+      ],
+      [
+        -14.2479,
+        -0.0638
+      ],
+      [
+        -13.7479,
+        -0.0638
+      ],
+      [
+        -13.2478,
+        -0.0638
+      ],
+      [
+        -12.7478,
+        -0.0638
+      ],
+      [
+        -12.2478,
+        -0.0638
+      ],
+      [
+        -11.7477,
+        -0.0638
+      ],
+      [
+        -11.2477,
+        -0.0638
+      ],
+      [
+        -10.7477,
+        -0.0638
+      ],
+      [
+        -10.2476,
+        -0.0638
+      ],
+      [
+        -9.7476,
+        -0.0638
+      ],
+      [
+        -9.2476,
+        -0.0638
+      ],
+      [
+        -8.7475,
+        -0.0638
+      ],
+      [
+        -8.2475,
+        -0.0638
+      ],
+      [
+        -7.7475,
+        -0.0638
+      ],
+      [
+        -7.2474,
+        -0.0638
+      ],
+      [
+        -6.7474,
+        -0.0638
+      ],
+      [
+        -6.2474,
+        -0.0638
+      ],
+      [
+        -5.7473,
+        -0.0638
+      ],
+      [
+        -5.2473,
+        -0.0638
+      ],
+      [
+        -4.7473,
+        -0.0638
+      ],
+      [
+        -4.2472,
+        -0.0638
+      ],
+      [
+        -3.7472,
+        -0.0638
+      ],
+      [
+        -3.2472,
+        -0.0638
+      ],
+      [
+        -2.7472,
+        -0.0638
+      ],
+      [
+        -2.2471,
+        -0.0638
+      ],
+      [
+        -1.7471,
+        -0.0638
+      ],
+      [
+        -1.2471,
+        -0.0638
+      ],
+      [
+        -0.747,
+        -0.0638
+      ],
+      [
+        -0.247,
+        -0.0638
+      ],
+      [
+        0.253,
+        -0.0638
+      ],
+      [
+        0.7531,
+        -0.0638
+      ],
+      [
+        1.2531,
+        -0.0638
+      ],
+      [
+        1.7531,
+        -0.0638
+      ],
+      [
+        2.2532,
+        -0.0638
+      ],
+      [
+        2.7532,
+        -0.0638
+      ],
+      [
+        3.2532,
+        -0.0638
+      ],
+      [
+        3.7533,
+        -0.0638
+      ],
+      [
+        4.2533,
+        -0.0638
+      ],
+      [
+        4.7533,
+        -0.0638
+      ],
+      [
+        5.2534,
+        -0.0638
+      ],
+      [
+        5.7534,
+        -0.0638
+      ],
+      [
+        6.2534,
+        -0.0638
+      ],
+      [
+        6.7535,
+        -0.0638
+      ],
+      [
+        7.2535,
+        -0.0638
+      ],
+      [
+        7.7535,
+        -0.0638
+      ],
+      [
+        8.2536,
+        -0.0638
+      ],
+      [
+        8.7536,
+        -0.0638
+      ],
+      [
+        9.2536,
+        -0.0638
+      ],
+      [
+        9.7537,
+        -0.0638
+      ],
+      [
+        10.2537,
+        -0.0638
+      ],
+      [
+        10.7537,
+        -0.0638
+      ],
+      [
+        11.2538,
+        -0.0638
+      ],
+      [
+        11.7538,
+        -0.0638
+      ],
+      [
+        12.2538,
+        -0.0638
+      ],
+      [
+        12.7539,
+        -0.0638
+      ],
+      [
+        13.2539,
+        -0.0638
+      ],
+      [
+        13.7539,
+        -0.0638
+      ],
+      [
+        14.2539,
+        -0.0638
+      ],
+      [
+        14.754,
+        -0.0638
+      ],
+      [
+        15.254,
+        -0.0638
+      ],
+      [
+        15.754,
+        -0.0638
+      ],
+      [
+        16.2541,
+        -0.0638
+      ],
+      [
+        16.7541,
+        -0.0638
+      ],
+      [
+        17.2541,
+        -0.0638
+      ],
+      [
+        17.7542,
+        -0.0638
+      ],
+      [
+        18.2542,
+        -0.0638
+      ],
+      [
+        18.7542,
+        -0.0638
+      ],
+      [
+        19.2543,
+        -0.0638
+      ],
+      [
+        19.7543,
+        -0.0638
+      ],
+      [
+        20.2543,
+        -0.0638
+      ],
+      [
+        20.7544,
+        -0.0638
+      ],
+      [
+        21.2544,
+        -0.0638
+      ],
+      [
+        21.7544,
+        -0.0638
+      ],
+      [
+        22.2545,
+        -0.0638
+      ],
+      [
+        22.7545,
+        -0.0638
+      ],
+      [
+        23.2545,
+        -0.0638
+      ],
+      [
+        23.7546,
+        -0.0638
+      ],
+      [
+        24.2546,
+        -0.0638
+      ],
+      [
+        24.7546,
+        -0.0638
+      ],
+      [
+        25.2547,
+        -0.0638
+      ],
+      [
+        25.7547,
+        -0.0638
+      ],
+      [
+        26.2547,
+        -0.0638
+      ],
+      [
+        26.7548,
+        -0.0638
+      ],
+      [
+        27.2548,
+        -0.0638
+      ],
+      [
+        27.7548,
+        -0.0638
+      ],
+      [
+        28.2549,
+        -0.0638
+      ],
+      [
+        28.7549,
+        -0.0638
+      ],
+      [
+        29.2549,
+        -0.0638
+      ],
+      [
+        29.755,
+        -0.0638
+      ],
+      [
+        30.255,
+        -0.0638
+      ],
+      [
+        30.755,
+        -0.0638
+      ],
+      [
+        31.2551,
+        -0.0638
+      ],
+      [
+        31.7551,
+        -0.0638
+      ],
+      [
+        32.2551,
+        -0.0638
+      ],
+      [
+        32.7551,
+        -0.0638
+      ],
+      [
+        33.2552,
+        -0.0638
+      ],
+      [
+        33.7552,
+        -0.0638
+      ],
+      [
+        34.2552,
+        -0.0638
+      ],
+      [
+        34.7553,
+        -0.0638
+      ],
+      [
+        35.2553,
+        -0.0638
+      ],
+      [
+        35.7553,
+        -0.0638
+      ],
+      [
+        36.2554,
+        -0.0638
+      ],
+      [
+        36.7554,
+        -0.0638
+      ],
+      [
+        37.2554,
+        -0.0638
+      ],
+      [
+        37.7555,
+        -0.0638
+      ],
+      [
+        38.2555,
+        -0.0638
+      ],
+      [
+        38.7555,
+        -0.0638
+      ],
+      [
+        39.2556,
+        -0.0638
+      ],
+      [
+        39.7556,
+        -0.0638
+      ],
+      [
+        40.2556,
+        -0.0638
+      ],
+      [
+        40.7557,
+        -0.0638
+      ],
+      [
+        41.2557,
+        -0.0638
+      ],
+      [
+        41.7557,
+        -0.0638
+      ],
+      [
+        42.2558,
+        -0.0638
+      ],
+      [
+        42.7558,
+        -0.0638
+      ],
+      [
+        43.2558,
+        -0.0638
+      ],
+      [
+        43.7559,
+        -0.0638
+      ],
+      [
+        44.2559,
+        -0.0638
+      ],
+      [
+        44.7559,
+        -0.0638
+      ],
+      [
+        45.256,
+        -0.0638
+      ],
+      [
+        45.756,
+        -0.0638
+      ],
+      [
+        46.256,
+        -0.0638
+      ],
+      [
+        46.7561,
+        -0.0638
+      ],
+      [
+        47.2561,
+        -0.0638
+      ],
+      [
+        47.7561,
+        -0.0638
+      ],
+      [
+        48.2562,
+        -0.0638
+      ],
+      [
+        48.7562,
+        -0.0638
+      ],
+      [
+        49.2562,
+        -0.0638
+      ],
+      [
+        49.7562,
+        -0.0638
+      ],
+      [
+        50.2563,
+        -0.0638
+      ],
+      [
+        50.7563,
+        -0.0638
+      ],
+      [
+        51.2563,
+        -0.0638
+      ],
+      [
+        51.7564,
+        -0.0638
+      ],
+      [
+        52.2564,
+        -0.0638
+      ],
+      [
+        52.7564,
+        -0.0638
+      ],
+      [
+        53.2565,
+        -0.0638
+      ],
+      [
+        53.7565,
+        -0.0638
+      ],
+      [
+        54.2565,
+        -0.0638
+      ],
+      [
+        54.7566,
+        -0.0638
+      ],
+      [
+        55.2566,
+        -0.0607
+      ],
+      [
+        55.756,
+        -0.0368
+      ],
+      [
+        56.2537,
+        0.0107
+      ],
+      [
+        56.7486,
+        0.0817
+      ],
+      [
+        57.2397,
+        0.1759
+      ],
+      [
+        57.7257,
+        0.2932
+      ],
+      [
+        58.2056,
+        0.4333
+      ],
+      [
+        58.6784,
+        0.596
+      ],
+      [
+        59.143,
+        0.7808
+      ],
+      [
+        59.5984,
+        0.9873
+      ],
+      [
+        60.0434,
+        1.2151
+      ],
+      [
+        60.4772,
+        1.4637
+      ],
+      [
+        60.8988,
+        1.7325
+      ],
+      [
+        61.3073,
+        2.0209
+      ],
+      [
+        61.7016,
+        2.3282
+      ],
+      [
+        62.081,
+        2.6539
+      ],
+      [
+        62.4446,
+        2.9971
+      ],
+      [
+        62.7916,
+        3.3571
+      ],
+      [
+        63.1212,
+        3.733
+      ],
+      [
+        63.4327,
+        4.1241
+      ],
+      [
+        63.7254,
+        4.5295
+      ],
+      [
+        64.0104,
+        4.9403
+      ],
+      [
+        64.2955,
+        5.3511
+      ],
+      [
+        64.5805,
+        5.762
+      ],
+      [
+        64.8655,
+        6.1728
+      ],
+      [
+        65.1506,
+        6.5837
+      ],
+      [
+        65.4356,
+        6.9945
+      ],
+      [
+        65.7206,
+        7.4054
+      ],
+      [
+        66.0056,
+        7.8162
+      ],
+      [
+        66.2907,
+        8.227
+      ],
+      [
+        66.5757,
+        8.6379
+      ],
+      [
+        66.8607,
+        9.0487
+      ],
+      [
+        67.1458,
+        9.4596
+      ],
+      [
+        67.4308,
+        9.8704
+      ],
+      [
+        67.7158,
+        10.2813
+      ],
+      [
+        68.0008,
+        10.6921
+      ],
+      [
+        68.2859,
+        11.1029
+      ],
+      [
+        68.5709,
+        11.5138
+      ],
+      [
+        68.8559,
+        11.9246
+      ],
+      [
+        69.1409,
+        12.3355
+      ],
+      [
+        69.426,
+        12.7463
+      ],
+      [
+        69.711,
+        13.1572
+      ],
+      [
+        69.996,
+        13.568
+      ],
+      [
+        70.2811,
+        13.9788
+      ],
+      [
+        70.5661,
+        14.3897
+      ],
+      [
+        70.8511,
+        14.8005
+      ],
+      [
+        71.1361,
+        15.2114
+      ],
+      [
+        71.4212,
+        15.6222
+      ],
+      [
+        71.7062,
+        16.033
+      ],
+      [
+        71.9912,
+        16.4439
+      ],
+      [
+        72.2762,
+        16.8547
+      ],
+      [
+        72.5613,
+        17.2656
+      ],
+      [
+        72.8463,
+        17.6764
+      ],
+      [
+        73.1422,
+        18.0794
+      ],
+      [
+        73.458,
+        18.467
+      ],
+      [
+        73.7929,
+        18.8383
+      ],
+      [
+        74.1461,
+        19.1922
+      ],
+      [
+        74.5166,
+        19.5279
+      ],
+      [
+        74.9035,
+        19.8446
+      ],
+      [
+        75.3059,
+        20.1413
+      ],
+      [
+        75.7227,
+        20.4175
+      ],
+      [
+        76.1528,
+        20.6723
+      ],
+      [
+        76.5953,
+        20.9052
+      ],
+      [
+        77.0489,
+        21.1155
+      ],
+      [
+        77.5125,
+        21.3028
+      ],
+      [
+        77.9849,
+        21.4664
+      ],
+      [
+        78.465,
+        21.6061
+      ],
+      [
+        78.9515,
+        21.7215
+      ],
+      [
+        79.4431,
+        21.8123
+      ],
+      [
+        79.9387,
+        21.8782
+      ],
+      [
+        80.4371,
+        21.919
+      ],
+      [
+        80.9368,
+        21.9348
+      ],
+      [
+        81.4367,
+        21.9254
+      ],
+      [
+        81.9355,
+        21.8909
+      ],
+      [
+        82.4319,
+        21.8313
+      ],
+      [
+        82.9247,
+        21.7468
+      ],
+      [
+        83.4126,
+        21.6376
+      ],
+      [
+        83.8944,
+        21.504
+      ],
+      [
+        84.3689,
+        21.3464
+      ],
+      [
+        84.8348,
+        21.1651
+      ],
+      [
+        85.291,
+        20.9605
+      ],
+      [
+        85.7364,
+        20.7333
+      ],
+      [
+        86.1698,
+        20.484
+      ],
+      [
+        86.59,
+        20.2131
+      ],
+      [
+        86.9962,
+        19.9215
+      ],
+      [
+        87.3871,
+        19.6098
+      ],
+      [
+        87.7618,
+        19.2789
+      ],
+      [
+        88.1195,
+        18.9295
+      ],
+      [
+        88.4591,
+        18.5625
+      ],
+      [
+        88.7798,
+        18.1789
+      ],
+      [
+        89.0808,
+        17.7797
+      ],
+      [
+        89.3613,
+        17.3659
+      ],
+      [
+        89.6207,
+        16.9384
+      ],
+      [
+        89.8582,
+        16.4985
+      ],
+      [
+        90.0733,
+        16.0471
+      ],
+      [
+        90.2654,
+        15.5855
+      ],
+      [
+        90.4341,
+        15.1148
+      ],
+      [
+        90.5788,
+        14.6363
+      ],
+      [
+        90.6993,
+        14.151
+      ],
+      [
+        90.7953,
+        13.6603
+      ],
+      [
+        90.8664,
+        13.1655
+      ],
+      [
+        90.9125,
+        12.6676
+      ],
+      [
+        90.9336,
+        12.1681
+      ],
+      [
+        90.9295,
+        11.6681
+      ],
+      [
+        90.9002,
+        11.169
+      ],
+      [
+        90.8458,
+        10.672
+      ],
+      [
+        90.7666,
+        10.1783
+      ],
+      [
+        90.6625,
+        9.6893
+      ],
+      [
+        90.5341,
+        9.2061
+      ],
+      [
+        90.3814,
+        8.73
+      ],
+      [
+        90.205,
+        8.2621
+      ],
+      [
+        90.0053,
+        7.8038
+      ],
+      [
+        89.7828,
+        7.356
+      ],
+      [
+        89.5381,
+        6.9201
+      ],
+      [
+        89.2717,
+        6.497
+      ],
+      [
+        88.9844,
+        6.0878
+      ],
+      [
+        88.6768,
+        5.6936
+      ],
+      [
+        88.3498,
+        5.3154
+      ],
+      [
+        88.0042,
+        4.9541
+      ],
+      [
+        87.6409,
+        4.6106
+      ],
+      [
+        87.2607,
+        4.2859
+      ],
+      [
+        86.8647,
+        3.9807
+      ],
+      [
+        86.4538,
+        3.6958
+      ],
+      [
+        86.0291,
+        3.4319
+      ],
+      [
+        85.5917,
+        3.1897
+      ],
+      [
+        85.1426,
+        2.9699
+      ],
+      [
+        84.6831,
+        2.7729
+      ],
+      [
+        84.2142,
+        2.5993
+      ],
+      [
+        83.7372,
+        2.4495
+      ],
+      [
+        83.2533,
+        2.3239
+      ],
+      [
+        82.7636,
+        2.2228
+      ],
+      [
+        82.2695,
+        2.1464
+      ],
+      [
+        81.7722,
+        2.0951
+      ],
+      [
+        81.2729,
+        2.0687
+      ],
+      [
+        80.7729,
+        2.0676
+      ],
+      [
+        80.2735,
+        2.0916
+      ],
+      [
+        79.776,
+        2.1407
+      ],
+      [
+        79.2815,
+        2.2148
+      ],
+      [
+        78.7914,
+        2.3136
+      ],
+      [
+        78.3069,
+        2.437
+      ],
+      [
+        77.8292,
+        2.5846
+      ],
+      [
+        77.3595,
+        2.756
+      ],
+      [
+        76.8991,
+        2.9509
+      ],
+      [
+        76.449,
+        3.1687
+      ],
+      [
+        76.0105,
+        3.4088
+      ],
+      [
+        75.5846,
+        3.6707
+      ],
+      [
+        75.1724,
+        3.9537
+      ],
+      [
+        74.775,
+        4.2571
+      ],
+      [
+        74.3933,
+        4.58
+      ],
+      [
+        74.0284,
+        4.9218
+      ],
+      [
+        73.6811,
+        5.2815
+      ],
+      [
+        73.3524,
+        5.6582
+      ],
+      [
+        73.043,
+        6.051
+      ],
+      [
+        72.7538,
+        6.4589
+      ],
+      [
+        72.4855,
+        6.8807
+      ],
+      [
+        72.2387,
+        7.3156
+      ],
+      [
+        72.0141,
+        7.7623
+      ]
+    ],
+    "width": 35.0,
+    "pitch": 4.75,
+    "perf_along": 1.981,
+    "perf_across": 2.794,
+    "perf_row_z": 14.093,
+    "first_perf_s": -96.1875
+  },
+  "features": [
+    {
+      "id": "sprocket",
+      "label": "Sprocket",
+      "part": "sprocket",
+      "point": [
+        56.256,
+        21.669,
+        -14.093
+      ]
+    },
+    {
+      "id": "cam_notch",
+      "label": "Cam notch",
+      "part": "sprocket",
+      "point": [
+        59.243,
+        14.763,
+        21.2
+      ]
+    },
+    {
+      "id": "pawl",
+      "label": "Pawl",
+      "part": "pawl",
+      "point": [
+        61.364,
+        16.884,
+        25.2
+      ]
+    },
+    {
+      "id": "release_button",
+      "label": "Release button",
+      "part": "release_button",
+      "point": [
+        67.728,
+        24.898,
+        37.0
+      ]
+    },
+    {
+      "id": "advance_knob",
+      "label": "Advance knob",
+      "part": "advance_knob",
+      "point": [
+        87.5,
+        12.0,
+        42.5
+      ]
+    },
+    {
+      "id": "rewind_knob",
+      "label": "Rewind knob",
+      "part": "rewind_knob",
+      "point": [
+        -53.5,
+        12.5,
+        49.5
+      ]
+    },
+    {
+      "id": "film_gate",
+      "label": "Film gate",
+      "part": "shell",
+      "point": [
+        0.0,
+        0.2,
+        14.15
+      ]
+    },
+    {
+      "id": "cassette",
+      "label": "Film cassette",
+      "part": "cassette",
+      "point": [
+        -52.25,
+        12.5,
+        19.5
+      ]
+    },
+    {
+      "id": "rear_cover_latch",
+      "label": "Cover latch",
+      "part": "turn_button_right",
+      "point": [
+        42.5,
+        10.6,
+        38.0
+      ]
+    },
+    {
+      "id": "dark_slide",
+      "label": "Dark slide",
+      "part": "dark_slide",
+      "point": [
+        0.0,
+        1.55,
+        40.0
+      ]
+    },
+    {
+      "id": "slot_velvet",
+      "label": "Velvet light trap",
+      "part": "slot_velvet",
+      "point": [
+        0.0,
+        2.325,
+        31.5
+      ]
+    },
+    {
+      "id": "pinhole",
+      "label": "Pinhole",
+      "part": "pinhole_shim",
+      "point": [
+        0.15,
+        50.05,
+        0.0
+      ]
+    },
+    {
+      "id": "shutter_lock",
+      "label": "Shutter lock",
+      "part": "shutter_lock",
+      "point": [
+        0.0,
+        54.0,
+        22.5
+      ]
+    },
+    {
+      "id": "shutter_tabs",
+      "label": "Shutter tab",
+      "part": "shutter_open_tab",
+      "point": [
+        -28.0,
+        54.05,
+        0.0
+      ]
+    },
+    {
+      "id": "viewfinder_front",
+      "label": "Front finder frame",
+      "part": "viewfinder_front_frame",
+      "point": [
+        0.0,
+        30.9,
+        49.75
+      ]
+    },
+    {
+      "id": "viewfinder_rear",
+      "label": "Rear sight",
+      "part": "viewfinder_rear_frame",
+      "point": [
+        0.0,
+        15.4,
+        46.03
+      ]
+    },
+    {
+      "id": "body_hook_rail",
+      "label": "Hook rail",
+      "part": "shell",
+      "point": [
+        0.0,
+        7.7,
+        29.25
+      ]
+    },
+    {
+      "id": "body_latch_pin",
+      "label": "Latch pin",
+      "part": "latch_pin",
+      "point": [
+        0.0,
+        8.5,
+        -24.0
+      ]
+    },
+    {
+      "id": "m42_mount",
+      "label": "M42 lens mount",
+      "part": "m42_rear_cap_ring",
+      "point": [
+        0.0,
+        48.0,
+        22.0
+      ]
+    },
+    {
+      "id": "tripod_nut",
+      "label": "Tripod nut",
+      "part": "tripod_nut",
+      "point": [
+        0.0,
+        36.362,
+        -36.85
+      ]
+    }
+  ],
+  "spec_sheet": [
+    {
+      "id": "frame_width",
+      "label": "Frame width",
+      "value": 65.0,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.frame_w"
+    },
+    {
+      "id": "frame_height",
+      "label": "Frame height",
+      "value": 24.0,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.frame_h"
+    },
+    {
+      "id": "aspect_ratio",
+      "label": "Aspect ratio (width to height)",
+      "value": 2.7083,
+      "unit": "",
+      "section": "specs",
+      "status": "locked",
+      "source": "derived:aspect_ratio"
+    },
+    {
+      "id": "standard_frame_width",
+      "label": "Standard 135 frame width, for comparison",
+      "value": 36.0,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.standard_frame_w"
+    },
+    {
+      "id": "perf_pitch",
+      "label": "Perforation pitch",
+      "value": 4.75,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.perf_pitch"
+    },
+    {
+      "id": "perfs_per_frame",
+      "label": "Perforations per frame",
+      "value": 14.0,
+      "unit": "perfs",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.perfs_per_frame"
+    },
+    {
+      "id": "advance_per_frame",
+      "label": "Film advance per frame",
+      "value": 66.5,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "film.advance"
+    },
+    {
+      "id": "sprocket_teeth",
+      "label": "Sprocket teeth",
+      "value": 14.0,
+      "unit": "teeth",
+      "section": "specs",
+      "status": "locked",
+      "source": "sprocket.teeth"
+    },
+    {
+      "id": "frames_per_roll",
+      "label": "Frames per 36-exposure roll, before loading waste",
+      "value": 20,
+      "unit": "frames",
+      "section": "specs",
+      "status": "draft",
+      "source": "derived:frames_per_roll"
+    },
+    {
+      "id": "sprocket_pitch_d",
+      "label": "Sprocket pitch diameter",
+      "value": 21.1676,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "pitch_d"
+    },
+    {
+      "id": "pinhole_diameter",
+      "label": "Pinhole diameter",
+      "value": 0.3,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "optics.pinhole_d"
+    },
+    {
+      "id": "pinhole_distance",
+      "label": "Pinhole to film distance",
+      "value": 50.0,
+      "unit": "mm",
+      "section": "specs",
+      "status": "locked",
+      "source": "optics.pinhole_y"
+    },
+    {
+      "id": "f_number",
+      "label": "Aperture (f-number)",
+      "value": 166.6667,
+      "unit": "",
+      "section": "specs",
+      "status": "locked",
+      "source": "derived:f_number"
+    },
+    {
+      "id": "hook_rail_half_length",
+      "label": "Hook rail half length, either side of centre",
+      "value": 36.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.hook_half_x"
+    },
+    {
+      "id": "hook_slot_rear",
+      "label": "Hook slot rear face, from the film plane",
+      "value": 4.2,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.hook_slot_y[0]"
+    },
+    {
+      "id": "hook_slot_front",
+      "label": "Hook slot front face, from the film plane",
+      "value": 6.2,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.hook_slot_y[1]"
+    },
+    {
+      "id": "hook_slot_roof",
+      "label": "Hook slot roof height, from gate centre",
+      "value": 30.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.hook_slot_top_z"
+    },
+    {
+      "id": "tongue_rear",
+      "label": "Body tongue rear face, from the film plane",
+      "value": 4.5,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.tongue_y[0]"
+    },
+    {
+      "id": "tongue_front",
+      "label": "Body tongue front face, from the film plane",
+      "value": 5.9,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.tongue_y[1]"
+    },
+    {
+      "id": "tongue_top",
+      "label": "Body tongue top height, from gate centre",
+      "value": 29.7,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.tongue_top_z"
+    },
+    {
+      "id": "detach_angle",
+      "label": "Tilt the tongue allows when the body swings off",
+      "value": 5.0,
+      "unit": "deg",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.detach_deg"
+    },
+    {
+      "id": "latch_pin_diameter",
+      "label": "Bottom latch pin diameter",
+      "value": 3.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "measured.rod_d"
+    },
+    {
+      "id": "latch_pin_distance",
+      "label": "Latch pin distance from the film plane",
+      "value": 8.5,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.latch_pin_y"
+    },
+    {
+      "id": "latch_pin_height",
+      "label": "Latch pin height, from gate centre",
+      "value": -25.5,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.latch_pin_z"
+    },
+    {
+      "id": "latch_lug_gap",
+      "label": "Latch gap between the lugs, half width",
+      "value": 22.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "body_link.lug_x[0]"
+    },
+    {
+      "id": "datum_distance",
+      "label": "Body datum face distance from the film plane",
+      "value": 4.2,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "gate.datum_y"
+    },
+    {
+      "id": "gate_aperture_width",
+      "label": "Front aperture width",
+      "value": 67.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "gate.aperture_w"
+    },
+    {
+      "id": "gate_aperture_height",
+      "label": "Front aperture height",
+      "value": 26.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "gate.aperture_h"
+    },
+    {
+      "id": "m42_thread",
+      "label": "Lens mount thread diameter",
+      "value": 42.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "optics.m42_thread_d"
+    },
+    {
+      "id": "m42_pitch",
+      "label": "Lens mount thread pitch",
+      "value": 1.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "optics.m42_pitch"
+    },
+    {
+      "id": "m42_bore",
+      "label": "Lens mount clear bore",
+      "value": 36.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "optics.m42_bore"
+    },
+    {
+      "id": "m42_seat_to_pinhole",
+      "label": "Mount seat to pinhole plane",
+      "value": 2.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "measured.m42_seat_to_pinhole"
+    },
+    {
+      "id": "m42_seat_to_film",
+      "label": "Mount seat distance from the film plane",
+      "value": 48.0,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "derived:m42_seat_to_film"
+    },
+    {
+      "id": "image_circle",
+      "label": "Minimum image circle",
+      "value": 69.2892,
+      "unit": "mm",
+      "section": "interface",
+      "status": "draft",
+      "source": "derived:image_circle"
+    }
+  ]
+}

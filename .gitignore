@@ -1,7 +1,12 @@
 .DS_Store
 .venv/
 __pycache__/
-out/
+# out/ is generated. The site data is committed because the deploy is built from it: the manifest,
+# the GLBs the page draws and the stills it shows. STL and STEP stay local.
+out/*
+!out/manifest.json
+!out/glb
+!out/stills
 .serena/
 viewer/node_modules/
 viewer/dist/
