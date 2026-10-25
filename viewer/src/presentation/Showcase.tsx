@@ -6,6 +6,7 @@ import { MANIFEST_URL } from '../manifest'
 import { GROUP_LABELS, GROUPS, type Group, type Manifest } from '../types'
 import { Director, motionsFor } from './Director'
 import { FilmStripNav, stripVars } from './FilmStripNav'
+import { Loading, useLoadingDone } from './Loading'
 import { FormatOverlay } from './FormatOverlay'
 import { matches, PHONE, REDUCED_MOTION, useMedia } from './media'
 import { PlaybackBar } from './PlaybackBar'
@@ -32,14 +33,15 @@ declare global {
   }
 }
 
-function LoadProgress({ viewer }: { viewer: Viewer }) {
+/** The loading screen over the page, down to the last part that has loaded or failed. */
+function LoadScreen({ viewer }: { viewer: Viewer }) {
   const total = viewer.manifest.parts.length
   const settled = useSelector(viewer.store, s => viewer.manifest.parts.filter(p => s.boxes[p.name] || s.failed.has(p.name)).length)
-  if (settled >= total) return null
+  const { visible, leaving } = useLoadingDone(total > 0 && settled >= total)
+  if (!visible) return null
   return (
-    <div className="load" role="progressbar" aria-label="Loading the camera" aria-valuemin={0} aria-valuemax={total} aria-valuenow={settled}>
-      <span className="load-track"><span className="load-bar" style={{ transform: `scaleX(${settled / total})` }} /></span>
-      <span className="load-text">Loading the camera, {settled} of {total} parts</span>
+    <div className="loading-layer" data-leaving={leaving}>
+      <Loading progress={settled / Math.max(1, total)} />
     </div>
   )
 }
@@ -155,6 +157,7 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
   const interactive = !phone || explore
   return (
     <section className="showcase" aria-label="The camera" style={stripVars(manifest)}>
+      <LoadScreen viewer={viewer} />
       <Masthead title={chapters[0].title} showTitle={active !== chapters[0].id} onSkip={skip} />
       <div className="paper" aria-hidden="true" />
       <StageCanvas>
@@ -188,7 +191,6 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
                 <div className="card">
                   {c.id === 'hero' ? <h1>{c.title}</h1> : <h2>{c.title}</h2>}
                   <p>{fillCopy(manifest, c.text)}</p>
-                  {c.id === 'hero' && <LoadProgress viewer={viewer} />}
                   {c.id === 'modules' && isActive && <ModulePicker highlight={highlight} onPick={setHighlight} />}
                   {motion && transport && isActive && (
                     <PlaybackBar

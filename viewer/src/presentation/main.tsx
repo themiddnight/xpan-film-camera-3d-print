@@ -9,6 +9,7 @@ import { Showcase } from './Showcase'
 import { DOCS } from './content'
 import { DRAWINGS, FIGURES } from './figures'
 import { FigureViews, useFigureEntries } from './FigureViews'
+import { Loading } from './Loading'
 import { MakerDoc } from './MakerDoc'
 import { hasWebGL, NoWebGL } from './NoWebGL'
 import { Still } from './Still'
@@ -57,7 +58,7 @@ function Presentation() {
   }, [])
 
   switch (load.status) {
-    case 'loading': return <p className="page-status">Loading the camera</p>
+    case 'loading': return <Loading progress={null} />
     case 'error': return (
       <div className="page-status" role="alert">
         <p>The page could not be built from the CAD export:</p>

@@ -73,7 +73,7 @@ async function checkLayout(page, run) {
 
 async function waitForLoad(page) {
   const start = Date.now()
-  await page.waitForFunction(() => window.presentation && !document.querySelector('.load'), null, { timeout: LOAD_TIMEOUT_MS })
+  await page.waitForFunction(() => window.presentation && !document.querySelector('.loading'), null, { timeout: LOAD_TIMEOUT_MS })
   return Date.now() - start
 }
 
