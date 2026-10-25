@@ -9,21 +9,33 @@ const FOLLOW_RATE = 8
 /**
  * Turns its children about the vertical axis through the centre of every part to the angle `angle`
  * returns, read every frame. A small angle keeps the framed silhouette inside the shot fitted at rest.
+ * `spin` keeps it turning at that many radians a second, on top of the angle, and winds that extra
+ * turn out when it stops so the next chapter starts square.
  */
-export function Turntable({ angle, children }: { angle: () => number; children: ReactNode }) {
+export function Turntable({ angle, spin = 0, children }: { angle: () => number; spin?: number; children: ReactNode }) {
   const viewer = useViewer()
   const bounds = useViewerState(viewer.selectBounds)
   const invalidate = useThree(s => s.invalidate)
   const outer = useRef<Group>(null)
+  const turned = useRef(0)
   const centre = useMemo(() => bounds?.getCenter(new Vector3()) ?? new Vector3(), [bounds])
 
   useFrame((_, seconds) => {
     const group = outer.current
     if (!group) return
+    const step = Math.min(seconds, 0.1)
+    if (spin !== 0) {
+      // Kept within half a turn, so the wind-out when the chapter changes is never more than that.
+      turned.current = (turned.current + spin * step + Math.PI) % (2 * Math.PI) - Math.PI
+      group.rotation.z = angle() + turned.current
+      invalidate()
+      return
+    }
+    turned.current = 0
     const goal = angle()
     const gap = goal - group.rotation.z
     if (gap === 0) return
-    group.rotation.z = Math.abs(gap) < 1e-4 ? goal : group.rotation.z + gap * Math.min(1, FOLLOW_RATE * Math.min(seconds, 0.1))
+    group.rotation.z = Math.abs(gap) < 1e-4 ? goal : group.rotation.z + gap * Math.min(1, FOLLOW_RATE * step)
     invalidate()
   })
 

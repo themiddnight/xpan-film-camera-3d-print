@@ -25,6 +25,8 @@ const SCREENS_PER_SECOND = 0.4
 const STILL_SCREENS = 1
 /** The whole turn, in radians, the camera swings through as a chapter without motion scrolls by. */
 const ORBIT_RAD = 0.4
+/** The hero turns slowly on its own, a full turn in about a minute. */
+const HERO_SPIN = 0.1
 
 declare global {
   interface Window {
@@ -163,7 +165,8 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
       <StageCanvas>
         <StagedView
           track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} turn={turn}
-          frameExplode={chapter.scene?.explodeByScroll ? 1 : undefined}
+          spin={chapter.id === 'hero' && !reduced ? HERO_SPIN : 0}
+          frameExplode={chapter.scene?.explodeByScroll ? 'live' : undefined}
         >
           <Director motions={motions} active={active} scroll={scroll} />
           {chapter.scene?.explodeByScroll && <ScrollExplode scroll={scroll} active={active} staging={staging} />}

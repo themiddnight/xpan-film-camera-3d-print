@@ -55,10 +55,12 @@ function aimAtRegion(camera: PerspectiveCamera, region: Region, width: number, h
  * an element inside `track`, the shot is framed in that element's rect and the picture still fills
  * the track.
  */
-export function ShotRig({ shot, explode, track, focus }: {
+export function ShotRig({ shot, explode, follow = false, track, focus }: {
   shot: Staging['shot']
   /** The explode the shot is framed at, when it is not the viewer's own. */
   explode?: number
+  /** Puts the camera straight at the fit, with no ease, for a fit the scroll itself drives. */
+  follow?: boolean
   track?: RefObject<HTMLElement | null>
   focus?: RefObject<HTMLElement | null>
 }) {
@@ -104,7 +106,7 @@ export function ShotRig({ shot, explode, track, focus }: {
     if (!bounds || !Number.isFinite(aspect) || aspect <= 0) return
     const goal = shotFor(viewer, shot, aspect, explode)
     if (!goal) return
-    if (!target.current || matches(REDUCED_MOTION)) {
+    if (!target.current || follow || matches(REDUCED_MOTION)) {
       tween.current = null
       place(goal.position, goal.target)
     } else {
@@ -114,7 +116,7 @@ export function ShotRig({ shot, explode, track, focus }: {
       }
     }
     invalidate()
-  }, [viewer, shot, bounds, aspect, explode, camera, controls, invalidate])
+  }, [viewer, shot, bounds, aspect, explode, follow, camera, controls, invalidate])
 
   useFrame(() => {
     const t = tween.current

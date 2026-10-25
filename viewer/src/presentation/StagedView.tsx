@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, View } from '@react-three/drei'
 import { PartsScene } from '../scene/PartsScene'
 import { useSelector } from '../state/store'
-import { ViewerContext, type Viewer } from '../state/viewer'
+import { useViewerState, ViewerContext, type Viewer } from '../state/viewer'
 import { PHONE, useMedia } from './media'
 import { Pins } from './Pins'
 import { ShotRig } from './ShotRig'
@@ -13,6 +13,16 @@ import { Turntable } from './Turntable'
 import type { Staging } from './story'
 
 const still = () => 0
+
+/** Frames the shot at the viewer's explode, which changes as the page scrolls; only this re-renders. */
+function LiveShotRig({ shot, track, focus }: {
+  shot: Staging['shot']
+  track: RefObject<HTMLElement | null>
+  focus?: RefObject<HTMLElement | null>
+}) {
+  const explode = useViewerState(s => s.explode)
+  return <ShotRig shot={shot} explode={explode} follow track={track} focus={focus} />
+}
 
 /** Whether the element is anywhere in the viewport, so a view far off the page keeps no labels. */
 function useOnScreen(ref: RefObject<HTMLElement | null>): boolean {
@@ -44,15 +54,20 @@ function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) 
  * `turn` returns the turntable angle in radians, read every frame. Children render on the turntable with
  * the parts, so overlays in camera coordinates turn with them, with the viewer in context.
  */
-export function StagedView({ track, focus, viewer, staging, interactive, turn = still, frameExplode, children }: {
+export function StagedView({ track, focus, viewer, staging, interactive, turn = still, spin = 0, frameExplode, children }: {
   track: RefObject<HTMLElement | null>
   focus?: RefObject<HTMLElement | null>
   viewer: Viewer
   staging: Staging
   interactive: boolean
   turn?: () => number
-  /** The explode the camera is framed at, when the staging moves it. */
-  frameExplode?: number
+  /** Radians a second the parts keep turning, for a chapter that should not sit still. */
+  spin?: number
+  /**
+   * The explode the camera is framed at: a fixed amount, or `live` to follow the viewer's own, which
+   * the scroll drives, so the camera pulls back as the parts separate.
+   */
+  frameExplode?: number | 'live'
   children?: ReactNode
 }) {
   const compact = useMedia(PHONE)
@@ -68,13 +83,15 @@ export function StagedView({ track, focus, viewer, staging, interactive, turn = 
         <StudioLights />
         {/* Before the children, so its reset to rest runs ahead of their effects that pose the parts. */}
         <StagingSync viewer={viewer} staging={staging} />
-        <Turntable angle={turn}>
+        <Turntable angle={turn} spin={spin}>
           <PartsScene />
           <Pins viewer={viewer} ids={framed && onScreen ? staging.pins ?? [] : []} compact={compact} track={track} />
           {children}
         </Turntable>
         {interactive && <OrbitControls makeDefault enableZoom={false} enablePan={false} />}
-        <ShotRig shot={staging.shot} explode={frameExplode} track={track} focus={focus} />
+        {frameExplode === 'live'
+          ? <LiveShotRig shot={staging.shot} track={track} focus={focus} />
+          : <ShotRig shot={staging.shot} explode={frameExplode} track={track} focus={focus} />}
       </ViewerContext.Provider>
     </View>
   )
