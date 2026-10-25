@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     publicDir: isPublic ? false : '../out',
     base: './',
-    server: { port: 8642, strictPort: true },
+    server: { port: 5173, strictPort: true },
     // three.js, fiber and drei are most of the one 3D chunk the page needs (1.36MB in the public build with the showcase
     // and the maker half, 383kB gzipped), and the page cannot draw anything without all of it, so splitting buys nothing.
     // The limit sits just above today's size so real growth still warns.
