@@ -76,6 +76,26 @@ button { font: inherit; color: inherit; }
   --tile-w: calc(var(--frame-h) * var(--strip-pitch));
 }
 
+/*
+ * Graph paper behind the canvas: cells with a heavier line every five. Fixed, so it stays still while the
+ * camera turns over it; the build notes sheet (z-index 4) covers it once the showcase has gone by.
+ */
+.paper {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  --cell: 24px;
+  background-color: var(--seamless);
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+  background-size: calc(var(--cell) * 5) calc(var(--cell) * 5), calc(var(--cell) * 5) calc(var(--cell) * 5), var(--cell) var(--cell), var(--cell) var(--cell);
+  background-position: center;
+}
+
 .stage {
   position: sticky;
   top: 0;
@@ -155,7 +175,8 @@ button { font: inherit; color: inherit; }
   gap: 16px;
   height: var(--masthead-h);
   padding: 0 var(--gutter);
-  background: var(--seamless);
+  /* Fades into the graph paper instead of cutting a band across it. */
+  background: linear-gradient(var(--seamless) 60%, rgba(213, 216, 216, 0));
   pointer-events: none;
 }
 
@@ -594,6 +615,7 @@ button { font: inherit; color: inherit; }
 .sheet {
   --maker-gap: clamp(32px, 5vw, 64px);
   position: relative;
+  z-index: 4;
   background: var(--drawing-white);
   padding: clamp(72px, 10vw, 140px) var(--gutter) clamp(96px, 12vw, 180px);
 }

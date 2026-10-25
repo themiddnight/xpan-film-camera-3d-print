@@ -154,6 +154,7 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
   return (
     <section className="showcase" aria-label="The camera" style={stripVars(manifest)}>
       <Masthead title={chapters[0].title} showTitle={active !== chapters[0].id} onSkip={skip} />
+      <div className="paper" aria-hidden="true" />
       <StageCanvas>
         <StagedView track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} turn={turn}>
           <Director motions={motions} active={active} scroll={scroll} />

@@ -64,6 +64,7 @@ export function Still({ manifest, chapter }: { manifest: Manifest; chapter: Chap
           {chapter.id === 'format' && <OverlayWhenLoaded />}
         </StagedView>
       </StageCanvas>
+      <div className="paper" aria-hidden="true" />
       <div ref={stage} className="still-stage" />
     </>
   )
