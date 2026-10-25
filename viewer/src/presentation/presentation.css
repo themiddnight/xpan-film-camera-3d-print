@@ -551,6 +551,42 @@ button { font: inherit; color: inherit; }
 
   .strip-title { font-size: 9px; padding: 0 6px 4px; }
   .strip-edge { font-size: 9px; }
+
+  /* Shorter cards leave the camera more of the screen: the phase line and the readout say the same as the slider. */
+  .card p { font-size: 15px; line-height: 1.42; }
+  .playback-phase { font-size: 14px; }
+  .playback-readout { font-size: 14px; }
+}
+
+@media (max-width: 640px) and (max-height: 700px) {
+  .card h2 { font-size: 21px; margin-bottom: 6px; }
+  .card p { font-size: 14px; }
+  /* Still announced: it is the bar's live region. */
+  .playback-phase {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Fingers need about 44px: grow the hit area, not the drawing. */
+@media (pointer: coarse) {
+  /* .explore is already absolutely placed, which anchors its ::after too. */
+  .playback-button, .module, .masthead-skip { position: relative; }
+  .playback-button::after, .module::after, .explore::after, .masthead-skip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+  .pin-tap::before { inset: -17px; }
+  .playback-scrub { height: 32px; }
 }
 
 /* The maker half: an engineering drawing sheet. White paper, black ink, drafting blue for links and notes. */
