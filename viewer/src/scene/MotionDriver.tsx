@@ -3,14 +3,14 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Matrix4, Vector3 } from 'three'
 import { useViewer, useViewerState, type ViewerState } from '../state/viewer'
 import { writeSectionPlane } from './frames'
-import { explodeOffset, spreadDirections } from './explode'
+import { explodeOffset, explodeVectors } from './explode'
 
 interface Applied {
   revision: number
   explode: number
   nodes: number
   boxes: ViewerState['boxes'] | null
-  spread: Map<string, Vector3>
+  vectors: Map<string, Vector3>
 }
 
 /**
@@ -34,7 +34,7 @@ export function MotionDriver() {
     return () => unsubscribe.forEach(u => u())
   }, [viewer, invalidate])
   const scratch = useMemo(() => ({ matrix: new Matrix4(), offset: new Vector3() }), [])
-  const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, spread: new Map() }), [])
+  const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, vectors: new Map() }), [])
 
   useFrame((_, seconds) => {
     const { motion, nodes, store, manifest, cycles } = viewer
@@ -49,7 +49,7 @@ export function MotionDriver() {
       applied.nodes === nodes.version && applied.boxes === boxes
     ) return
 
-    if (applied.boxes !== boxes) applied.spread = spreadDirections(manifest.parts, boxes)
+    if (applied.boxes !== boxes) applied.vectors = explodeVectors(manifest.parts, boxes)
     applied.revision = motion.revision
     applied.explode = explode
     applied.nodes = nodes.version
@@ -59,7 +59,7 @@ export function MotionDriver() {
       const node = nodes.get(part.name)
       if (!node) continue
       motion.partMatrix(scratch.matrix, part.name)
-      explodeOffset(scratch.offset, part.group, applied.spread.get(part.name), explode)
+      explodeOffset(scratch.offset, applied.vectors.get(part.name), explode)
       // A translation applied after the drives only adds to the matrix's translation column.
       const e = scratch.matrix.elements
       scratch.matrix.setPosition(e[12] + scratch.offset.x, e[13] + scratch.offset.y, e[14] + scratch.offset.z)

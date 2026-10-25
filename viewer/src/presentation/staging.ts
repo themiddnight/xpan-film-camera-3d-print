@@ -1,11 +1,11 @@
-import { Box3, MathUtils, Vector3 } from 'three'
+import { MathUtils, Vector3 } from 'three'
 import { explodedBounds } from '../scene/explode'
 import type { Viewer } from '../state/viewer'
 import { GROUPS, type PartView, type Section } from '../types'
 import type { Staging } from './story'
 
 /** Vertical field of view of every staged camera. */
-export const SHOT_FOV_DEG = 30
+export const SHOT_FOV_DEG = 15
 /** Room around the framed parts, as a fraction of the half-frame. */
 const FIT_MARGIN = 1.12
 
@@ -44,13 +44,8 @@ export function applyStaging(viewer: Viewer, staging: Staging): void {
  */
 export function shotFor(viewer: Viewer, shot: Staging['shot'], aspect: number): { position: Vector3; target: Vector3 } | null {
   const { boxes, explode } = viewer.store.getState()
-  const framed = new Box3()
-  for (const p of viewer.manifest.parts) {
-    const box = boxes[p.name]
-    if (box && (shot.frame.includes(p.name) || shot.frame.includes(p.group))) framed.union(box)
-  }
-  if (framed.isEmpty()) return null
-  const bounds = explodedBounds(framed, explode)
+  const bounds = explodedBounds(viewer.manifest.parts, boxes, explode, p => shot.frame.includes(p.name) || shot.frame.includes(p.group))
+  if (bounds.isEmpty()) return null
   const target = bounds.getCenter(new Vector3())
 
   const back = new Vector3(...shot.direction).normalize()

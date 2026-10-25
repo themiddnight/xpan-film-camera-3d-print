@@ -5,6 +5,11 @@ import type { Kind, PartManifest } from '../types'
 
 const GHOST_OPACITY = 0.25
 export const INSIDE_SHADE = 0.35
+/** Edges drawn where faces meet at more than this angle, and every part's silhouette. */
+export const OUTLINE_ANGLE_DEG = 30
+export const OUTLINE_COLOR = '#8E9194'
+/** How far part colours move toward white, so black outlines show on black PETG. */
+export const SURFACE_LIFT = 0
 /** Bought parts read as metal; the colour still comes from the manifest. */
 export const SURFACE: Record<Kind, { metalness: number; roughness: number }> = {
   printed: { metalness: 0.05, roughness: 0.55 },

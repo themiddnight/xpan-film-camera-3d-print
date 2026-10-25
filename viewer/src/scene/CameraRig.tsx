@@ -35,7 +35,7 @@ export function CameraRig() {
     if (!bounds || bounds.isEmpty() || !controls) return
     // The explode amount at the moment of the request sets the framing; moving the slider does not move the camera.
     const state = viewer.store.getState()
-    let framed = explodedBounds(bounds, state.explode)
+    let framed = explodedBounds(viewer.manifest.parts, state.boxes, state.explode)
     let factor = DISTANCE_FACTOR
     if (view === 'mechanism') {
       const parts = new Box3()

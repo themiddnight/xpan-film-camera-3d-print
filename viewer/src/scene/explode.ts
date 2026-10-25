@@ -1,46 +1,42 @@
 import { Box3, Vector3 } from 'three'
-import { GROUPS, type Group, type PartManifest } from '../types'
+import type { PartManifest } from '../types'
+import { GROUP_OFFSET, LIFT_CLEAR, PART_OFFSET } from './explodeLayout'
 
-/** How far each group sits in front of the one behind it, at full explode. */
-const GROUP_STEP_MM = 70
-/** How far a part moves away from its group's centre, at full explode. */
-const PART_SPREAD_MM = 30
-
-/** Unit direction from each group's centre to each part's centre; parts at the centre go up. */
-export function spreadDirections(
+/** Each part's offset at full explode, from the layout table. A lifted part needs its own and its reference box. */
+export function explodeVectors(
   parts: readonly PartManifest[],
   boxes: Readonly<Record<string, Box3>>,
 ): Map<string, Vector3> {
-  const groupBox = new Map<Group, Box3>()
+  const vectors = new Map<string, Vector3>()
   for (const p of parts) {
+    const lift = LIFT_CLEAR[p.name]
     const box = boxes[p.name]
-    if (box) groupBox.set(p.group, (groupBox.get(p.group) ?? new Box3()).union(box))
+    const above = lift && boxes[lift.above]
+    if (lift && box && above) vectors.set(p.name, new Vector3(0, 0, above.max.z - box.min.z + lift.air))
+    else vectors.set(p.name, new Vector3(...(PART_OFFSET[p.name] ?? GROUP_OFFSET[p.group])))
   }
-  const directions = new Map<string, Vector3>()
-  for (const p of parts) {
-    const box = boxes[p.name]
-    const group = groupBox.get(p.group)
-    if (!box || !group) continue
-    const dir = box.getCenter(new Vector3()).sub(group.getCenter(new Vector3()))
-    if (dir.lengthSq() < 1e-6) dir.set(0, 0, 1)
-    directions.set(p.name, dir.normalize())
-  }
-  return directions
+  return vectors
 }
 
-/** Writes a part's explode offset into `out`: its group steps forward along Y, then it spreads out. */
-export function explodeOffset(out: Vector3, group: Group, direction: Vector3 | undefined, amount: number): Vector3 {
-  out.set(0, GROUPS.indexOf(group) * GROUP_STEP_MM * amount, 0)
-  if (direction) out.addScaledVector(direction, PART_SPREAD_MM * amount)
-  return out
+/** Writes a part's explode offset into `out`. */
+export function explodeOffset(out: Vector3, vector: Vector3 | undefined, amount: number): Vector3 {
+  return vector ? out.copy(vector).multiplyScalar(amount) : out.set(0, 0, 0)
 }
 
-/** The rest-pose bounds grown to hold the scene at this explode amount, for framing the camera. */
-export function explodedBounds(rest: Box3, amount: number): Box3 {
-  const spread = PART_SPREAD_MM * amount
-  const box = rest.clone()
-  box.min.addScalar(-spread)
-  box.max.addScalar(spread)
-  box.max.y += (GROUPS.length - 1) * GROUP_STEP_MM * amount
-  return box
+/** The bounds of the named parts (all when `include` is omitted) where they sit at this explode amount. */
+export function explodedBounds(
+  parts: readonly PartManifest[],
+  boxes: Readonly<Record<string, Box3>>,
+  amount: number,
+  include: (part: PartManifest) => boolean = () => true,
+): Box3 {
+  const vectors = explodeVectors(parts, boxes)
+  const bounds = new Box3()
+  const offset = new Vector3()
+  for (const p of parts) {
+    const box = boxes[p.name]
+    if (!box || !include(p)) continue
+    bounds.union(box.clone().translate(explodeOffset(offset, vectors.get(p.name), amount)))
+  }
+  return bounds
 }
