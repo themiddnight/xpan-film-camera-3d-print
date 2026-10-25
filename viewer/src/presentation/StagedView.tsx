@@ -28,8 +28,8 @@ function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) 
  * inside `StageCanvas`. `track` must be a positioned element, since pin labels are placed inside it.
  * Each view needs its own viewer, so its mechanisms move independently of every other view.
  * `focus`, an element inside `track`, is where the shot is framed; the picture still fills `track`.
- * `turn` returns the turntable angle in radians, read every frame. Children render inside the view, after the
- * staging is applied in the same commit, with the viewer in context.
+ * `turn` returns the turntable angle in radians, read every frame. Children render on the turntable with
+ * the parts, so overlays in camera coordinates turn with them, with the viewer in context.
  */
 export function StagedView({ track, focus, viewer, staging, interactive, turn = still, children }: {
   track: RefObject<HTMLElement | null>
@@ -52,11 +52,11 @@ export function StagedView({ track, focus, viewer, staging, interactive, turn = 
         <Turntable angle={turn}>
           <PartsScene />
           <Pins viewer={viewer} ids={framed ? staging.pins ?? [] : []} compact={compact} />
+          {children}
         </Turntable>
         <StagingSync viewer={viewer} staging={staging} />
         {interactive && <OrbitControls makeDefault enableZoom={false} enablePan={false} />}
         <ShotRig shot={staging.shot} track={track} focus={focus} />
-        {children}
       </ViewerContext.Provider>
     </View>
   )
