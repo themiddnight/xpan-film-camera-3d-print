@@ -44,7 +44,7 @@ function Finish({ player }: { player: KeyPlayer | null }) {
   return null
 }
 
-/** The overlay's `Html` labels fail to unmount if they mount before the view's first draw, so wait for the parts. */
+/** Mounted with the parts: its `Html` labels made React log an unmount error when mounted earlier in still mode. */
 function OverlayWhenLoaded() {
   const viewer = useViewer()
   const ready = useViewerState(s => viewer.selectBounds(s) !== null)
