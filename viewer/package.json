@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.2.0",
   "license": "CERN-OHL-S-2.0",
+  "packageManager": "pnpm@11.5.2",
   "type": "module",
   "scripts": {
     "dev": "vite",

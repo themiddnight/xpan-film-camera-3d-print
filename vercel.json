@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm i -g pnpm@11.5.2 && pnpm --dir viewer install --frozen-lockfile",
-  "buildCommand": "pnpm --dir viewer build:public",
+  "installCommand": "npx --yes pnpm@11.5.2 --dir viewer install --frozen-lockfile",
+  "buildCommand": "npx --yes pnpm@11.5.2 --dir viewer build:public",
   "outputDirectory": "viewer/dist-public",
   "headers": [
     {
