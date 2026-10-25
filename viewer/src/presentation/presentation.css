@@ -187,6 +187,7 @@ button { font: inherit; color: inherit; }
 .masthead-skip-short { display: none; }
 
 .card {
+  position: relative;
   box-sizing: border-box;
   width: var(--column);
   padding: 28px 30px 30px;
@@ -204,7 +205,25 @@ button { font: inherit; color: inherit; }
 
 .chapter-hero .card {
   background: none;
-  padding: 0;
+  padding: 0 0 22px;
+}
+
+/* How far the page has scrolled through this chapter: full means the next one is a scroll away. */
+.card-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.card-progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--brass);
+  transform: scaleX(var(--chapter-progress, 0));
+  transform-origin: left center;
 }
 
 .chapter-hero h1 {

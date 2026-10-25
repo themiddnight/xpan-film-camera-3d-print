@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { KeyPlayer } from '../state/cycle'
 import { useSelector } from '../state/store'
 import { createViewer, type Viewer } from '../state/viewer'
@@ -93,12 +93,19 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
   const motions = useMemo(() => motionsFor(viewer, chapters), [viewer, chapters])
   const ids = useMemo(() => chapters.map(c => c.id), [chapters])
   const { active, scroll } = useChapterScroll(ids)
+  const progress = useSyncExternalStore(scroll.subscribe, () => Math.round(scroll.get().value * 20) / 20)
   const phone = useMedia(PHONE)
   const reduced = useMedia(REDUCED_MOTION)
   const [explore, setExplore] = useState(false)
   const [highlight, setHighlight] = useState<Group | null>(null)
   const stage = useRef<HTMLDivElement>(null)
   const focus = useRef<HTMLDivElement>(null)
+  const cards = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const show = () => cards.current?.style.setProperty('--chapter-progress', String(scroll.get().value))
+    show()
+    return scroll.subscribe(show)
+  }, [scroll])
 
   const chapter = chapters.find(c => c.id === active) ?? chapters[0]
   const staging = useMemo(() => highlighted(manifest, chapter, chapter.id === 'modules' ? highlight : null), [manifest, chapter, highlight])
@@ -144,7 +151,7 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
         )}
       </div>
       <div className="chapters">
-        <div className="chapter-cards">
+        <div ref={cards} className="chapter-cards">
           {chapters.map(c => {
             const motion = motions.get(c.id)
             const transport = transports.get(c.id)
@@ -161,6 +168,14 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
                       player={motion.player} transport={transport} counter={motion.counter}
                       label={`${c.title} motion`} hint="Scroll to watch it move, or press play"
                     />
+                  )}
+                  {isActive && (
+                    <div
+                      className="card-progress" role="progressbar" aria-label={`Scroll through ${c.title}`}
+                      aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)}
+                    >
+                      <span className="card-progress-bar" />
+                    </div>
                   )}
                 </div>
               </article>
