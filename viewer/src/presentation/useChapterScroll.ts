@@ -36,30 +36,34 @@ export function chapterElement(id: string): HTMLElement | null {
   return document.querySelector<HTMLElement>(`[${CHAPTER_ATTRIBUTE}="${id}"]`)
 }
 
-/** Where a chapter's track starts on the page and how far it scrolls while its card stays pinned. */
+/** Where a chapter's track starts on the page and how far it scrolls. */
 export function chapterRange(id: string): { top: number; length: number } | null {
   const el = chapterElement(id)
   if (!el) return null
-  return { top: el.getBoundingClientRect().top + window.scrollY, length: Math.max(1, el.offsetHeight - window.innerHeight) }
+  return { top: el.getBoundingClientRect().top + window.scrollY, length: Math.max(1, el.offsetHeight) }
 }
 
 /**
- * The chapter whose track crosses the middle of the screen, as React state, and the progress through
- * it as a `ChapterScroll`. Past the last track the last chapter stays active.
+ * The chapter whose track is at the top of the screen, as React state, and the progress through it as
+ * a `ChapterScroll`. Past the last track the last chapter stays active, at its end.
  */
 export function useChapterScroll(ids: readonly string[]): { active: string; scroll: ChapterScroll } {
   const [active, setActive] = useState(ids[0])
   const scroll = useMemo(() => new ChapterScroll(ids[0]), [ids])
   useEffect(() => {
     const read = () => {
-      const line = window.innerHeight / 2
       for (const id of ids) {
         const rect = chapterElement(id)?.getBoundingClientRect()
-        if (!rect || rect.top > line || rect.bottom <= line) continue
-        const length = rect.height - window.innerHeight
+        if (!rect || rect.top > 0 || rect.bottom <= 0) continue
         setActive(id)
-        scroll.set({ id, value: length > 0 ? Math.min(1, Math.max(0, -rect.top / length)) : 0 })
+        scroll.set({ id, value: rect.height > 0 ? Math.min(1, -rect.top / rect.height) : 0 })
         return
+      }
+      const last = ids[ids.length - 1]
+      const rect = chapterElement(last)?.getBoundingClientRect()
+      if (rect && rect.bottom <= 0) {
+        setActive(last)
+        scroll.set({ id: last, value: 1 })
       }
     }
     read()

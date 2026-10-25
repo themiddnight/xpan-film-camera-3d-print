@@ -81,9 +81,17 @@ async function shoot(page, name) {
   await page.screenshot({ path: join(shots, `${name}.png`) })
 }
 
+/** Scrolls `at` (0 to 1) of the way through a chapter's track; its card shows while the track is at the top. */
+function scrollIntoChapter(page, id, at) {
+  return page.evaluate(([i, f]) => {
+    const track = document.querySelector(`[data-chapter="${i}"]`)
+    window.scrollTo(0, track.getBoundingClientRect().top + window.scrollY + track.offsetHeight * f)
+  }, [id, at])
+}
+
 async function visitChapters(page, run) {
   for (const id of chapters) {
-    await page.evaluate(i => document.querySelector(`[data-chapter="${i}"]`)?.scrollIntoView({ block: 'center' }), id)
+    await scrollIntoChapter(page, id, 0.5)
     await page.waitForTimeout(SETTLE_MS)
     const active = await page.evaluate(() => window.presentation?.chapter)
     if (active !== id) fail(run, `scrolled to ${id} but the active chapter is ${active}`)
@@ -92,7 +100,7 @@ async function visitChapters(page, run) {
 }
 
 async function frameRate(page) {
-  await page.evaluate(() => document.querySelector('[data-chapter="advance"]').scrollIntoView({ block: 'center' }))
+  await scrollIntoChapter(page, 'advance', 0)
   await page.waitForTimeout(SETTLE_MS)
   return page.evaluate(async windowMs => {
     const player = window.presentation.players.get('advance')

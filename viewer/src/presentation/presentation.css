@@ -105,18 +105,40 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-/* Each chapter is a tall track (height set inline); its card stays pinned while the track scrolls by. */
-.chapter { position: relative; }
-
-.chapter-pin {
+/*
+ * The cards share one pinned layer and swap in place; the chapter tracks (heights set inline) run end
+ * to end behind it. The exit screen lets the last chapter finish before the showcase scrolls away.
+ */
+.chapter-cards {
   position: sticky;
   top: 0;
   height: 100svh;
   box-sizing: border-box;
-  display: flex;
+  display: grid;
   align-items: center;
+  justify-items: start;
   padding: calc(var(--masthead-h) + var(--gutter)) 0 calc(var(--strip-h) + var(--gutter)) var(--gutter);
 }
+
+.chapter {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), visibility 0s linear 0.35s;
+}
+
+.chapter[aria-current="step"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.45s var(--ease) 0.1s, transform 0.45s var(--ease) 0.1s, visibility 0s;
+}
+
+/* Not on the layer: a sticky box's negative margin lets it stay pinned past the end of the showcase. */
+.chapter-cards + .chapter-track { margin-top: -100svh; }
+
+.chapters-exit { height: 100svh; }
 
 /* The page title and the skip button, over the showcase. */
 .masthead {
@@ -133,6 +155,7 @@ button { font: inherit; color: inherit; }
   gap: 16px;
   height: var(--masthead-h);
   padding: 0 var(--gutter);
+  background: var(--seamless);
   pointer-events: none;
 }
 
@@ -478,8 +501,9 @@ button { font: inherit; color: inherit; }
     bottom: 43svh;
   }
 
-  .chapter-pin {
-    align-items: flex-end;
+  .chapter-cards {
+    align-items: end;
+    justify-items: stretch;
     padding: 0 0 calc(var(--strip-h) + 10px);
   }
 
@@ -661,7 +685,7 @@ button { font: inherit; color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .strip-run, .strip-frame, .strip-title, .load-bar, .masthead-title { transition: none; }
+  .strip-run, .strip-frame, .strip-title, .load-bar, .masthead-title, .chapter, .chapter[aria-current="step"] { transition: none; }
 }
 
 /* Still mode (?still=<chapter>): the chapter's picture alone, filling the page. */

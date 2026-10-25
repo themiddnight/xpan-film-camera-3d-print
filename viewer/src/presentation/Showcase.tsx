@@ -16,10 +16,10 @@ import { StagedView } from './StagedView'
 import type { Chapter, Staging } from './story'
 import { chapterRange, useChapterScroll, type ChapterScroll } from './useChapterScroll'
 
-/** Screen heights of scroll per second of motion, on top of the one screen the pinned card takes. */
+/** Screen heights of scroll per second of motion. */
 const SCREENS_PER_SECOND = 0.4
 /** Screen heights of scroll through a chapter without motion. */
-const STILL_SCREENS = 1.7
+const STILL_SCREENS = 1
 /** The whole turn, in radians, the camera swings through as a chapter without motion scrolls by. */
 const ORBIT_RAD = 0.4
 
@@ -63,7 +63,7 @@ function highlighted(manifest: Manifest, chapter: Chapter, group: Group | null):
 
 /** How tall a chapter's scroll track is, in screen heights: longer motions get more room. */
 function trackScreens(motion: KeyPlayer | undefined): number {
-  return motion ? 1 + motion.duration * SCREENS_PER_SECOND : STILL_SCREENS
+  return motion ? Math.max(STILL_SCREENS, motion.duration * SCREENS_PER_SECOND) : STILL_SCREENS
 }
 
 /** The page title, kept at the top once the hero has scrolled away, and a way past the showcase. */
@@ -82,8 +82,9 @@ function Masthead({ title, showTitle, onSkip }: { title: string; showTitle: bool
 }
 
 /**
- * The showcase: one stage behind the page and a tall scroll track per chapter, its card pinned while
- * the track scrolls by. Scrolling through a chapter with motion plays its keyframes; through one
+ * The showcase: one stage behind the page, one pinned layer of chapter cards over it, and a scroll
+ * track per chapter laid end to end, so the end of one chapter's scroll is the start of the next and
+ * the cards swap in place. Scrolling through a chapter with motion plays its keyframes; through one
  * without, it swings the camera a little. The film-strip navigator runs along the bottom.
  * `figureViews`, the page's other staged views, are drawn into the same canvas, since a page has only one.
  */
@@ -143,16 +144,13 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
         )}
       </div>
       <div className="chapters">
-        {chapters.map(c => {
-          const motion = motions.get(c.id)
-          const transport = transports.get(c.id)
-          const isActive = c.id === active
-          return (
-            <article
-              key={c.id} className={`chapter chapter-${c.id}`} data-chapter={c.id} aria-current={isActive ? 'step' : undefined}
-              style={{ height: `${trackScreens(motion?.player) * 100}svh` }}
-            >
-              <div className="chapter-pin">
+        <div className="chapter-cards">
+          {chapters.map(c => {
+            const motion = motions.get(c.id)
+            const transport = transports.get(c.id)
+            const isActive = c.id === active
+            return (
+              <article key={c.id} className={`chapter chapter-${c.id}`} aria-current={isActive ? 'step' : undefined} inert={!isActive}>
                 <div className="card">
                   {c.id === 'hero' ? <h1>{c.title}</h1> : <h2>{c.title}</h2>}
                   <p>{fillCopy(manifest, c.text)}</p>
@@ -165,10 +163,14 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
                     />
                   )}
                 </div>
-              </div>
-            </article>
-          )
-        })}
+              </article>
+            )
+          })}
+        </div>
+        {chapters.map(c => (
+          <div key={c.id} className="chapter-track" data-chapter={c.id} style={{ height: `${trackScreens(motions.get(c.id)?.player) * 100}svh` }} />
+        ))}
+        <div className="chapters-exit" />
       </div>
       <FilmStripNav manifest={manifest} chapters={chapters} active={active} scroll={scroll} onSelect={scrollTo} />
     </section>
