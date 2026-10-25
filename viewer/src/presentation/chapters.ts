@@ -44,7 +44,7 @@ export const CHAPTERS: readonly Chapter[] = [
     title: 'Three modules',
     text: 'The film back holds and moves the film. The body sets the distance to it, and the pinhole module screws onto the body’s lens mount. Pick a module to see it on its own.',
     shot: { direction: [1, 0.42, 0.34], frame: ['film-back', 'body', 'pinhole'] },
-    scene: { explode: 0.4 },
+    scene: { explode: 0.7 },
     pins: ['advance_knob', 'm42_mount', 'shutter_lock'],
   },
   {
