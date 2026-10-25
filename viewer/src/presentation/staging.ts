@@ -22,12 +22,16 @@ export function applyStaging(viewer: Viewer, staging: Staging): void {
   const parts: Record<string, PartView> = Object.fromEntries(manifest.parts.map(p => [p.name, SHOWN]))
   for (const name of scene.ghost ?? []) parts[name] = { visible: true, ghost: true }
   for (const name of scene.hide ?? []) parts[name] = { visible: false, ghost: false }
+  const leaving = scene.remove
+    ? manifest.parts.filter(p => scene.remove!.parts.includes(p.name) || scene.remove!.parts.includes(p.group)).map(p => p.name)
+    : []
   store.update(s => ({
     ...s,
     parts,
     groups: Object.fromEntries(GROUPS.map(g => [g, SHOWN])) as typeof s.groups,
     filter: 'all',
     explode: scene.explode ?? 0,
+    remove: scene.remove ? { parts: leaving, slide: scene.remove.slide, amount: 0 } : null,
     section: scene.section ?? NO_SECTION,
     focus: null,
   }))
@@ -42,9 +46,12 @@ export function applyStaging(viewer: Viewer, staging: Staging): void {
  * the viewer's explode amount so every box corner lands inside the frame at this aspect. Null while
  * none of the framed parts has loaded.
  */
-export function shotFor(viewer: Viewer, shot: Staging['shot'], aspect: number): { position: Vector3; target: Vector3 } | null {
-  const { boxes, explode } = viewer.store.getState()
-  const bounds = explodedBounds(viewer.manifest.parts, boxes, explode, p => shot.frame.includes(p.name) || shot.frame.includes(p.group))
+export function shotFor(
+  viewer: Viewer, shot: Staging['shot'], aspect: number, explode = viewer.store.getState().explode,
+): { position: Vector3; target: Vector3 } | null {
+  const { boxes } = viewer.store.getState()
+  const framed = (p: { name: string; group: string }) => shot.frame.includes(p.name) || shot.frame.includes(p.group)
+  const bounds = explodedBounds(viewer.manifest.parts, boxes, explode, framed)
   if (bounds.isEmpty()) return null
   const target = bounds.getCenter(new Vector3())
 

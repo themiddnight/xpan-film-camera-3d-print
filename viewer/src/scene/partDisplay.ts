@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
+import { useFrame } from '@react-three/fiber'
 import type { Box3, Group, Material } from 'three'
 import { partMode, useViewer, useViewerState, type PartMode } from '../state/viewer'
 import type { Kind, PartManifest } from '../types'
@@ -43,15 +44,33 @@ export function usePartDisplay(spec: PartManifest, materials: readonly Material[
   }, [viewer.nodes, spec.name])
 
   const ghost = mode === 'ghost'
+  // How far this part has left the camera in an illustrative shot; 0 for every other part.
+  const gone = useRef(0)
   useLayoutEffect(() => {
     for (const m of materials) {
       m.clippingPlanes = clipActive ? [viewer.clipPlane] : []
-      m.transparent = ghost
-      m.opacity = ghost ? GHOST_OPACITY : 1
-      m.depthWrite = !ghost
+      m.transparent = ghost || gone.current > 0
+      m.opacity = (ghost ? GHOST_OPACITY : 1) * (1 - gone.current)
+      m.depthWrite = !m.transparent
       m.needsUpdate = true
     }
   }, [materials, clipActive, ghost, viewer.clipPlane])
+
+  useFrame(() => {
+    const remove = viewer.store.getState().remove
+    const next = remove && remove.parts.includes(spec.name) ? remove.amount : 0
+    if (next === gone.current) return
+    gone.current = next
+    const transparent = ghost || next > 0
+    for (const m of materials) {
+      if (m.transparent !== transparent) {
+        m.transparent = transparent
+        m.depthWrite = !transparent
+        m.needsUpdate = true
+      }
+      m.opacity = (ghost ? GHOST_OPACITY : 1) * (1 - next)
+    }
+  })
 
   return { node, mode }
 }

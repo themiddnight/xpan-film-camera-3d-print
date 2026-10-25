@@ -2,7 +2,8 @@ import { createContext, useContext } from 'react'
 import { Box3, Plane } from 'three'
 import { PartNodes } from '../scene/partNodes'
 import {
-  type Cycle, type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type ViewName,
+  type Cycle, type Group, type KindFilter, type Manifest, type PartManifest, type PartView, type Section, type Vec3,
+  type ViewName,
 } from '../types'
 import { CyclePlayer } from './cycle'
 import { Motion } from './motion'
@@ -24,6 +25,11 @@ export interface ViewerState {
   framed: readonly string[]
   /** The cycle shown in its cutaway, with the part views it changed, so turning it off restores them. */
   focus: { cycle: string; saved: Readonly<Record<string, PartView>> } | null
+  /**
+   * Parts leaving the camera in an illustrative shot (the presentation's body swap), how far they
+   * slide at the end, and how far along they are. Not a mechanism: the CAD has no such motion.
+   */
+  remove: { parts: readonly string[]; slide: Vec3; amount: number } | null
 }
 
 /** What a part shows right now, after its own toggles, its group's toggles and the kind filter. */
@@ -58,6 +64,7 @@ export interface Viewer {
     setFilter: (filter: KindFilter) => void
     setSection: (section: Section) => void
     setExplode: (amount: number) => void
+    setRemoveAmount: (amount: number) => void
     showView: (view: ViewName) => void
     reportBox: (name: string, box: Box3 | null) => void
     /** Marks a part that will not appear; whoever caught the failure has already logged it. */
@@ -104,6 +111,7 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
     failed: new Set(),
     framed: manifest.cycles.length > 0 ? cycleParts(manifest, manifest.cycles[0]) : [],
     focus: null,
+    remove: null,
   })
   const selectBounds = boundsSelector(manifest.parts)
   const motion = new Motion(manifest.mechanisms)
@@ -124,6 +132,9 @@ export function createViewer(manifest: Manifest, baseUrl: string): Viewer {
       setFilter: filter => store.update(s => (s.filter === filter ? s : { ...s, filter })),
       setSection: section => store.update(s => ({ ...s, section })),
       setExplode: explode => store.update(s => (s.explode === explode ? s : { ...s, explode })),
+      setRemoveAmount: amount => store.update(s => (s.remove && s.remove.amount !== amount
+        ? { ...s, remove: { ...s.remove, amount } }
+        : s)),
       showView: view => store.update(s => ({ ...s, view, viewRequest: s.viewRequest + 1 })),
       reportBox: (name, box) => store.update(s => {
         if (box === null) {

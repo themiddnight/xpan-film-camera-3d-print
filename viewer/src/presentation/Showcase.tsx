@@ -9,6 +9,8 @@ import { FilmStripNav, stripVars } from './FilmStripNav'
 import { FormatOverlay } from './FormatOverlay'
 import { matches, PHONE, REDUCED_MOTION, useMedia } from './media'
 import { PlaybackBar } from './PlaybackBar'
+import { ScrollExplode } from './ScrollExplode'
+import { ScrollRemove } from './ScrollRemove'
 import { ScrollTransport } from './scrollMotion'
 import { fillCopy } from './spec'
 import { StageCanvas } from './StageCanvas'
@@ -156,8 +158,13 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
       <Masthead title={chapters[0].title} showTitle={active !== chapters[0].id} onSkip={skip} />
       <div className="paper" aria-hidden="true" />
       <StageCanvas>
-        <StagedView track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} turn={turn}>
+        <StagedView
+          track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} turn={turn}
+          frameExplode={chapter.scene?.explodeByScroll ? 1 : undefined}
+        >
           <Director motions={motions} active={active} scroll={scroll} />
+          {chapter.scene?.explodeByScroll && <ScrollExplode scroll={scroll} active={active} staging={staging} />}
+          {chapter.scene?.remove && <ScrollRemove scroll={scroll} active={active} staging={staging} />}
           {active === 'format' && <FormatOverlay />}
         </StagedView>
         {figureViews}

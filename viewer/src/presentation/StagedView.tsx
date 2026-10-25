@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode, type RefObject } from 'react'
+import { useEffect, useState, type ReactNode, type RefObject } from 'react'
 import { useThree } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, View } from '@react-three/drei'
 import { PartsScene } from '../scene/PartsScene'
@@ -13,6 +13,19 @@ import { Turntable } from './Turntable'
 import type { Staging } from './story'
 
 const still = () => 0
+
+/** Whether the element is anywhere in the viewport, so a view far off the page keeps no labels. */
+function useOnScreen(ref: RefObject<HTMLElement | null>): boolean {
+  const [on, setOn] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => setOn(entry.isIntersecting))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [ref])
+  return on
+}
 
 function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) {
   const invalidate = useThree(s => s.invalidate)
@@ -31,19 +44,23 @@ function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) 
  * `turn` returns the turntable angle in radians, read every frame. Children render on the turntable with
  * the parts, so overlays in camera coordinates turn with them, with the viewer in context.
  */
-export function StagedView({ track, focus, viewer, staging, interactive, turn = still, children }: {
+export function StagedView({ track, focus, viewer, staging, interactive, turn = still, frameExplode, children }: {
   track: RefObject<HTMLElement | null>
   focus?: RefObject<HTMLElement | null>
   viewer: Viewer
   staging: Staging
   interactive: boolean
   turn?: () => number
+  /** The explode the camera is framed at, when the staging moves it. */
+  frameExplode?: number
   children?: ReactNode
 }) {
   const compact = useMedia(PHONE)
   // Until every part has loaded or failed there is no shot, and the default camera would show a
   // close-up of whichever part arrived first.
   const framed = useSelector(viewer.store, s => viewer.selectBounds(s) !== null)
+  // Labels mount in a layer over the page, so a view that has scrolled away must not keep any.
+  const onScreen = useOnScreen(track)
   return (
     <View track={track as RefObject<HTMLElement>} visible={framed}>
       <ViewerContext.Provider value={viewer}>
@@ -53,11 +70,11 @@ export function StagedView({ track, focus, viewer, staging, interactive, turn = 
         <StagingSync viewer={viewer} staging={staging} />
         <Turntable angle={turn}>
           <PartsScene />
-          <Pins viewer={viewer} ids={framed ? staging.pins ?? [] : []} compact={compact} />
+          <Pins viewer={viewer} ids={framed && onScreen ? staging.pins ?? [] : []} compact={compact} track={track} />
           {children}
         </Turntable>
         {interactive && <OrbitControls makeDefault enableZoom={false} enablePan={false} />}
-        <ShotRig shot={staging.shot} track={track} focus={focus} />
+        <ShotRig shot={staging.shot} explode={frameExplode} track={track} focus={focus} />
       </ViewerContext.Provider>
     </View>
   )

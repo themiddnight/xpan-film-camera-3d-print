@@ -78,12 +78,13 @@ button { font: inherit; color: inherit; }
 
 /*
  * Graph paper behind the canvas: cells with a heavier line every five. Fixed, so it stays still while the
- * camera turns over it; the build notes sheet (z-index 4) covers it once the showcase has gone by.
+ * camera turns over it; the build notes sheet (z-index 1) covers it once the showcase has gone by.
+ * Both stay under the canvas (z-index 2), which draws the figures onto the sheet.
  */
 .paper {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
   --cell: 24px;
   background-color: var(--seamless);
@@ -360,6 +361,14 @@ button { font: inherit; color: inherit; }
   z-index: 3;
 }
 
+/* Feature labels: a layer over the canvas and the whole page, so a label is never hidden. */
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
 /* Pins and labels in the stage */
 
 .pin { position: relative; white-space: nowrap; font-family: var(--font); }
@@ -615,7 +624,7 @@ button { font: inherit; color: inherit; }
 .sheet {
   --maker-gap: clamp(32px, 5vw, 64px);
   position: relative;
-  z-index: 4;
+  z-index: 1;
   background: var(--drawing-white);
   padding: clamp(72px, 10vw, 140px) var(--gutter) clamp(96px, 12vw, 180px);
 }

@@ -20,6 +20,16 @@ function stagingErrors(manifest: Manifest, owner: string, staging: Staging): str
   for (const id of Object.keys(staging.pose ?? {})) {
     if (!mechanisms.has(id)) unknown('mechanism', id)
   }
+  const scene = staging.scene
+  if (scene?.explodeByScroll && scene.explode !== undefined) {
+    errors.push(`${owner}: explodeByScroll and explode are set together`)
+  }
+  for (const name of scene?.remove?.parts ?? []) {
+    if (!parts.has(name) && !GROUPS.some(g => g === name)) unknown('part', name)
+  }
+  if (scene?.remove && scene.remove.slide.every(v => v === 0)) {
+    errors.push(`${owner}: remove.slide is zero`)
+  }
   const motion = staging.motion
   if (motion && 'cycle' in motion) {
     if (!cycles.has(motion.cycle)) unknown('cycle', motion.cycle)

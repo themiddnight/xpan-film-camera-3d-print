@@ -8,6 +8,7 @@ import { explodeOffset, explodeVectors } from './explode'
 interface Applied {
   revision: number
   explode: number
+  remove: number
   nodes: number
   boxes: ViewerState['boxes'] | null
   vectors: Map<string, Vector3>
@@ -33,8 +34,8 @@ export function MotionDriver() {
     invalidate()
     return () => unsubscribe.forEach(u => u())
   }, [viewer, invalidate])
-  const scratch = useMemo(() => ({ matrix: new Matrix4(), offset: new Vector3() }), [])
-  const applied = useMemo((): Applied => ({ revision: -1, explode: -1, nodes: -1, boxes: null, vectors: new Map() }), [])
+  const scratch = useMemo(() => ({ matrix: new Matrix4(), offset: new Vector3(), leaving: new Vector3() }), [])
+  const applied = useMemo((): Applied => ({ revision: -1, explode: -1, remove: -1, nodes: -1, boxes: null, vectors: new Map() }), [])
 
   useFrame((_, seconds) => {
     const { motion, nodes, store, manifest, cycles } = viewer
@@ -43,15 +44,17 @@ export function MotionDriver() {
     const moving = cycles.some(c => c.getStatus().running || c.getStatus().looping) ||
       motion.mechanisms.some(m => motion.isPlaying(m.id))
     if (moving) invalidate()
-    const { explode, boxes } = store.getState()
+    const { explode, boxes, remove } = store.getState()
+    const removeAmount = remove?.amount ?? 0
     if (
-      applied.revision === motion.revision && applied.explode === explode &&
+      applied.revision === motion.revision && applied.explode === explode && applied.remove === removeAmount &&
       applied.nodes === nodes.version && applied.boxes === boxes
     ) return
 
     if (applied.boxes !== boxes) applied.vectors = explodeVectors(manifest.parts, boxes)
     applied.revision = motion.revision
     applied.explode = explode
+    applied.remove = removeAmount
     applied.nodes = nodes.version
     applied.boxes = boxes
 
@@ -60,6 +63,9 @@ export function MotionDriver() {
       if (!node) continue
       motion.partMatrix(scratch.matrix, part.name)
       explodeOffset(scratch.offset, applied.vectors.get(part.name), explode)
+      if (remove && removeAmount > 0 && remove.parts.includes(part.name)) {
+        scratch.offset.addScaledVector(scratch.leaving.set(...remove.slide), removeAmount)
+      }
       // A translation applied after the drives only adds to the matrix's translation column.
       const e = scratch.matrix.elements
       scratch.matrix.setPosition(e[12] + scratch.offset.x, e[13] + scratch.offset.y, e[14] + scratch.offset.z)

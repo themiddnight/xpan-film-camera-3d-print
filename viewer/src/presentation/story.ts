@@ -1,4 +1,4 @@
-import type { CycleKey, Group, Section } from '../types'
+import type { CycleKey, Group, Section, Vec3 } from '../types'
 
 /** Camera direction from the framed centre toward the camera, in camera mm axes. */
 export type ShotDirection = readonly [number, number, number]
@@ -12,7 +12,19 @@ export interface Staging {
     /** Overrides the distance fitted from the framed bounds. */
     distance?: number
   }
-  scene?: { hide?: readonly string[]; ghost?: readonly string[]; explode?: number; section?: Section }
+  scene?: {
+    hide?: readonly string[]
+    ghost?: readonly string[]
+    explode?: number
+    /** The explode follows the scroll through the chapter, from none to full. */
+    explodeByScroll?: boolean
+    /**
+     * Parts that leave the camera as the chapter scrolls: their groups or names, and how far they
+     * slide in camera mm at the end. They fade out on the way, since they pass behind the film back.
+     */
+    remove?: { parts: readonly (string | Group)[]; slide: Vec3 }
+    section?: Section
+  }
   /** Mechanism values on entry, by mechanism id. */
   pose?: Readonly<Record<string, number>>
   /** A manifest cycle by id, or inline keys played by the cycle player. */

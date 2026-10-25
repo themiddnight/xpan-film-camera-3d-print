@@ -16,6 +16,8 @@ function steps(...list: readonly Step[]): CycleKey[] {
 }
 
 const FINDERS = ['viewfinder_rear_frame', 'viewfinder_front_frame']
+/** The dark slide pulled, carried over and dropped into the holder on the rear cover. */
+const DARK_SLIDE_STOWED = { dark_slide: 1, slide_carry: 1, slide_stow: 1 } as const
 const COVER = ['rear_cover', 'pressure_pad', 'slide_holder']
 
 /**
@@ -44,7 +46,7 @@ export const CHAPTERS: readonly Chapter[] = [
     title: 'Three modules',
     text: 'The film back holds and moves the film. The body sets the distance to it, and the pinhole module screws onto the body’s lens mount. Pick a module to see it on its own.',
     shot: { direction: [1, 0.42, 0.34], frame: ['film-back', 'body', 'pinhole'] },
-    scene: { explode: 0.7 },
+    scene: { explodeByScroll: true },
     pins: ['advance_knob', 'm42_mount', 'shutter_lock'],
   },
   {
@@ -98,6 +100,8 @@ export const CHAPTERS: readonly Chapter[] = [
     title: 'Pinhole and shutter',
     text: 'Light comes in through a {{value:pinhole_diameter}} hole, {{value:pinhole_distance}} from the film, which works out to f/{{number:f_number}}. Unlock the shutter and slide it open to start the exposure, then slide it shut to end it.',
     shot: { direction: [0.35, 1, 0.3], frame: ['pinhole', 'pinhole_body'] },
+    // The slide lives on the cover as soon as the back is loaded.
+    pose: DARK_SLIDE_STOWED,
     motion: {
       keys: steps(
         [0, 'unlock the shutter', { shutter_lock: 0, shutter: 0 }],
@@ -113,7 +117,7 @@ export const CHAPTERS: readonly Chapter[] = [
     title: 'Viewfinder',
     text: 'Unfold the front frame, then the rear sight. Put your eye to the sight: what fits inside the front frame is what lands on the film.',
     shot: { direction: [0.55, 1, 0.5], frame: ['viewfinder_front_frame', 'viewfinder_rear_frame', 'm42_rear_cap_ring'] },
-    pose: { finder_rear: 1, finder_front: 1 },
+    pose: { ...DARK_SLIDE_STOWED, finder_rear: 1, finder_front: 1 },
     motion: {
       keys: steps(
         [0, 'unfold the front frame', { finder_rear: 1, finder_front: 1 }],
@@ -129,13 +133,19 @@ export const CHAPTERS: readonly Chapter[] = [
     title: 'Swap the body',
     text: 'The body hangs on a hook rail at the top of the film back and clicks onto a latch pin at the bottom. Swing it off and fit another, deeper or with a real lens. The rest of this page shows how to design one.',
     shot: { direction: [-0.85, 0.5, 0.3], frame: ['pinhole_body', 'latch_pin', 'm42_body_cap'] },
-    // Cut through the middle and seen from the cut side, the hook rail and the latch pin show in profile.
-    scene: { section: { axis: 'x', t: 0.5, flip: true } },
+    scene: {
+      // Cut through the middle and seen from the cut side, the hook rail and the latch pin show in profile.
+      section: { axis: 'x', t: 0.5, flip: true },
+      // The body and its module leave along the front, drawn as an illustration: the printed hook has no
+      // removal path yet (checks 17.8), so this is not a CAD mechanism.
+      remove: { parts: ['body', 'pinhole'], slide: [0, 55, 0] },
+    },
     motion: {
       keys: steps(
         [0, 'swing the body off the latch', { body_detach: 0 }],
-        [1.6, 'lift it off the hook rail', { body_detach: 1 }],
-        [2.2, 'lift it off the hook rail', {}],
+        [1.6, 'unlocked: the latch hook is clear of the pin', { body_detach: 1 }],
+        // Held to the middle of the chapter's scroll, where ScrollRemove takes over.
+        [3.2, 'unlocked: the latch hook is clear of the pin', {}],
       ),
     },
     pins: ['body_hook_rail', 'body_latch_pin'],
