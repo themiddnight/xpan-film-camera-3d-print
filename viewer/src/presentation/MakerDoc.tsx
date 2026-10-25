@@ -52,12 +52,12 @@ function DrawingFrame({ drawing }: { drawing: Drawing }) {
   )
 }
 
-function BlockView({ block, manifest, entries }: { block: Block; manifest: Manifest; entries: readonly FigureEntry[] }) {
+function BlockView({ block, manifest, entries, webgl }: { block: Block; manifest: Manifest; entries: readonly FigureEntry[]; webgl: boolean }) {
   switch (block.kind) {
     case 'markdown': return <div className="prose" dangerouslySetInnerHTML={{ __html: marked.parse(fillCopy(manifest, block.text), { async: false }) }} />
     case 'figure': {
       const entry = entries.find(e => e.figure.id === block.id)
-      return entry ? <FigureBox entry={entry} /> : null
+      return entry && webgl ? <FigureBox entry={entry} /> : null
     }
     case 'drawing': {
       const drawing = DRAWINGS.find(d => d.id === block.id)
@@ -76,8 +76,9 @@ function BlockView({ block, manifest, entries }: { block: Block; manifest: Manif
 /**
  * The maker half: documents in page order on a white drawing sheet, with the 3D figures' boxes where
  * the markdown places them. The canvas sits above the sheet and draws each figure into its box.
+ * Without WebGL the boxes are left out and the text reads on its own.
  */
-export function MakerDoc({ manifest, entries }: { manifest: Manifest; entries: readonly FigureEntry[] }) {
+export function MakerDoc({ manifest, entries, webgl }: { manifest: Manifest; entries: readonly FigureEntry[]; webgl: boolean }) {
   return (
     <div className="sheet" id="maker">
       {DOCS.map(doc => {
@@ -86,7 +87,7 @@ export function MakerDoc({ manifest, entries }: { manifest: Manifest; entries: r
           <section key={doc.id} className={`maker maker-${doc.id}`} aria-labelledby={`maker-${doc.id}`}>
             {title && <h2 id={`maker-${doc.id}`}>{title}</h2>}
             <div className="maker-body">
-              {blocks.map((block, i) => <BlockView key={i} block={block} manifest={manifest} entries={entries} />)}
+              {blocks.map((block, i) => <BlockView key={i} block={block} manifest={manifest} entries={entries} webgl={webgl} />)}
             </div>
           </section>
         )

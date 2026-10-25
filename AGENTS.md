@@ -77,6 +77,8 @@ Run these from the repository root. `uv sync` installs build123d into `.venv` (P
 | `pnpm --dir viewer test` | Runs the vitest tests: manifest parsing and the story validator, which reads the real `out/manifest.json` (run the export first) |
 | `pnpm --dir viewer build` | Typechecks and builds both pages into `viewer/dist/` (private; includes all of `out/`) |
 | `pnpm --dir viewer build:public` | Builds the presentation alone into `viewer/dist-public/` with only `manifest.json`, `glb/` and `stills/` from `out/`, then `scripts/check-public.mjs` fails if the workshop page, workshop code or any STL/STEP file got in |
+| `pnpm --dir viewer stills` | Captures each chapter into `out/stills/<id>.png` (1600x900, Playwright and a dev server it starts); run it before `build:public`, which copies the stills into the site. First time: `pnpm --dir viewer exec playwright install chromium` |
+| `pnpm --dir viewer verify` | After `build:public`: drives `dist-public/` at 1440x900 and 375x812, with reduced motion, and with WebGL off. Fails on console errors, sideways scroll, unresolved placeholders, a missing still, a navigator that does not scroll, or a phone drag that does not scroll the page; screenshots go to `out/verify/` |
 | `node docs/figures/film-transport/build.mjs` | Writes the film-transport figure pages (add `--light` for the light page, `--audit` to check the geometry); needs the anatomy skill (`ANATOMY_HOME`, default `~/.claude/skills/anatomy`) |
 
 - The viewer only reads `out/manifest.json` and `out/glb/`. Run the export first; the dev server picks up new files on reload. Workshop-only code lives in `viewer/src/workshop/`; `scene/`, `state/`, `manifest.ts` and `types.ts` are shared with the presentation in `viewer/src/presentation/`.

@@ -9,7 +9,9 @@
     "build:public": "vite build --mode public && node scripts/copy-public-data.mjs && node scripts/check-public.mjs",
     "preview": "vite preview",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "stills": "node scripts/stills.mjs",
+    "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "5.3.0",
@@ -25,6 +27,7 @@
     "@types/react-dom": "19.3.0",
     "@types/three": "0.186.0",
     "@vitejs/plugin-react": "6.1.2",
+    "playwright": "1.64.1",
     "typescript": "7.0.2",
     "vite": "8.3.4",
     "vitest": "5.0.5"

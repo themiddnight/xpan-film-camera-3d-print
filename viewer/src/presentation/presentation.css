@@ -62,7 +62,7 @@ button { font: inherit; color: inherit; }
 
 /*
  * Stacking: the one canvas (z-index 2) sits above the maker sheet so figures draw straight onto it, and
- * below the showcase text, the strip and the Explore button (z-index 3). Outside its views the canvas is transparent.
+ * below the stage's pins, the showcase text, the strip and the Explore button (z-index 3). Outside its views the canvas is transparent.
  */
 
 /* Showcase layout: a sticky stage with the chapters scrolling over it. */
@@ -77,6 +77,7 @@ button { font: inherit; color: inherit; }
 .stage {
   position: sticky;
   top: 0;
+  z-index: 3;
   height: 100svh;
 }
 
@@ -585,3 +586,29 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .strip-run, .strip-frame, .strip-title, .load-bar { transition: none; }
 }
+
+/* Still mode (?still=<chapter>): the chapter's picture alone, filling the page. */
+.still-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+}
+
+/* Without WebGL: each chapter's text above its still. */
+.still-fallback {
+  padding: var(--gutter);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.still-note {
+  margin-bottom: 40px;
+  padding: 14px 18px;
+  background: var(--drawing-white);
+}
+
+.fallback-chapter { margin-bottom: 72px; }
+.fallback-chapter h1 { font-size: clamp(40px, 8vw, 80px); margin-bottom: 18px; }
+.fallback-chapter h2 { font-size: 30px; margin-bottom: 14px; }
+.fallback-chapter p { max-width: 62ch; margin-bottom: 20px; }
+.fallback-chapter img { display: block; width: 100%; height: auto; }
