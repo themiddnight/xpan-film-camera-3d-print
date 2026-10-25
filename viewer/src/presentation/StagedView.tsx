@@ -12,6 +12,8 @@ import { StudioLights } from './StudioLights'
 import { Turntable } from './Turntable'
 import type { Staging } from './story'
 
+const still = () => 0
+
 function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) {
   const invalidate = useThree(s => s.invalidate)
   useEffect(() => {
@@ -26,16 +28,16 @@ function StagingSync({ viewer, staging }: { viewer: Viewer; staging: Staging }) 
  * inside `StageCanvas`. `track` must be a positioned element, since pin labels are placed inside it.
  * Each view needs its own viewer, so its mechanisms move independently of every other view.
  * `focus`, an element inside `track`, is where the shot is framed; the picture still fills `track`.
- * `spin` swings the camera slowly on its turntable. Children render inside the view, after the
+ * `turn` returns the turntable angle in radians, read every frame. Children render inside the view, after the
  * staging is applied in the same commit, with the viewer in context.
  */
-export function StagedView({ track, focus, viewer, staging, interactive, spin = false, children }: {
+export function StagedView({ track, focus, viewer, staging, interactive, turn = still, children }: {
   track: RefObject<HTMLElement | null>
   focus?: RefObject<HTMLElement | null>
   viewer: Viewer
   staging: Staging
   interactive: boolean
-  spin?: boolean
+  turn?: () => number
   children?: ReactNode
 }) {
   const compact = useMedia(PHONE)
@@ -47,7 +49,7 @@ export function StagedView({ track, focus, viewer, staging, interactive, spin = 
       <ViewerContext.Provider value={viewer}>
         <PerspectiveCamera makeDefault fov={SHOT_FOV_DEG} near={1} far={5000} up={[0, 0, 1]} />
         <StudioLights />
-        <Turntable spin={spin}>
+        <Turntable angle={turn}>
           <PartsScene />
           <Pins viewer={viewer} ids={framed ? staging.pins ?? [] : []} compact={compact} />
         </Turntable>

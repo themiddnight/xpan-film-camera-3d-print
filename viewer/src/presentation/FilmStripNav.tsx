@@ -1,6 +1,7 @@
-import type { CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
 import type { FilmStrip, Manifest } from '../types'
 import type { Chapter } from './story'
+import type { ChapterScroll } from './useChapterScroll'
 
 interface FrameGeometry {
   /** Film advance per frame, frame width and height, in mm. */
@@ -77,19 +78,27 @@ function leader(g: FrameGeometry, end: 'head' | 'tail') {
 /**
  * The film-strip navigator: a black-and-white negative with one frame per chapter and frame numbers
  * printed along its edge. The current chapter's frame advances into the gate at the centre of the
- * screen; choosing a frame scrolls to its chapter.
+ * screen, with a bar under the gate for how far through the chapter the page has scrolled; choosing a
+ * frame scrolls to the start of its chapter.
  */
-export function FilmStripNav({ manifest, chapters, active, onSelect }: {
+export function FilmStripNav({ manifest, chapters, active, scroll, onSelect }: {
   manifest: Manifest
   chapters: readonly Chapter[]
   active: string
+  scroll: ChapterScroll
   onSelect: (id: string) => void
 }) {
+  const nav = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const show = () => nav.current?.style.setProperty('--chapter-progress', String(scroll.get().value))
+    show()
+    return scroll.subscribe(show)
+  }, [scroll])
   const g = geometry(manifest)
   const index = Math.max(0, chapters.findIndex(c => c.id === active))
   const style = { '--strip-i': index, '--strip-leader': LEADER_TILES } as CSSProperties
   return (
-    <nav className="strip" aria-label="Chapters" style={style}>
+    <nav ref={nav} className="strip" aria-label="Chapters" style={style}>
       <ol className="strip-run">
         {leader(g, 'head')}
         {chapters.map((c, i) => (
@@ -110,6 +119,7 @@ export function FilmStripNav({ manifest, chapters, active, onSelect }: {
         {leader(g, 'tail')}
       </ol>
       <span className="strip-gate" aria-hidden="true" />
+      <span className="strip-progress" aria-hidden="true"><span className="strip-progress-bar" /></span>
     </nav>
   )
 }

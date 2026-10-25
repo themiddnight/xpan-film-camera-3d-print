@@ -28,7 +28,7 @@ function FigureView({ entry }: { entry: FigureEntry }) {
   const motions = useMemo(() => new Map(entry.motion ? [[entry.figure.id, entry.motion]] : []), [entry])
   return (
     <StagedView track={entry.box} viewer={entry.viewer} staging={entry.figure} interactive={!phone}>
-      <Director motions={motions} active={entry.figure.id} autoplay={false} />
+      <Director motions={motions} active={entry.figure.id} />
     </StagedView>
   )
 }

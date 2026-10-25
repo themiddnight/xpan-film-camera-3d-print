@@ -7,7 +7,7 @@ import { DOCS } from './content'
 import { DRAWINGS, type Drawing } from './figures'
 import type { FigureEntry } from './FigureViews'
 import { splitDoc, type Block } from './maker'
-import { PlaybackBar } from './PlaybackBar'
+import { PlaybackBar, playerTransport } from './PlaybackBar'
 import { fillCopy } from './spec'
 import { SpecTable } from './SpecTable'
 
@@ -16,7 +16,12 @@ function FigureBox({ entry }: { entry: FigureEntry }) {
   return (
     <figure className="figure" data-figure={figure.id}>
       <div ref={entry.box} className="figure-box" role="img" aria-label={figure.caption} />
-      {motion && <PlaybackBar player={motion.player} counter={motion.counter} label={`${figure.id} motion`} />}
+      {motion && (
+        <PlaybackBar
+          player={motion.player} transport={playerTransport(motion.player)} counter={motion.counter}
+          label={`${figure.id} motion`} hint="Press play to watch it move"
+        />
+      )}
       <figcaption>{figure.caption}</figcaption>
     </figure>
   )

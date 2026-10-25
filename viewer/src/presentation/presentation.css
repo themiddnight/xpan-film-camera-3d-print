@@ -17,6 +17,7 @@
   --frame-h: 52px;
   --edge-h: 16px;
   --ease: cubic-bezier(0.6, 0, 0.2, 1);
+  --masthead-h: 56px;
 }
 
 @media (max-width: 640px) {
@@ -24,6 +25,7 @@
     --gutter: 16px;
     --frame-h: 34px;
     --edge-h: 14px;
+    --masthead-h: 48px;
   }
 }
 
@@ -84,7 +86,7 @@ button { font: inherit; color: inherit; }
 /* Where the shot is framed; the picture still fills the stage behind the card and the strip. */
 .stage-focus {
   position: absolute;
-  top: 0;
+  top: var(--masthead-h);
   right: 0;
   bottom: var(--strip-h);
   left: calc(var(--gutter) + var(--column));
@@ -103,13 +105,63 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-.chapter {
-  min-height: 100svh;
+/* Each chapter is a tall track (height set inline); its card stays pinned while the track scrolls by. */
+.chapter { position: relative; }
+
+.chapter-pin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  padding: var(--gutter) 0 calc(var(--strip-h) + var(--gutter)) var(--gutter);
+  padding: calc(var(--masthead-h) + var(--gutter)) 0 calc(var(--strip-h) + var(--gutter)) var(--gutter);
 }
+
+/* The page title and the skip button, over the showcase. */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  height: 0;
+}
+
+.masthead-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--masthead-h);
+  padding: 0 var(--gutter);
+  pointer-events: none;
+}
+
+.masthead-title {
+  font-size: 17px;
+  font-weight: 720;
+  font-stretch: 125%;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.masthead-title[data-shown="true"] { opacity: 1; transform: none; }
+
+.masthead-skip {
+  margin-left: auto;
+  padding: 7px 14px;
+  border: 1.5px solid var(--petg);
+  border-radius: 999px;
+  background: var(--drawing-white);
+  font-size: 14px;
+  line-height: 1.2;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.masthead-skip:hover { background: var(--petg); color: var(--drawing-white); }
+
+.masthead-skip-short { display: none; }
 
 .card {
   box-sizing: border-box;
@@ -240,7 +292,7 @@ button { font: inherit; color: inherit; }
 
 .explore {
   position: absolute;
-  top: 12px;
+  top: calc(var(--masthead-h) + 8px);
   right: var(--gutter);
   z-index: 3;
 }
@@ -396,20 +448,45 @@ button { font: inherit; color: inherit; }
     linear-gradient(var(--brass), var(--brass)) right bottom / var(--bar) var(--arm) no-repeat;
 }
 
+/* How far the page has scrolled through the chapter in the gate. */
+.strip-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  width: calc(var(--frame-h) * var(--strip-frame-w));
+  height: 2px;
+  transform: translateX(-50%);
+  background: rgba(213, 216, 216, 0.25);
+  pointer-events: none;
+}
+
+.strip-progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--brass);
+  transform: scaleX(var(--chapter-progress, 0));
+  transform-origin: left center;
+}
+
 /* Phones: the camera above, the text at the bottom over a soft fade. */
 
 @media (max-width: 640px) {
   /* Below the Explore button, and down toward the text so the camera and its words read together. */
   .stage-focus {
-    top: 7svh;
+    top: calc(var(--masthead-h) + 4svh);
     left: 0;
     bottom: 43svh;
   }
 
-  .chapter {
+  .chapter-pin {
     align-items: flex-end;
     padding: 0 0 calc(var(--strip-h) + 10px);
   }
+
+  .masthead-title { font-size: 15px; white-space: nowrap; }
+  .masthead-skip { padding: 6px 11px; font-size: 13px; white-space: nowrap; }
+  .masthead-skip-long { display: none; }
+  .masthead-skip-short { display: inline; }
 
   .card {
     width: 100%;
@@ -584,7 +661,7 @@ button { font: inherit; color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .strip-run, .strip-frame, .strip-title, .load-bar { transition: none; }
+  .strip-run, .strip-frame, .strip-title, .load-bar, .masthead-title { transition: none; }
 }
 
 /* Still mode (?still=<chapter>): the chapter's picture alone, filling the page. */

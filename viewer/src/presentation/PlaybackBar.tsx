@@ -1,6 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import type { KeyPlayer } from '../state/cycle'
 import type { CycleCounter } from '../types'
+import type { Transport } from './scrollMotion'
 
 /** What the readout says while the frame advance runs: film moved and perforations counted. */
 function counterText(counter: CycleCounter, moved: number): string {
@@ -38,34 +39,54 @@ const ReplayIcon = () => (
   </svg>
 )
 
+/** Play, pause, replay and seek on the player itself, for a figure's motion. */
+export function playerTransport(player: KeyPlayer): Transport {
+  return {
+    subscribe: player.subscribe,
+    isPlaying: () => player.getStatus().running,
+    play: () => player.resume(),
+    pause: () => player.pauseRun(),
+    replay: () => player.restart(),
+    seek: t => player.seek(t),
+  }
+}
+
 /**
- * Play, pause, replay and a scrub slider for the active chapter's motion, with the phase it is in.
- * `counter` adds the live film readout of the frame advance.
+ * Play, pause, replay and a scrub slider for a motion, with the phase it is in. `transport` decides
+ * what the buttons move: the player, or the page scroll for a chapter. `counter` adds the live film
+ * readout of the frame advance. `hint` shows before the motion has started.
  */
-export function PlaybackBar({ player, counter, label }: { player: KeyPlayer; counter: CycleCounter | null; label: string }) {
+export function PlaybackBar({ player, transport, counter, label, hint }: {
+  player: KeyPlayer
+  transport: Transport
+  counter: CycleCounter | null
+  label: string
+  hint: string
+}) {
   const status = useSyncExternalStore(player.subscribe, player.getStatus)
+  const playing = useSyncExternalStore(transport.subscribe, transport.isPlaying)
   const { time, moved } = usePlayhead(player, counter)
   return (
     <div className="playback" role="group" aria-label={label}>
       <div className="playback-controls">
         <button
           type="button" className="playback-button"
-          aria-label={status.running ? 'Pause' : 'Play'}
-          onClick={() => (status.running ? player.pauseRun() : player.resume())}
+          aria-label={playing ? 'Pause' : 'Play'}
+          onClick={() => (playing ? transport.pause() : transport.play())}
         >
-          {status.running ? <PauseIcon /> : <PlayIcon />}
+          {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
-        <button type="button" className="playback-button" aria-label="Replay" onClick={() => player.restart()}>
+        <button type="button" className="playback-button" aria-label="Replay" onClick={transport.replay}>
           <ReplayIcon />
         </button>
         <input
           className="playback-scrub" type="range" aria-label="Scrub"
           min={0} max={player.duration} step={0.01} value={time}
-          onChange={e => player.seek(Number(e.target.value))}
+          onChange={e => transport.seek(Number(e.target.value))}
         />
       </div>
       <p className="playback-phase" aria-live="polite">
-        {time === 0 && !status.running ? 'Press play to watch it move' : sentence(status.phase)}
+        {time === 0 && !playing ? hint : sentence(status.phase)}
       </p>
       {counter && <p className="playback-readout">{counterText(counter, moved)}</p>}
     </div>

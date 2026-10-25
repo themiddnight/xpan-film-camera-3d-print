@@ -3,10 +3,9 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { KeyPlayer } from '../state/cycle'
 import { useViewer, useViewerState, type Viewer } from '../state/viewer'
 import type { CycleCounter } from '../types'
+import { motionTime } from './scrollMotion'
 import type { Staging } from './story'
-
-/** Autoplay waits for the camera to arrive, as ShotRig eases over this long. */
-const SETTLE_MS = 800
+import type { ChapterScroll } from './useChapterScroll'
 
 export interface Motion {
   player: KeyPlayer
@@ -31,10 +30,10 @@ export function motionsFor(viewer: Viewer, owners: readonly { id: string; motion
 /**
  * Runs inside a staged view, after the active staging is applied in the same commit. On a change of
  * `active` it stops every motion, so nothing an earlier owner started keeps writing over the new
- * pose; with `autoplay`, once the parts are in and the camera has arrived it plays the new owner's
- * motion once.
+ * pose. With `scroll`, the active owner's motion follows the scroll through its chapter once the
+ * parts are in; without it, the motion moves only when its playback bar says so.
  */
-export function Director({ motions, active, autoplay }: { motions: ReadonlyMap<string, Motion>; active: string; autoplay: boolean }) {
+export function Director({ motions, active, scroll }: { motions: ReadonlyMap<string, Motion>; active: string; scroll?: ChapterScroll }) {
   const viewer = useViewer()
   const invalidate = useThree(s => s.invalidate)
   const ready = useViewerState(s => viewer.selectBounds(s) !== null)
@@ -47,10 +46,16 @@ export function Director({ motions, active, autoplay }: { motions: ReadonlyMap<s
   }, [motions, player, invalidate])
 
   useEffect(() => {
-    if (!player || !ready || !autoplay) return
-    const timer = setTimeout(() => player.run(), SETTLE_MS)
-    return () => clearTimeout(timer)
-  }, [player, ready, autoplay])
+    if (!player || !ready || !scroll) return
+    const follow = () => {
+      const at = scroll.get()
+      if (at.id !== active) return
+      player.seek(motionTime(at.value, player.duration))
+      invalidate()
+    }
+    follow()
+    return scroll.subscribe(follow)
+  }, [player, ready, scroll, active, invalidate])
 
   useFrame((_, seconds) => {
     if (!player) return

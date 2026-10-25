@@ -9,16 +9,24 @@ import { FilmStripNav, stripVars } from './FilmStripNav'
 import { FormatOverlay } from './FormatOverlay'
 import { matches, PHONE, REDUCED_MOTION, useMedia } from './media'
 import { PlaybackBar } from './PlaybackBar'
+import { ScrollTransport } from './scrollMotion'
 import { fillCopy } from './spec'
 import { StageCanvas } from './StageCanvas'
 import { StagedView } from './StagedView'
 import type { Chapter, Staging } from './story'
-import { CHAPTER_ATTRIBUTE, useActiveChapter } from './useActiveChapter'
+import { chapterRange, useChapterScroll, type ChapterScroll } from './useChapterScroll'
+
+/** Screen heights of scroll per second of motion, on top of the one screen the pinned card takes. */
+const SCREENS_PER_SECOND = 0.4
+/** Screen heights of scroll through a chapter without motion. */
+const STILL_SCREENS = 1.7
+/** The whole turn, in radians, the camera swings through as a chapter without motion scrolls by. */
+const ORBIT_RAD = 0.4
 
 declare global {
   interface Window {
-    /** Read by browser checks: the stage's viewer and the active chapter. */
-    presentation?: { viewer: Viewer; chapter: string; players: ReadonlyMap<string, KeyPlayer> }
+    /** Read by browser checks: the stage's viewer, the active chapter and the scroll through it. */
+    presentation?: { viewer: Viewer; chapter: string; players: ReadonlyMap<string, KeyPlayer>; scroll: ChapterScroll }
   }
 }
 
@@ -53,16 +61,37 @@ function highlighted(manifest: Manifest, chapter: Chapter, group: Group | null):
   return { ...chapter, scene: { ...chapter.scene, ghost: [...(chapter.scene?.ghost ?? []), ...others] } }
 }
 
+/** How tall a chapter's scroll track is, in screen heights: longer motions get more room. */
+function trackScreens(motion: KeyPlayer | undefined): number {
+  return motion ? 1 + motion.duration * SCREENS_PER_SECOND : STILL_SCREENS
+}
+
+/** The page title, kept at the top once the hero has scrolled away, and a way past the showcase. */
+function Masthead({ title, showTitle, onSkip }: { title: string; showTitle: boolean; onSkip: () => void }) {
+  return (
+    <div className="masthead">
+      <div className="masthead-bar">
+        <p className="masthead-title" data-shown={showTitle} aria-hidden={!showTitle}>{title}</p>
+        <button type="button" className="masthead-skip" aria-label="Skip to the build notes" onClick={onSkip}>
+          <span className="masthead-skip-long">Skip to the build notes</span>
+          <span className="masthead-skip-short" aria-hidden="true">Build notes</span>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /**
- * The showcase: one stage behind the page, restaged as each chapter's text crosses the middle of the
- * screen, with the film-strip navigator along the bottom. `figureViews`, the page's other staged
- * views, are drawn into the same canvas, since a page has only one.
+ * The showcase: one stage behind the page and a tall scroll track per chapter, its card pinned while
+ * the track scrolls by. Scrolling through a chapter with motion plays its keyframes; through one
+ * without, it swings the camera a little. The film-strip navigator runs along the bottom.
+ * `figureViews`, the page's other staged views, are drawn into the same canvas, since a page has only one.
  */
 export function Showcase({ manifest, chapters, figureViews }: { manifest: Manifest; chapters: readonly Chapter[]; figureViews?: ReactNode }) {
   const viewer = useMemo(() => createViewer(manifest, MANIFEST_URL), [manifest])
   const motions = useMemo(() => motionsFor(viewer, chapters), [viewer, chapters])
   const ids = useMemo(() => chapters.map(c => c.id), [chapters])
-  const active = useActiveChapter(ids)
+  const { active, scroll } = useChapterScroll(ids)
   const phone = useMedia(PHONE)
   const reduced = useMedia(REDUCED_MOTION)
   const [explore, setExplore] = useState(false)
@@ -72,21 +101,35 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
 
   const chapter = chapters.find(c => c.id === active) ?? chapters[0]
   const staging = useMemo(() => highlighted(manifest, chapter, chapter.id === 'modules' ? highlight : null), [manifest, chapter, highlight])
+  const transports = useMemo(
+    () => new Map([...motions].map(([id, m]) => [id, new ScrollTransport(id, m.player.duration)])),
+    [motions],
+  )
   useEffect(() => {
-    window.presentation = { viewer, chapter: active, players: new Map([...motions].map(([id, m]) => [id, m.player])) }
-  }, [viewer, motions, active])
+    window.presentation = { viewer, chapter: active, players: new Map([...motions].map(([id, m]) => [id, m.player])), scroll }
+  }, [viewer, motions, active, scroll])
   useEffect(() => { if (active !== 'modules') setHighlight(null) }, [active])
+  useEffect(() => () => transports.forEach(t => t.pause()), [transports, active])
 
+  const turn = useMemo(() => () => {
+    const at = scroll.get()
+    return reduced || motions.has(at.id) ? 0 : ORBIT_RAD * (at.value - 0.5)
+  }, [scroll, reduced, motions])
+
+  const behavior = (): ScrollBehavior => (matches(REDUCED_MOTION) ? 'auto' : 'smooth')
   const scrollTo = (id: string) => {
-    document.querySelector(`[${CHAPTER_ATTRIBUTE}="${id}"]`)?.scrollIntoView({ behavior: matches(REDUCED_MOTION) ? 'auto' : 'smooth', block: 'center' })
+    const range = chapterRange(id)
+    if (range) window.scrollTo({ top: range.top, behavior: behavior() })
   }
+  const skip = () => document.getElementById('maker')?.scrollIntoView({ behavior: behavior() })
 
   const interactive = !phone || explore
   return (
     <section className="showcase" aria-label="The camera" style={stripVars(manifest)}>
+      <Masthead title={chapters[0].title} showTitle={active !== chapters[0].id} onSkip={skip} />
       <StageCanvas>
-        <StagedView track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} spin={active === 'hero' && !reduced}>
-          <Director motions={motions} active={active} autoplay={!reduced} />
+        <StagedView track={stage} focus={focus} viewer={viewer} staging={staging} interactive={interactive} turn={turn}>
+          <Director motions={motions} active={active} scroll={scroll} />
           {active === 'format' && <FormatOverlay />}
         </StagedView>
         {figureViews}
@@ -102,21 +145,32 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
       <div className="chapters">
         {chapters.map(c => {
           const motion = motions.get(c.id)
+          const transport = transports.get(c.id)
           const isActive = c.id === active
           return (
-            <article key={c.id} className={`chapter chapter-${c.id}`} data-chapter={c.id} aria-current={isActive ? 'step' : undefined}>
-              <div className="card">
-                {c.id === 'hero' ? <h1>{c.title}</h1> : <h2>{c.title}</h2>}
-                <p>{fillCopy(manifest, c.text)}</p>
-                {c.id === 'hero' && <LoadProgress viewer={viewer} />}
-                {c.id === 'modules' && isActive && <ModulePicker highlight={highlight} onPick={setHighlight} />}
-                {motion && isActive && <PlaybackBar player={motion.player} counter={motion.counter} label={`${c.title} motion`} />}
+            <article
+              key={c.id} className={`chapter chapter-${c.id}`} data-chapter={c.id} aria-current={isActive ? 'step' : undefined}
+              style={{ height: `${trackScreens(motion?.player) * 100}svh` }}
+            >
+              <div className="chapter-pin">
+                <div className="card">
+                  {c.id === 'hero' ? <h1>{c.title}</h1> : <h2>{c.title}</h2>}
+                  <p>{fillCopy(manifest, c.text)}</p>
+                  {c.id === 'hero' && <LoadProgress viewer={viewer} />}
+                  {c.id === 'modules' && isActive && <ModulePicker highlight={highlight} onPick={setHighlight} />}
+                  {motion && transport && isActive && (
+                    <PlaybackBar
+                      player={motion.player} transport={transport} counter={motion.counter}
+                      label={`${c.title} motion`} hint="Scroll to watch it move, or press play"
+                    />
+                  )}
+                </div>
               </div>
             </article>
           )
         })}
       </div>
-      <FilmStripNav manifest={manifest} chapters={chapters} active={active} onSelect={scrollTo} />
+      <FilmStripNav manifest={manifest} chapters={chapters} active={active} scroll={scroll} onSelect={scrollTo} />
     </section>
   )
 }
