@@ -15,3 +15,5 @@ viewer/dist-public/
 .worktrees/
 viewer/*.tsbuildinfo
 .claude/worktrees/
+.vercel
+.env*
