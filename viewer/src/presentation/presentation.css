@@ -514,10 +514,11 @@ button { font: inherit; color: inherit; }
 
 @media (max-width: 640px) {
   /* Below the Explore button, and down toward the text so the camera and its words read together. */
+  /* Above the active card, whatever its height (--card-reach is set from the card's top edge). */
   .stage-focus {
     top: calc(var(--masthead-h) + 4svh);
     left: 0;
-    bottom: 43svh;
+    bottom: calc(var(--card-reach, 43svh) + 8px);
   }
 
   .chapter-cards {

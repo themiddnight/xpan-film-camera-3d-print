@@ -106,6 +106,25 @@ export function Showcase({ manifest, chapters, figureViews }: { manifest: Manife
     show()
     return scroll.subscribe(show)
   }, [scroll])
+  // On a phone the card sits under the camera, so the shot is framed above the active card's top edge.
+  useEffect(() => {
+    const layer = cards.current
+    const chapter = layer?.querySelector<HTMLElement>('.chapter[aria-current="step"]')
+    if (!phone || !layer || !chapter || !stage.current) return
+    // Layout offsets, not the bounding box, which would include the card's entry slide.
+    let frame = 0
+    const place = () => {
+      cancelAnimationFrame(frame)
+      // Next frame, so the framing area's own observer does not fire inside this one's loop.
+      frame = requestAnimationFrame(() => stage.current?.style.setProperty('--card-reach', `${layer.clientHeight - chapter.offsetTop}px`))
+    }
+    const observer = new ResizeObserver(place)
+    observer.observe(chapter)
+    return () => {
+      observer.disconnect()
+      cancelAnimationFrame(frame)
+    }
+  }, [phone, active])
 
   const chapter = chapters.find(c => c.id === active) ?? chapters[0]
   const staging = useMemo(() => highlighted(manifest, chapter, chapter.id === 'modules' ? highlight : null), [manifest, chapter, highlight])

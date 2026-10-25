@@ -49,12 +49,13 @@ export function StagedView({ track, focus, viewer, staging, interactive, turn = 
       <ViewerContext.Provider value={viewer}>
         <PerspectiveCamera makeDefault fov={SHOT_FOV_DEG} near={1} far={5000} up={[0, 0, 1]} />
         <StudioLights />
+        {/* Before the children, so its reset to rest runs ahead of their effects that pose the parts. */}
+        <StagingSync viewer={viewer} staging={staging} />
         <Turntable angle={turn}>
           <PartsScene />
           <Pins viewer={viewer} ids={framed ? staging.pins ?? [] : []} compact={compact} />
           {children}
         </Turntable>
-        <StagingSync viewer={viewer} staging={staging} />
         {interactive && <OrbitControls makeDefault enableZoom={false} enablePan={false} />}
         <ShotRig shot={staging.shot} track={track} focus={focus} />
       </ViewerContext.Provider>

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { MathUtils, PerspectiveCamera, Vector3 } from 'three'
 import { useViewer, useViewerState } from '../state/viewer'
@@ -66,9 +66,18 @@ export function ShotRig({ shot, track, focus }: {
   const controls = useThree(s => s.controls) as unknown as Controls | null
   const invalidate = useThree(s => s.invalidate)
   const size = useThree(s => s.size)
+  // The focus element can resize without the canvas resizing, as when a phone card grows.
+  const [focusSize, setFocusSize] = useState(0)
+  useEffect(() => {
+    const el = focus?.current
+    if (!el) return
+    const observer = new ResizeObserver(() => setFocusSize(n => n + 1))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [focus])
   const region = useMemo(
     () => measure(track?.current ?? null, focus?.current ?? null, size.width, size.height),
-    [track, focus, size],
+    [track, focus, size, focusSize],
   )
   const aspect = region.w / region.h
 
