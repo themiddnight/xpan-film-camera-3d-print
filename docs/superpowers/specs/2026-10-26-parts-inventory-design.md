@@ -55,7 +55,7 @@ Every other part stays printed.
   "M42 rear cap ring"). Each item keeps the manifest name of its first member for its thumbnail, its
   largest dimension in mm, and its `bom`.
 - `bom.ts`: `BomRow` gains `id` from the `#` column; `BomTable` gives each row `id="bom-<id>"`.
-- `PartsInventory.tsx`: one block per module with a heading and a count line, then a card grid per kind
+- `PartsInventory.tsx`: one block per module with a heading and a tally line (`30 pieces · 13 print · 10 make · 7 buy`, kinds with no pieces left out), then a card grid per kind
   (Print, Make from stock, Buy). A card shows the thumbnail, the name, `×N` when N > 1, the largest
   dimension, and for stock and bought parts a link `BOM #<id>` to `#bom-<id>`. Images are lazy and sized.
   No WebGL on the page.
