@@ -782,7 +782,7 @@ button { font: inherit; color: inherit; }
 /* A link from the Parts section lands on its bill row, clear of the masthead. */
 .bom-table tbody tr { scroll-margin-top: calc(var(--masthead-h) + 16px); }
 
-/* The Parts section: a card per piece, grouped by module and then by how a builder gets it. */
+/* The Parts section: a drawing per piece on the sheet, grouped by module and then by how a builder gets it. */
 .parts-module { margin: 0 0 2.4em; }
 .parts-module h3 {
   margin: 0 0 4px;
@@ -793,34 +793,26 @@ button { font: inherit; color: inherit; }
 }
 .parts-tally { margin: 0 0 14px; font-size: 14px; color: rgba(0, 0, 0, 0.7); font-variant-numeric: tabular-nums; }
 .parts-kind h4 {
-  margin: 18px 0 10px;
+  margin: 18px 0 14px;
   padding-bottom: 6px;
   border-bottom: 1.5px solid var(--petg);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
-.parts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 12px;
+/* Drawings share one scale and stand on the row's baseline, with the caption under each. */
+.parts-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 28px 32px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.part-card { min-width: 0; font-size: 14px; line-height: 1.35; }
-.part-card img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1;
-  background: var(--seamless);
-  outline: 1px solid var(--petg);
-  outline-offset: -1px;
-}
-.part-card p { margin: 0; }
-.part-name { margin-top: 8px; font-weight: 600; overflow-wrap: anywhere; }
+.part { min-width: 0; max-width: 100%; font-size: 14px; line-height: 1.35; }
+.part img { display: block; max-width: 100%; height: auto; }
+.part p { margin: 0; }
+.part-name { margin-top: 6px; font-weight: 600; overflow-wrap: anywhere; }
 .part-count { font-variant-numeric: tabular-nums; }
 .part-meta {
   display: flex;

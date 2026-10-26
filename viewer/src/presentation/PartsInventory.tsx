@@ -2,12 +2,13 @@ import type { Kind, Manifest } from '../types'
 import { inventory, type InventoryItem, type KindList } from './parts'
 
 const KIND_HEADINGS: Record<Kind, string> = { printed: 'Print', stock: 'Make from stock', bought: 'Buy' }
-const KIND_TALLY: Record<Kind, string> = { printed: 'print', stock: 'make', bought: 'buy' }
+const KIND_TALLY: Record<Kind, string> = { printed: 'printed', stock: 'made from stock', bought: 'bought' }
 
-/** "30 pieces · 13 print · 10 make · 7 buy": the module's total, then each kind that has pieces. */
+/** "30 pieces: 13 printed, 10 made from stock, 7 bought": the module's total, then each kind that has pieces. */
 export function tally(lists: readonly KindList[]): string {
   const total = lists.reduce((n, l) => n + l.pieces, 0)
-  return [`${total} ${total === 1 ? 'piece' : 'pieces'}`, ...lists.filter(l => l.pieces > 0).map(l => `${l.pieces} ${KIND_TALLY[l.kind]}`)].join(' · ')
+  const kinds = lists.filter(l => l.pieces > 0).map(l => `${l.pieces} ${KIND_TALLY[l.kind]}`)
+  return `${total} ${total === 1 ? 'piece' : 'pieces'}${kinds.length > 0 ? `: ${kinds.join(', ')}` : ''}`
 }
 
 /** Whole numbers without a trailing ".0": a 3mm rod reads "3 mm", not "3.0 mm". */
@@ -15,10 +16,10 @@ function mm(value: number): string {
   return `${Number(value.toFixed(1))} mm`
 }
 
-function Card({ item }: { item: InventoryItem }) {
+function Drawing({ item }: { item: InventoryItem }) {
   return (
-    <li className="part-card">
-      <img src={`stills/parts/${item.part}.png`} alt="" width={320} height={320} loading="lazy" decoding="async" />
+    <li className="part">
+      <img src={`stills/parts/${item.part}.png`} alt="" width={item.drawing.width} height={item.drawing.height} loading="lazy" decoding="async" />
       <p className="part-name">
         {item.label}
         {item.count > 1 && <span className="part-count"> ×{item.count}</span>}
@@ -33,7 +34,7 @@ function Card({ item }: { item: InventoryItem }) {
 
 /**
  * Every piece of the camera, by module and then by how a builder gets it. A flat inventory built
- * from the manifest; the thumbnails are the stills `pnpm stills` writes.
+ * from the manifest; the drawings are the pictures `pnpm stills` writes, all at one scale.
  */
 export function PartsInventory({ manifest }: { manifest: Manifest }) {
   return (
@@ -45,8 +46,8 @@ export function PartsInventory({ manifest }: { manifest: Manifest }) {
           {module.lists.filter(l => l.items.length > 0).map(list => (
             <div key={list.kind} className={`parts-kind parts-${list.kind}`}>
               <h4>{KIND_HEADINGS[list.kind]}</h4>
-              <ul className="parts-grid">
-                {list.items.map(item => <Card key={item.part} item={item} />)}
+              <ul className="parts-row">
+                {list.items.map(item => <Drawing key={item.part} item={item} />)}
               </ul>
             </div>
           ))}

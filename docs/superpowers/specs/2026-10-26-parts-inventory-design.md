@@ -52,28 +52,39 @@ Every other part stays printed.
   three kind lists in the order printed, stock, bought. It drops `inventory: false` parts, merges a
   `<base>_left`/`<base>_right` pair into one item named `<base>` that counts its members, and makes a
   display name from the snake-case name (first letter capitalised: `m42_rear_cap_ring` reads
-  "M42 rear cap ring"). Each item keeps the manifest name of its first member for its thumbnail, its
+  "M42 rear cap ring"). Each item keeps the manifest name of its first member for its drawing, its
   largest dimension in mm, and its `bom`.
 - `bom.ts`: `BomRow` gains `id` from the `#` column; `BomTable` gives each row `id="bom-<id>"`.
-- `PartsInventory.tsx`: one block per module with a heading and a tally line (`30 pieces · 13 print · 10 make · 7 buy`, kinds with no pieces left out), then a card grid per kind
-  (Print, Make from stock, Buy). A card shows the thumbnail, the name, `×N` when N > 1, the largest
+- `PartsInventory.tsx`: one block per module with a heading and a tally line (`30 pieces: 13 printed, 10 made from stock, 7 bought`, kinds with no pieces left out), then a wrapping row of drawings per kind
+  (Print, Make from stock, Buy). An item shows the drawing, the name, `×N` when N > 1, the largest
   dimension, and for stock and bought parts a link `BOM #<id>` to `#bom-<id>`. Images are lazy and sized.
   No WebGL on the page.
 - `maker.ts`: a `{{parts}}` block. `content/parts.md` holds the section; `DOCS` lists it before `bom`.
   `content/bom.md` no longer claims everything else is printed without showing it.
 
-## Thumbnails
+## Drawings
 
-- `?part=<manifest name>` renders that one part through the still pipeline: the same isometric direction
-  for every part, framed on the part alone, all others hidden, `window.stillReady` when drawn.
-- `pnpm stills` also writes `out/stills/parts/<name>.png` at 320 x 320 for every inventory part.
-  The deploy already copies `out/stills/`.
-- Every thumbnail fills its frame, so sizes come from the mm figure on the card, not the picture.
+Each part is a black-ink line drawing in a true isometric view (from the front, left and above), every
+part at one scale (`PX_PER_MM`, 2.2 CSS px per mm), so the shell and a pin show their real size against
+each other.
+
+- `presentation/partDrawing.ts` holds the view, the scale and the pure `drawingSize(placed_size_mm)`, the
+  CSS size of a drawing. The page sets `<img width height>` from it, and the renderer draws at that size
+  times `SS` (3), so the browser downsizes the picture.
+- `placed_size_mm` is the part's bounding box where it sits in the camera. `size_mm` is the part as built
+  and stays the size a builder reads off the caption; a part placed at an angle is larger in the camera.
+- `?drawings` loads `renderPartDrawings.ts` through a dynamic import (the public bundle does not carry it),
+  draws the first part of each inventory item and sets `window.partDrawings` (name to PNG data URL) and
+  `window.partDrawingsReady`. It throws if a model's real bounding box projects to another size than
+  `placed_size_mm`.
+- `pnpm stills` loads that route once and writes `out/stills/parts/<name>.png`, removing the PNGs of parts
+  no longer drawn. The deploy already copies `out/stills/`.
+- Drawings stand on a shared baseline in a wrapping row per kind, with no card frames.
 
 ## Tests and checks
 
 - Python: the kind/bom rule raises on a printed part with `bom` and on a stock part without one.
 - Vitest on the real manifest: module and kind counts, the left/right merge, no film or cassette, every
   `bom` resolves to a row of `docs/bom.md`.
-- `verify.mjs`: every inventory thumbnail exists in `dist-public/stills/parts/`, the Parts images load,
+- `verify.mjs`: the Parts images load and each is its stated width times `SS` pixels wide,
   no sideways scroll at 1440 and 375.

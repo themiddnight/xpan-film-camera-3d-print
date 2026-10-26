@@ -1,4 +1,5 @@
 import { GROUPS, GROUP_LABELS, KINDS, type Group, type Kind, type Manifest, type PartManifest } from '../types'
+import { drawingSize } from './partDrawing'
 
 /** One drawing of the inventory: a part, or a left/right pair shown as one. */
 export interface InventoryItem {
@@ -10,6 +11,8 @@ export interface InventoryItem {
   count: number
   /** Longest side of the part's bounding box, in mm. */
   largestMm: number
+  /** CSS size of the item's drawing, which is drawn at the same scale as every other. */
+  drawing: { width: number; height: number }
   /** The `#` of the docs/bom.md row, for stock and bought items. */
   bom: string | null
 }
@@ -65,6 +68,7 @@ function item(p: PartManifest, key: string): InventoryItem {
     part: p.name,
     count: 1,
     largestMm: Math.max(...p.size_mm),
+    drawing: drawingSize(p.placed_size_mm),
     bom: p.bom,
   }
 }
