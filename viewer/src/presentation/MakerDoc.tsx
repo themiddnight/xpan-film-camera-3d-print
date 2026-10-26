@@ -7,6 +7,7 @@ import { DOCS } from './content'
 import { DRAWINGS, type Drawing } from './figures'
 import type { FigureEntry } from './FigureViews'
 import { splitDoc, type Block } from './maker'
+import { PartsInventory } from './PartsInventory'
 import { PlaybackBar, playerTransport } from './PlaybackBar'
 import { fillCopy } from './spec'
 import { SpecTable } from './SpecTable'
@@ -74,6 +75,7 @@ function BlockView({ block, manifest, entries, webgl }: { block: Block; manifest
         <BomTable />
       </ErrorBoundary>
     )
+    case 'parts': return <PartsInventory manifest={manifest} />
     case 'unknown': return null
   }
 }

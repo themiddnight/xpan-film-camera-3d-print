@@ -50,6 +50,11 @@ describe('splitBlocks', () => {
     ])
   })
 
+  it('reads {{parts}} as the inventory block and {{parts:x}} as unknown', () => {
+    expect(splitBlocks('{{parts}}')).toEqual([{ kind: 'parts' }])
+    expect(splitBlocks('{{parts:x}}')).toEqual([{ kind: 'unknown', ref: '{{parts:x}}' }])
+  })
+
   it('leaves a placeholder inside a sentence as prose', () => {
     expect(splitBlocks('See {{figure:a}} here.')).toEqual([{ kind: 'markdown', text: 'See {{figure:a}} here.' }])
   })

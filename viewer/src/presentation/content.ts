@@ -3,6 +3,7 @@ import filmTransport from './content/film-transport.md?raw'
 import intro from './content/intro.md?raw'
 import interfaceSpec from './content/interface.md?raw'
 import designYourOwn from './content/design-your-own.md?raw'
+import parts from './content/parts.md?raw'
 import bom from './content/bom.md?raw'
 import printing from './content/printing.md?raw'
 import decisions from './content/decisions.md?raw'
@@ -15,6 +16,7 @@ export const DOCS: readonly Doc[] = [
   { id: 'film-transport', markdown: filmTransport },
   { id: 'interface', markdown: interfaceSpec },
   { id: 'design-your-own', markdown: designYourOwn },
+  { id: 'parts', markdown: parts },
   { id: 'bom', markdown: bom },
   { id: 'printing', markdown: printing },
   { id: 'decisions', markdown: decisions },

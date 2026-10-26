@@ -5,6 +5,7 @@ export type Block =
   | { kind: 'drawing'; id: string }
   | { kind: 'spec'; section: string }
   | { kind: 'bom' }
+  | { kind: 'parts' }
   | { kind: 'unknown'; ref: string }
 
 export interface Doc {
@@ -12,8 +13,8 @@ export interface Doc {
   markdown: string
 }
 
-/** A component placeholder stands alone on its line: `{{figure:<id>}}`, `{{drawing:<id>}}`, `{{spec:<section>}}` or `{{bom}}`. */
-const BLOCK_LINE = /^\{\{(figure|drawing|spec|bom)(?::([^}]*))?\}\}[ \t]*$/
+/** A component placeholder stands alone on its line: `{{figure:<id>}}`, `{{drawing:<id>}}`, `{{spec:<section>}}`, `{{bom}}` or `{{parts}}`. */
+const BLOCK_LINE = /^\{\{(figure|drawing|spec|bom|parts)(?::([^}]*))?\}\}[ \t]*$/
 /** Any placeholder left in prose once spec values are filled. */
 const ANY_REF = /\{\{[^}]*\}\}/g
 const VALUE_REF = /\{\{(?:value|number):[^}]+\}\}/g
@@ -36,6 +37,7 @@ export function splitBlocks(markdown: string): Block[] {
     flush()
     const [ref, kind, arg] = match
     if (kind === 'bom' && arg === undefined) blocks.push({ kind: 'bom' })
+    else if (kind === 'parts' && arg === undefined) blocks.push({ kind: 'parts' })
     else if (kind === 'figure' && arg) blocks.push({ kind: 'figure', id: arg })
     else if (kind === 'drawing' && arg) blocks.push({ kind: 'drawing', id: arg })
     else if (kind === 'spec' && arg) blocks.push({ kind: 'spec', section: arg })

@@ -86,7 +86,8 @@ export function validateDocs(manifest: Manifest, docs: readonly Doc[], figures: 
         case 'drawing': if (!drawingIds.has(block.id)) unknown('drawing', block.id); break
         case 'spec': if (!SPEC_SECTIONS.some(s => s === block.section)) unknown('spec table', block.section); break
         case 'unknown': unknown('placeholder', block.ref); break
-        case 'bom': break
+        case 'bom':
+        case 'parts': break
         case 'markdown':
           for (const ref of specRefs(block.text)) if (!specs.has(ref)) unknown('spec', ref)
           for (const ref of strayRefs(block.text)) unknown('placeholder', ref)

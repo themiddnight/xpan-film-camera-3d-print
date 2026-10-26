@@ -12,7 +12,7 @@ export function BomTable() {
         </thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.part}>
+            <tr key={r.id} id={`bom-${r.id}`}>
               <th scope="row">{r.part}</th>
               <td>{r.qty}</td>
               <td>{r.spec}</td>
