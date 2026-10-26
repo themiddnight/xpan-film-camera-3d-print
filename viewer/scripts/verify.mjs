@@ -1,6 +1,7 @@
 // Drives the built public site (dist-public/, served by `vite preview`) and fails on anything a
 // visitor would hit: console errors or warnings, sideways scroll, an unresolved {{placeholder}},
-// a missing still or part thumbnail, a Parts section whose pictures or BOM links do not resolve,
+// a missing still or part drawing, a Parts section whose pictures or BOM links do not resolve or whose
+// drawings are not as big as the page says (which means the renderer and drawingSize disagree),
 // a navigator that does not scroll, a phone drag that does not scroll the page.
 // Screenshots go to out/verify/. Usage: pnpm build:public && node scripts/verify.mjs
 import { spawn } from 'node:child_process'
@@ -21,6 +22,10 @@ const FPS_WINDOW_MS = 3000
 const STAGE_Y = 250
 
 const chapters = [...readFileSync(join(viewerRoot, 'src/presentation/chapters.ts'), 'utf8').matchAll(/^ {4}id: '([^']+)'/gm)].map(m => m[1])
+// Each part drawing is rendered at this many pixels per CSS pixel; the page states the CSS size.
+const SS = Number(/export const SS = (\d+)/.exec(readFileSync(join(viewerRoot, 'src/presentation/partDrawing.ts'), 'utf8'))?.[1])
+if (!Number.isInteger(SS)) throw new Error('No SS found in src/presentation/partDrawing.ts')
+const SS_SLACK_PX = 2
 const failures = []
 const fail = (run, message) => failures.push(`${run}: ${message}`)
 
@@ -72,19 +77,25 @@ async function checkLayout(page, run) {
   if (result.status) fail(run, `the page shows a status: ${result.status}`)
 }
 
-/** The Parts section: every card has a picture that loaded, and every BOM link lands on a row. */
+/** The Parts section: every drawing loaded at the size the page states times SS, and every BOM link lands on a row. */
 async function checkParts(page, run) {
   // Lazy images below the fold would not load in a headless page that never scrolls to them.
   await page.evaluate(() => document.querySelectorAll('.parts img').forEach(i => { i.loading = 'eager' }))
   await page.evaluate(() => document.querySelector('.maker-parts').scrollIntoView())
   await page.waitForTimeout(SETTLE_MS)
-  const result = await page.evaluate(() => ({
-    cards: document.querySelectorAll('.part-card').length,
-    broken: [...document.querySelectorAll('.parts img')].filter(i => !i.complete || i.naturalWidth === 0).map(i => i.getAttribute('src')),
-    deadLinks: [...document.querySelectorAll('.part-card a')].map(a => a.getAttribute('href')).filter(h => !document.getElementById(h.slice(1))),
-  }))
-  if (result.cards === 0) fail(run, 'the Parts section has no cards')
-  if (result.broken.length > 0) fail(run, `part thumbnails did not load: ${result.broken.join(' ')}`)
+  const result = await page.evaluate(() => {
+    const images = [...document.querySelectorAll('.parts img')]
+    return {
+      parts: document.querySelectorAll('.part').length,
+      broken: images.filter(i => !i.complete || i.naturalWidth === 0).map(i => i.getAttribute('src')),
+      sizes: images.map(i => ({ src: i.getAttribute('src'), width: Number(i.getAttribute('width')), height: Number(i.getAttribute('height')), naturalWidth: i.naturalWidth, naturalHeight: i.naturalHeight })),
+      deadLinks: [...document.querySelectorAll('.part a')].map(a => a.getAttribute('href')).filter(h => !document.getElementById(h.slice(1))),
+    }
+  })
+  if (result.parts === 0) fail(run, 'the Parts section has no parts')
+  if (result.broken.length > 0) fail(run, `part drawings did not load: ${result.broken.join(' ')}`)
+  const off = result.sizes.filter(i => Math.abs(i.naturalWidth - i.width * SS) > SS_SLACK_PX || Math.abs(i.naturalHeight - i.height * SS) > SS_SLACK_PX)
+  if (off.length > 0) fail(run, `part drawings not drawn at their stated size times ${SS}: ${off.map(i => `${i.src} is ${i.naturalWidth} x ${i.naturalHeight}, page says ${i.width} x ${i.height}`).join('; ')}`)
   if (result.deadLinks.length > 0) fail(run, `BOM links with no row: ${result.deadLinks.join(' ')}`)
   await checkLayout(page, run)
   await shoot(page, `${run}-parts`)
@@ -183,10 +194,6 @@ try {
   mkdirSync(shots, { recursive: true })
   for (const id of chapters) {
     if (!existsSync(join(site, 'stills', `${id}.png`))) fail('stills', `dist-public/stills/${id}.png is missing. Run: pnpm stills && pnpm build:public`)
-  }
-  const inventory = JSON.parse(readFileSync(join(site, 'manifest.json'), 'utf8')).parts.filter(p => p.inventory)
-  for (const { name } of inventory) {
-    if (!existsSync(join(site, 'stills', 'parts', `${name}.png`))) fail('stills', `dist-public/stills/parts/${name}.png is missing. Run: pnpm stills && pnpm build:public`)
   }
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] })
   for (const run of RUNS) {
