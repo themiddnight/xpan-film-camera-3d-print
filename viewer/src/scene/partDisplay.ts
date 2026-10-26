@@ -11,9 +11,10 @@ export const OUTLINE_ANGLE_DEG = 30
 export const OUTLINE_COLOR = '#8E9194'
 /** How far part colours move toward white, so black outlines show on black PETG. */
 export const SURFACE_LIFT = 0
-/** Bought parts read as metal; the colour still comes from the manifest. */
+/** Stock and bought parts read as metal; the colour still comes from the manifest. */
 export const SURFACE: Record<Kind, { metalness: number; roughness: number }> = {
   printed: { metalness: 0.05, roughness: 0.55 },
+  stock: { metalness: 0.45, roughness: 0.35 },
   bought: { metalness: 0.45, roughness: 0.35 },
 }
 

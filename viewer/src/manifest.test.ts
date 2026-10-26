@@ -47,3 +47,19 @@ describe('parseManifest features and spec sheet', () => {
     expect(() => parseManifest(m)).toThrow(/manifest\.spec_sheet\[0\]\.value: expected a finite number/)
   })
 })
+
+describe('parseManifest part inventory fields', () => {
+  it('reads kind, bom, count and inventory from the real manifest', () => {
+    const parts = realManifest().parts
+    expect(parts.find(p => p.name === 'pawl_spring')).toMatchObject({ kind: 'bought', bom: '7', count: 1, inventory: true })
+    expect(parts.find(p => p.name === 'viewfinder_rear_pins')).toMatchObject({ kind: 'stock', count: 2 })
+    expect(parts.find(p => p.name === 'cassette')).toMatchObject({ inventory: false, bom: null })
+  })
+
+  it('rejects a part without a count', () => {
+    const m = raw()
+    const { count: _count, ...rest } = (m.parts as Record<string, unknown>[])[0]
+    m.parts = [rest]
+    expect(() => parseManifest(m)).toThrow(/manifest\.parts\[0\]\.count: expected a whole number of at least 1/)
+  })
+})

@@ -5,7 +5,7 @@ import {
 } from '../../types'
 
 const FILTERS: readonly KindFilter[] = ['all', ...KINDS]
-const FILTER_LABELS: Record<KindFilter, string> = { all: 'All', printed: 'Printed', bought: 'Bought' }
+const FILTER_LABELS: Record<KindFilter, string> = { all: 'All', printed: 'Printed', stock: 'Stock', bought: 'Bought' }
 
 const PartRow = memo(function PartRow({ part }: { part: PartManifest }) {
   const { setPartView } = useViewer().actions

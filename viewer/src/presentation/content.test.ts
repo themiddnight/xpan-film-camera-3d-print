@@ -75,9 +75,9 @@ describe('parseBom', () => {
     expect(rows).toHaveLength(all.length - skipped.length)
   })
 
-  it('keeps part, quantity, spec and use, and nothing about search terms or prices', () => {
+  it('keeps number, part, quantity, spec and use, and nothing about search terms or prices', () => {
     for (const row of rows) {
-      expect(Object.keys(row)).toEqual(['part', 'qty', 'spec', 'usedFor'])
+      expect(Object.keys(row)).toEqual(['id', 'part', 'qty', 'spec', 'usedFor'])
       for (const text of Object.values(row)) expect(text.length).toBeGreaterThan(0)
     }
     const shown = JSON.stringify(rows)
@@ -86,11 +86,16 @@ describe('parseBom', () => {
   })
 
   it('reads the first row as written', () => {
-    expect(rows[0]).toMatchObject({ part: 'Stainless 304 round rod', qty: '1m (or 2 x 500mm)', spec: 'Ø3.0mm, cut to length' })
+    expect(rows[0]).toMatchObject({ id: '1', part: 'Stainless 304 round rod', qty: '1m (or 2 x 500mm)', spec: 'Ø3.0mm, cut to length' })
+  })
+
+  it('keeps a lettered number as written', () => {
+    expect(rows.map(r => r.id)).toContain('7b')
   })
 
   it('throws when the table is reshaped', () => {
-    expect(() => parseBom('## Parts\n\n| Part | Used for |\n|---|---|\n| a | b |')).toThrow('Qty to buy')
+    expect(() => parseBom('## Parts\n\n| # | Part | Used for |\n|---|---|---|\n| 1 | a | b |')).toThrow('Qty to buy')
+    expect(() => parseBom('## Parts\n\n| Part | Qty to buy | Spec | Used for |\n|---|---|---|---|\n| a | 1 | b | c |')).toThrow('"#"')
     expect(() => parseBom('nothing here')).toThrow('no Parts table')
   })
 })

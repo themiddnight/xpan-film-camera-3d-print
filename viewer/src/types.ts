@@ -10,7 +10,8 @@ export const GROUP_LABELS: Record<Group, string> = {
   pinhole: 'Pinhole module',
 }
 
-export const KINDS = ['printed', 'bought'] as const
+/** How a builder gets a piece: prints it, cuts it from a bill-of-materials material, or buys it ready-made. */
+export const KINDS = ['printed', 'stock', 'bought'] as const
 export type Kind = (typeof KINDS)[number]
 
 export type Vec3 = readonly [number, number, number]
@@ -20,6 +21,12 @@ export interface PartManifest {
   glb: string
   group: Group
   kind: Kind
+  /** The `#` of the docs/bom.md row a stock or bought part comes from; null for a printed part or one outside the inventory. */
+  bom: string | null
+  /** Pieces this one solid stands for. */
+  count: number
+  /** False for what loads into the camera (cassette, film) rather than being part of it. */
+  inventory: boolean
   color: string
   volume_mm3: number
   size_mm: Vec3

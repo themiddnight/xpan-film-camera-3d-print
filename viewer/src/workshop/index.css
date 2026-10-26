@@ -33,6 +33,7 @@ label { cursor: pointer; }
 .pname { display: grid; grid-template-columns: auto 1fr; gap: 6px; align-items: start; min-width: 0;
   overflow-wrap: anywhere; }
 .pname input { margin: 2px 0 0; }
+.swatch.stock { border-radius: 50% 0; }
 .swatch.bought { border-radius: 50%; }
 .seg { margin-bottom: 8px; }
 .group { margin-top: 6px; }

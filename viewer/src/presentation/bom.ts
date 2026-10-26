@@ -1,11 +1,13 @@
 export interface BomRow {
+  /** The `#` cell, such as "1" or "7b"; the Parts section links to it. */
+  id: string
   part: string
   qty: string
   spec: string
   usedFor: string
 }
 
-const COLUMNS = { part: 'Part', qty: 'Qty to buy', spec: 'Spec', usedFor: 'Used for' } as const
+const COLUMNS = { id: '#', part: 'Part', qty: 'Qty to buy', spec: 'Spec', usedFor: 'Used for' } as const
 
 /** Qty text of a row the bill keeps for the record but nobody needs to buy. */
 const NOT_NEEDED = /^not needed$/i
@@ -15,7 +17,7 @@ function cells(line: string): string[] {
 }
 
 /**
- * The rows of the Parts table in docs/bom.md, with only the columns a builder needs: part, quantity,
+ * The rows of the Parts table in docs/bom.md, with only the columns a builder needs: its number, part, quantity,
  * spec and what it is used for. Search terms and prices stay out of the public page, as do rows marked
  * "Not needed". Throws when the table or one of those columns is missing, so a reshaped bill is not
  * shown half empty.
@@ -38,7 +40,7 @@ export function parseBom(markdown: string): BomRow[] {
     const row = cells(line)
     const qty = row[index.qty]
     if (NOT_NEEDED.test(qty)) continue
-    rows.push({ part: row[index.part], qty, spec: row[index.spec], usedFor: row[index.usedFor] })
+    rows.push({ id: row[index.id], part: row[index.part], qty, spec: row[index.spec], usedFor: row[index.usedFor] })
   }
   return rows
 }
