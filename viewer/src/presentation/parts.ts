@@ -1,11 +1,10 @@
 import { GROUPS, GROUP_LABELS, KINDS, type Group, type Kind, type Manifest, type PartManifest } from '../types'
-import type { Chapter, ShotDirection } from './story'
 
-/** One card of the inventory: a part, or a left/right pair shown as one. */
+/** One drawing of the inventory: a part, or a left/right pair shown as one. */
 export interface InventoryItem {
   /** Name for the card, such as "M42 rear cap ring". */
   label: string
-  /** Manifest name of the first member, which the card's thumbnail shows. */
+  /** Manifest name of the first member, which the item's drawing shows. */
   part: string
   /** Pieces the item stands for: one per member part. */
   count: number
@@ -67,23 +66,5 @@ function item(p: PartManifest, key: string): InventoryItem {
     count: 1,
     largestMm: Math.max(...p.size_mm),
     bom: p.bom,
-  }
-}
-
-/** The one view every part thumbnail is shot from, so the cards read as a set: from the front, left and above. */
-export const THUMBNAIL_DIRECTION: ShotDirection = [-1, 1, 1]
-
-/**
- * The staging `?part=<name>` renders through the still pipeline: that one part, framed alone from
- * THUMBNAIL_DIRECTION, every other part hidden. Null for a name the manifest does not have.
- */
-export function partStill(manifest: Manifest, name: string | null): Chapter | null {
-  if (name === null || !manifest.parts.some(p => p.name === name)) return null
-  return {
-    id: `part-${name}`,
-    title: name,
-    text: '',
-    shot: { direction: THUMBNAIL_DIRECTION, frame: [name] },
-    scene: { hide: manifest.parts.filter(p => p.name !== name).map(p => p.name) },
   }
 }

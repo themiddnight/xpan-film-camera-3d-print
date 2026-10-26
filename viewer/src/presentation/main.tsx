@@ -12,7 +12,7 @@ import { FigureViews, useFigureEntries } from './FigureViews'
 import { Loading } from './Loading'
 import { MakerDoc } from './MakerDoc'
 import { hasWebGL, NoWebGL } from './NoWebGL'
-import { partStill } from './parts'
+import { PartDrawingsPage } from './PartDrawingsPage'
 import { Still } from './Still'
 import { validateDocs, validateStory } from './validate'
 
@@ -24,12 +24,10 @@ type Load =
 /** The showcase over the maker half, with every figure drawn into the showcase's one canvas. */
 function Page({ manifest }: { manifest: Manifest }) {
   const entries = useFigureEntries(manifest, FIGURES)
-  // `?still=<chapter id>` and `?part=<manifest name>` draw one picture alone, for `pnpm stills`.
-  const chapter = useMemo(() => {
-    const query = new URLSearchParams(location.search)
-    return CHAPTERS.find(c => c.id === query.get('still')) ?? partStill(manifest, query.get('part'))
-  }, [manifest])
+  // `?still=<chapter id>` draws one chapter alone and `?drawings` draws every part, both for `pnpm stills`.
+  const chapter = useMemo(() => CHAPTERS.find(c => c.id === new URLSearchParams(location.search).get('still')), [])
   if (chapter) return <Still manifest={manifest} chapter={chapter} />
+  if (new URLSearchParams(location.search).has('drawings')) return <PartDrawingsPage manifest={manifest} />
   if (!hasWebGL()) {
     return (
       <>
