@@ -51,6 +51,7 @@ def main() -> int:
             angular_deflection=GLB_ANGULAR_DEFLECTION,
         )
         bb = part.bounding_box()
+        placed_bb = placed.bounding_box()
         manifest.append({
             "name": name,
             "glb": f"glb/{name}.glb",
@@ -61,6 +62,7 @@ def main() -> int:
             "color": spec.color,
             "volume_mm3": round(part.volume, 1),
             "size_mm": [round(bb.size.X, 2), round(bb.size.Y, 2), round(bb.size.Z, 2)],
+            "placed_size_mm": [round(placed_bb.size.X, 2), round(placed_bb.size.Y, 2), round(placed_bb.size.Z, 2)],
         })
         print(f"{name}: {part.volume:.0f} mm3, {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm")
     mechanisms, cycles = manifest_entries(CAMERA, set(PARTS))

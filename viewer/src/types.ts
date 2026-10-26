@@ -27,7 +27,10 @@ export interface PartManifest {
   inventory: boolean
   color: string
   volume_mm3: number
+  /** Bounding box of the part as built, before it is placed in the camera: the part's own length, width and height. */
   size_mm: Vec3
+  /** Bounding box of the part where it sits in the camera, along the camera's X, Y and Z axes. A part placed at an angle is larger here than in `size_mm`. */
+  placed_size_mm: Vec3
 }
 
 interface DriveBase {

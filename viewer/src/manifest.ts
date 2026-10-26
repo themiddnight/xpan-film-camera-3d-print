@@ -70,6 +70,7 @@ function part(x: unknown, path: string): PartManifest {
     color: string(o.color, `${path}.color`),
     volume_mm3: number(o.volume_mm3, `${path}.volume_mm3`),
     size_mm: vec3(o.size_mm, `${path}.size_mm`),
+    placed_size_mm: vec3(o.placed_size_mm, `${path}.placed_size_mm`),
   }
 }
 

@@ -56,3 +56,11 @@ describe('parseManifest part inventory fields', () => {
     expect(parts.find(p => p.name === 'cassette')).toMatchObject({ inventory: false, bom: null })
   })
 })
+
+describe('parseManifest part sizes', () => {
+  it('rejects a part with no placed size, as an export from before the drawings has none', () => {
+    const m = raw() as { parts: Record<string, unknown>[] }
+    delete m.parts[0].placed_size_mm
+    expect(() => parseManifest(m)).toThrow(/manifest\.parts\[0\]\.placed_size_mm: expected an array/)
+  })
+})
