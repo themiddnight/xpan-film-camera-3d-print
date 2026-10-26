@@ -7,7 +7,7 @@ export interface InventoryItem {
   label: string
   /** Manifest name of the first member, which the card's thumbnail shows. */
   part: string
-  /** Pieces the item stands for, across its members. */
+  /** Pieces the item stands for: one per member part. */
   count: number
   /** Longest side of the part's bounding box, in mm. */
   largestMm: number
@@ -51,7 +51,7 @@ export function inventory(manifest: Manifest): ModuleInventory[] {
       for (const p of parts.filter(q => q.group === group && q.kind === kind)) {
         const key = itemName(p.name)
         const have = items.get(key)
-        items.set(key, have ? { ...have, count: have.count + p.count } : item(p, key))
+        items.set(key, have ? { ...have, count: have.count + 1 } : item(p, key))
       }
       const list = [...items.values()]
       return { kind, items: list, pieces: list.reduce((n, i) => n + i.count, 0) }
@@ -64,7 +64,7 @@ function item(p: PartManifest, key: string): InventoryItem {
   return {
     label: words.charAt(0).toUpperCase() + words.slice(1),
     part: p.name,
-    count: p.count,
+    count: 1,
     largestMm: Math.max(...p.size_mm),
     bom: p.bom,
   }

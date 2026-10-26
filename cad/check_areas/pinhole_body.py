@@ -26,7 +26,7 @@ OVERLAP_TOL = 0.01         # mm3; matches the assembly overlap rule
 DETENT_TURN = 10.0         # deg off a pose at which the detent must already be pressing
 DETENT_SWEEP_MM3 = 4.0     # two pads pushed 0.3mm by the knuckle round: 2.7mm3 per leaf at 45 deg
 FOLD_STEPS = 9
-FINDER = tuple(f"viewfinder_{w}_{k}" for w in LEAVES for k in ("frame", "hinge", "pins"))
+FINDER = tuple(f"viewfinder_{w}_{k}" for w in LEAVES for k in ("frame", "hinge", "pin_left", "pin_right"))
 
 
 def _runs(part: Part, start, direction, length: float) -> list[tuple[float, float]]:

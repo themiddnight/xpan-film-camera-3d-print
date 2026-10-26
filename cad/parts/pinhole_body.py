@@ -320,12 +320,12 @@ def build_hinge(c: Camera, which: str) -> Part:
     return part - xcyl(f.pin_press_hole / 2, -x1 - 1, x1 + 1, y=y, z=lf.axle_z)
 
 
-def build_pins(c: Camera, which: str) -> Part:
-    """Two 3mm rod stubs, pressed into the cheeks, the leaf's knuckles turning on them."""
+def build_pin(c: Camera, which: str, side: int) -> Part:
+    """One 3mm rod stub (side -1 left, +1 right), pressed into its cheek, the leaf's knuckle turning on it."""
     lf = leaf(c, which)
     x_in, x1 = knuckle_x(c, lf.which)[0] + c.fit.fdm_clearance, cheek_x(c, lf.which)[1]
-    r = c.measured.rod_d / 2
-    return xcyl(r, -x1, -x_in, y=lf.axle_y, z=lf.axle_z) + xcyl(r, x_in, x1, y=lf.axle_y, z=lf.axle_z)
+    xa, xb = sorted((side * x_in, side * x1))
+    return xcyl(c.measured.rod_d / 2, xa, xb, y=lf.axle_y, z=lf.axle_z)
 
 
 def body_finder_mounts(c: Camera, body: Part) -> Part:
@@ -357,6 +357,7 @@ for _which in LEAVES:
     PARTS[f"viewfinder_{_which}_hinge"] = PartSpec(
         build=lambda c, w=_which: build_hinge(c, w), place=at_origin, group="body", kind="printed",
         color="#44444a", print_rotation=(0, 0, 0))
-    PARTS[f"viewfinder_{_which}_pins"] = PartSpec(
-        build=lambda c, w=_which: build_pins(c, w), place=at_origin, group="body", kind="stock",
-        color="#b8bcc2", bom="1", count=2)
+    for _side, _side_name in ((-1, "left"), (1, "right")):
+        PARTS[f"viewfinder_{_which}_pin_{_side_name}"] = PartSpec(
+            build=lambda c, w=_which, s=_side: build_pin(c, w, s), place=at_origin, group="body", kind="stock",
+            color="#b8bcc2", bom="1")

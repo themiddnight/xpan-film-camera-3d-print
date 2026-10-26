@@ -52,10 +52,6 @@ function oneOf<T extends string>(x: unknown, allowed: readonly T[], path: string
   return allowed.find(a => a === x) ?? fail(path, `one of ${allowed.join(', ')}`, x)
 }
 
-function integer(x: unknown, path: string): number {
-  return typeof x === 'number' && Number.isInteger(x) && x >= 1 ? x : fail(path, 'a whole number of at least 1', x)
-}
-
 function vec3(x: unknown, path: string): Vec3 {
   const items = array(x, path)
   if (items.length !== 3) fail(path, 'three numbers', x)
@@ -70,7 +66,6 @@ function part(x: unknown, path: string): PartManifest {
     group: oneOf(o.group, GROUPS, `${path}.group`),
     kind: oneOf(o.kind, KINDS, `${path}.kind`),
     bom: o.bom === null ? null : string(o.bom, `${path}.bom`),
-    count: integer(o.count, `${path}.count`),
     inventory: boolean(o.inventory, `${path}.inventory`),
     color: string(o.color, `${path}.color`),
     volume_mm3: number(o.volume_mm3, `${path}.volume_mm3`),

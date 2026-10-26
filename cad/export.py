@@ -57,7 +57,6 @@ def main() -> int:
             "group": spec.group,
             "kind": spec.kind,
             "bom": spec.bom,
-            "count": spec.count,
             "inventory": spec.inventory,
             "color": spec.color,
             "volume_mm3": round(part.volume, 1),

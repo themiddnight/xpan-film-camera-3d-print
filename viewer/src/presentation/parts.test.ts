@@ -31,6 +31,12 @@ describe('inventory of the real manifest', () => {
     expect(buttons[0]).toMatchObject({ label: 'Turn button', count: 2 })
   })
 
+  it('shows each viewfinder pin pair as one card at the size of one 6 mm stub', () => {
+    const pins = everyItem.filter(i => i.part.startsWith('viewfinder_') && i.part.includes('_pin_'))
+    expect(pins.map(i => i.label)).toEqual(['Viewfinder rear pin', 'Viewfinder front pin'])
+    for (const pin of pins) expect(pin).toMatchObject({ count: 2, largestMm: 6 })
+  })
+
   it('names a part from its snake-case name', () => {
     expect(everyItem.map(i => i.label)).toContain('M42 rear cap ring')
   })

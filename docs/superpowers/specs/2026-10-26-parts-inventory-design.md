@@ -16,19 +16,18 @@ just before the Bill of materials section.
 - `Kind = Literal["printed", "stock", "bought"]`. `stock` is a piece cut, drilled or trimmed from a BOM
   material (rod, sheet, shim, felt, foam, velvet). `bought` is a ready-made piece.
 - `bom: str | None`. The `#` of the `docs/bom.md` Parts row it comes from, such as `"1"` or `"7b"`.
-- `count: int = 1`. Pieces one solid stands for (each viewfinder pins solid models two hinge stubs).
 - `inventory: bool = True`. False for what loads into the camera rather than being part of it
   (cassette, film, film roll).
 - Rule in `__post_init__`: an inventory part that is not printed needs `bom`; a printed part must not
   have one.
 
-`cad/export.py` writes `bom`, `count` and `inventory` into each manifest part.
+`cad/export.py` writes `bom` and `inventory` into each manifest part.
 
 Assignments:
 
 | Part | Kind | BOM |
 |---|---|---|
-| hinge_pin, latch_pin, sprocket_pin, takeup_shaft, rewind_shaft, pawl_pin, shutter_lock_pivot, viewfinder_rear_pins (×2), viewfinder_front_pins (×2) | stock | 1 |
+| hinge_pin, latch_pin, sprocket_pin, takeup_shaft, rewind_shaft, pawl_pin, shutter_lock_pivot, viewfinder_{rear,front}_pin_left/right | stock | 1 |
 | pinhole_shim | stock | 3 |
 | dark_slide, shutter_blade | stock | 4 |
 | felt_washer | stock | 9 |
@@ -47,11 +46,11 @@ Every other part stays printed.
 
 ## Viewer
 
-- `types.ts` and `manifest.ts`: `KINDS` gains `stock`; parts carry `bom: string | null`, `count`,
+- `types.ts` and `manifest.ts`: `KINDS` gains `stock`; parts carry `bom: string | null` and
   `inventory`. The workshop kind filter picks up the third value from `KINDS`.
 - `presentation/parts.ts`: pure `inventory(manifest)` returns modules in `GROUPS` order, each with
   three kind lists in the order printed, stock, bought. It drops `inventory: false` parts, merges a
-  `<base>_left`/`<base>_right` pair into one item named `<base>` whose count is the sum, and makes a
+  `<base>_left`/`<base>_right` pair into one item named `<base>` that counts its members, and makes a
   display name from the snake-case name (first letter capitalised: `m42_rear_cap_ring` reads
   "M42 rear cap ring"). Each item keeps the manifest name of its first member for its thumbnail, its
   largest dimension in mm, and its `bom`.

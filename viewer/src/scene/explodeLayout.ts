@@ -33,10 +33,12 @@ export const PART_OFFSET: Readonly<Record<string, Vec3>> = {
 
   viewfinder_rear_frame: FINDER,
   viewfinder_rear_hinge: FINDER,
-  viewfinder_rear_pins: FINDER,
+  viewfinder_rear_pin_left: FINDER,
+  viewfinder_rear_pin_right: FINDER,
   viewfinder_front_frame: FINDER,
   viewfinder_front_hinge: FINDER,
-  viewfinder_front_pins: FINDER,
+  viewfinder_front_pin_left: FINDER,
+  viewfinder_front_pin_right: FINDER,
   tripod_nut: [0, GROUP_OFFSET.body[1], -20],
 
   m42_shim_ring: [0, 100, 0],

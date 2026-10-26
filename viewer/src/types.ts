@@ -23,8 +23,6 @@ export interface PartManifest {
   kind: Kind
   /** The `#` of the docs/bom.md row a stock or bought part comes from; null for a printed part or one outside the inventory. */
   bom: string | null
-  /** Pieces this one solid stands for. */
-  count: number
   /** False for what loads into the camera (cassette, film) rather than being part of it. */
   inventory: boolean
   color: string

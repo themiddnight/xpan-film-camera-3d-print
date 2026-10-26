@@ -32,7 +32,6 @@ def main() -> int:
         "bought part without a bom row is rejected": rejects(**{**stock, "kind": "bought", "bom": None}),
         "stock part with a print rotation is rejected": rejects(**{**stock, "print_rotation": (0, 0, 0)}),
         "printed part without a print rotation is rejected": rejects(print_rotation=None),
-        "zero count is rejected": rejects(count=0),
         "printed part is accepted": not rejects(),
         "stock part with a bom row is accepted": not rejects(**stock),
         "bought part with a bom row is accepted": not rejects(**{**stock, "kind": "bought", "bom": "7b"}),

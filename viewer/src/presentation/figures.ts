@@ -12,8 +12,8 @@ export const PART_NAMES: readonly string[] = [
   'sprocket', 'pawl', 'release_button', 'takeup_spool', 'drive_collar', 'advance_knob', 'rewind_fork', 'rewind_knob',
   'sprocket_pin', 'takeup_shaft', 'rewind_shaft', 'pawl_pin', 'pawl_spring', 'clutch_spring', 'felt_washer',
   'rewind_o_ring', 'pinhole_body', 'm42_shim_ring', 'm42_rear_cap_ring', 'tripod_nut', 'viewfinder_rear_frame',
-  'viewfinder_rear_hinge', 'viewfinder_rear_pins', 'viewfinder_front_frame', 'viewfinder_front_hinge',
-  'viewfinder_front_pins', 'shutter_housing', 'shutter_open_tab', 'shutter_close_tab', 'shutter_lock',
+  'viewfinder_rear_hinge', 'viewfinder_rear_pin_left', 'viewfinder_rear_pin_right', 'viewfinder_front_frame',
+  'viewfinder_front_hinge', 'viewfinder_front_pin_left', 'viewfinder_front_pin_right', 'shutter_housing', 'shutter_open_tab', 'shutter_close_tab', 'shutter_lock',
   'shutter_lock_cap', 'm42_body_cap', 'pinhole_shim', 'shutter_blade', 'shutter_lock_pivot', 'cassette', 'film',
   'film_roll',
 ]

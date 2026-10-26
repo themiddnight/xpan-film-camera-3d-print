@@ -27,15 +27,11 @@ class PartSpec:
     """Rotation into print orientation. Required for printed parts, None for the others."""
     bom: str | None = None
     """The `#` of the docs/bom.md Parts row a stock or bought part comes from, such as "1" or "7b"."""
-    count: int = 1
-    """Pieces this one solid stands for (the viewfinder pins solid models two hinge stubs)."""
     inventory: bool = True
     """False for what loads into the camera rather than being part of it (cassette, film)."""
 
     def __post_init__(self):
         if (self.kind == "printed") != (self.print_rotation is not None):
             raise ValueError("printed parts need a print_rotation; stock and bought parts must not have one")
-        if self.count < 1:
-            raise ValueError("count must be at least 1")
         if self.inventory and (self.kind == "printed") == (self.bom is not None):
             raise ValueError("an inventory part that is not printed needs a bom row; a printed part must not have one")
