@@ -1,6 +1,7 @@
 // Drives the built public site (dist-public/, served by `vite preview`) and fails on anything a
 // visitor would hit: console errors or warnings, sideways scroll, an unresolved {{placeholder}},
-// a missing still, a navigator that does not scroll, a phone drag that does not scroll the page.
+// a missing still or part thumbnail, a Parts section whose pictures or BOM links do not resolve,
+// a navigator that does not scroll, a phone drag that does not scroll the page.
 // Screenshots go to out/verify/. Usage: pnpm build:public && node scripts/verify.mjs
 import { spawn } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync } from 'node:fs'
@@ -69,6 +70,24 @@ async function checkLayout(page, run) {
   if (result.sideways) fail(run, 'the page scrolls sideways')
   if (result.placeholders.length > 0) fail(run, `unresolved placeholders: ${result.placeholders.join(' ')}`)
   if (result.status) fail(run, `the page shows a status: ${result.status}`)
+}
+
+/** The Parts section: every card has a picture that loaded, and every BOM link lands on a row. */
+async function checkParts(page, run) {
+  // Lazy images below the fold would not load in a headless page that never scrolls to them.
+  await page.evaluate(() => document.querySelectorAll('.parts img').forEach(i => { i.loading = 'eager' }))
+  await page.evaluate(() => document.querySelector('.maker-parts').scrollIntoView())
+  await page.waitForTimeout(SETTLE_MS)
+  const result = await page.evaluate(() => ({
+    cards: document.querySelectorAll('.part-card').length,
+    broken: [...document.querySelectorAll('.parts img')].filter(i => !i.complete || i.naturalWidth === 0).map(i => i.getAttribute('src')),
+    deadLinks: [...document.querySelectorAll('.part-card a')].map(a => a.getAttribute('href')).filter(h => !document.getElementById(h.slice(1))),
+  }))
+  if (result.cards === 0) fail(run, 'the Parts section has no cards')
+  if (result.broken.length > 0) fail(run, `part thumbnails did not load: ${result.broken.join(' ')}`)
+  if (result.deadLinks.length > 0) fail(run, `BOM links with no row: ${result.deadLinks.join(' ')}`)
+  await checkLayout(page, run)
+  await shoot(page, `${run}-parts`)
 }
 
 async function waitForLoad(page) {
@@ -165,6 +184,10 @@ try {
   for (const id of chapters) {
     if (!existsSync(join(site, 'stills', `${id}.png`))) fail('stills', `dist-public/stills/${id}.png is missing. Run: pnpm stills && pnpm build:public`)
   }
+  const inventory = JSON.parse(readFileSync(join(site, 'manifest.json'), 'utf8')).parts.filter(p => p.inventory)
+  for (const { name } of inventory) {
+    if (!existsSync(join(site, 'stills', 'parts', `${name}.png`))) fail('stills', `dist-public/stills/parts/${name}.png is missing. Run: pnpm stills && pnpm build:public`)
+  }
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] })
   for (const run of RUNS) {
     const context = await browser.newContext({
@@ -195,6 +218,7 @@ try {
       const figures = await page.evaluate(() => document.querySelectorAll('.figure-box').length)
       if (figures > 0) fail(run.name, 'a 3D figure box shows without WebGL')
       await shoot(page, `${run.name}-fallback`)
+      await checkParts(page, run.name)
       await context.close()
       continue
     }
@@ -216,6 +240,7 @@ try {
     await page.waitForTimeout(SETTLE_MS)
     await checkLayout(page, run.name)
     await shoot(page, `${run.name}-maker`)
+    await checkParts(page, run.name)
     report.push(entry)
     await context.close()
   }

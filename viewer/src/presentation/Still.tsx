@@ -14,7 +14,7 @@ import type { Chapter } from './story'
 
 declare global {
   interface Window {
-    /** Set by `?still=<chapter>` once the parts are in and the frame has been drawn. */
+    /** Set by `?still=<chapter>` or `?part=<name>` once the parts are in and the frame has been drawn. */
     stillReady?: boolean
   }
 }

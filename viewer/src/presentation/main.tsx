@@ -1,4 +1,4 @@
-import { StrictMode, useEffect, useState } from 'react'
+import { StrictMode, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource-variable/archivo/wdth.css'
 import './presentation.css'
@@ -12,6 +12,7 @@ import { FigureViews, useFigureEntries } from './FigureViews'
 import { Loading } from './Loading'
 import { MakerDoc } from './MakerDoc'
 import { hasWebGL, NoWebGL } from './NoWebGL'
+import { partStill } from './parts'
 import { Still } from './Still'
 import { validateDocs, validateStory } from './validate'
 
@@ -23,8 +24,11 @@ type Load =
 /** The showcase over the maker half, with every figure drawn into the showcase's one canvas. */
 function Page({ manifest }: { manifest: Manifest }) {
   const entries = useFigureEntries(manifest, FIGURES)
-  const still = new URLSearchParams(location.search).get('still')
-  const chapter = CHAPTERS.find(c => c.id === still)
+  // `?still=<chapter id>` and `?part=<manifest name>` draw one picture alone, for `pnpm stills`.
+  const chapter = useMemo(() => {
+    const query = new URLSearchParams(location.search)
+    return CHAPTERS.find(c => c.id === query.get('still')) ?? partStill(manifest, query.get('part'))
+  }, [manifest])
   if (chapter) return <Still manifest={manifest} chapter={chapter} />
   if (!hasWebGL()) {
     return (

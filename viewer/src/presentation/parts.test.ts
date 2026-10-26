@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { parseBom } from './bom'
 import bomMarkdown from '../../../docs/bom.md?raw'
 import { realManifest } from '../test/realManifest'
-import { inventory, type ModuleInventory } from './parts'
+import { inventory, partStill, type ModuleInventory } from './parts'
+import { validateStory } from './validate'
 import type { Group, Kind } from '../types'
 
 const modules = inventory(realManifest())
@@ -55,5 +56,31 @@ describe('inventory of the real manifest', () => {
     const cited = everyItem.flatMap(i => (i.bom === null ? [] : [i.bom]))
     expect(cited.length).toBeGreaterThan(0)
     for (const id of cited) expect(rows, `BOM #${id}`).toContain(id)
+  })
+})
+
+describe('partStill', () => {
+  const manifest = realManifest()
+  const names = manifest.parts.map(p => p.name)
+
+  it('frames the named part alone and hides every other part', () => {
+    const still = partStill(manifest, 'pawl')!
+    expect(still.shot.frame).toEqual(['pawl'])
+    expect(new Set(still.scene?.hide)).toEqual(new Set(names.filter(n => n !== 'pawl')))
+  })
+
+  it('shoots every part from the same direction', () => {
+    const directions = new Set(names.map(n => JSON.stringify(partStill(manifest, n)!.shot.direction)))
+    expect(directions.size).toBe(1)
+  })
+
+  it('is valid staging for every part of the manifest', () => {
+    const stills = names.map(n => partStill(manifest, n)!)
+    expect(validateStory(manifest, stills, [])).toEqual([])
+  })
+
+  it('has no picture for a part the manifest does not have', () => {
+    expect(partStill(manifest, 'no_such_part')).toBeNull()
+    expect(partStill(manifest, null)).toBeNull()
   })
 })
