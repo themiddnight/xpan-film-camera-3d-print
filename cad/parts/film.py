@@ -259,7 +259,7 @@ def build_cassette(c: Camera) -> Part:
 
 
 PARTS = {
-    "cassette": PartSpec(build=build_cassette, place=at_origin, group="film-back", kind="bought", color="#5b7a99"),
-    "film": PartSpec(build=build_film, place=at_origin, group="film-back", kind="bought", color="#8a5a2b"),
-    "film_roll": PartSpec(build=build_film_roll, place=at_origin, group="film-back", kind="bought", color="#6e4722"),
+    "cassette": PartSpec(build=build_cassette, place=at_origin, group="film-back", kind="bought", color="#5b7a99", inventory=False),
+    "film": PartSpec(build=build_film, place=at_origin, group="film-back", kind="bought", color="#8a5a2b", inventory=False),
+    "film_roll": PartSpec(build=build_film_roll, place=at_origin, group="film-back", kind="bought", color="#6e4722", inventory=False),
 }

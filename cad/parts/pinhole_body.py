@@ -346,9 +346,9 @@ PARTS = {
     "m42_shim_ring": PartSpec(build=build_shim_ring, place=at_origin, group="body", kind="printed",
                               color="#5a5a60", print_rotation=(90, 0, 0)),
     "m42_rear_cap_ring": PartSpec(build=build_rear_cap_ring, place=at_origin, group="body", kind="bought",
-                                  color="#1a1a1a"),
+                                  color="#1a1a1a", bom="2"),
     "tripod_nut": PartSpec(build=build_tripod_nut, place=at_origin, group="body", kind="bought",
-                           color="#b8bcc2"),
+                           color="#b8bcc2", bom="8"),
 }
 for _which in LEAVES:
     PARTS[f"viewfinder_{_which}_frame"] = PartSpec(
@@ -358,5 +358,5 @@ for _which in LEAVES:
         build=lambda c, w=_which: build_hinge(c, w), place=at_origin, group="body", kind="printed",
         color="#44444a", print_rotation=(0, 0, 0))
     PARTS[f"viewfinder_{_which}_pins"] = PartSpec(
-        build=lambda c, w=_which: build_pins(c, w), place=at_origin, group="body", kind="bought",
-        color="#b8bcc2")
+        build=lambda c, w=_which: build_pins(c, w), place=at_origin, group="body", kind="stock",
+        color="#b8bcc2", bom="1", count=2)
